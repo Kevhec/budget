@@ -1,27 +1,30 @@
 import { Request, Response } from 'express';
 import { UpdateOptions } from 'sequelize';
 import { Budget, Expense } from '../models';
-import { isInt } from '../lib/validations';
+import { isInt } from '../lib/utils/validations';
+import budgetSchema from '../schemas/budget';
 
 // Create
 async function createBudget(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
-  const name = req.body?.name;
+  const { error, value } = budgetSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json(error.details[0].message);
+  }
 
   try {
-    if (!name) {
-      return res.status(400).json('Name not found');
-    }
-
     const newBudget = await Budget.create({
-      name,
+      name: value.name,
+      PageId: value.pageId,
+      UserId: req.user.id,
     });
 
     return res.status(201).json({ budget: newBudget });
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (e: any) {
+    console.error('ERROR: ', e.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 }

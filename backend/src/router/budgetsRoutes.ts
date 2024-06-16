@@ -1,6 +1,4 @@
 import { Router } from 'express';
-import checkAuth from '../middleware/checkAuth';
-
 import {
   createBudget,
   deleteBudget,
@@ -9,18 +7,22 @@ import {
   updateBudget,
   getBudgetExpenses,
 } from '../controllers/budget';
+import authenticate from '../middleware/authenticate';
+import { Budget, Page } from '../models';
+import authorizeAccess from '../middleware/authorizeAccess';
+import authorizeCreation from '../middleware/authorizeCreation';
 
 const router = Router();
 
 router.route('/')
-  .post(checkAuth, createBudget)
-  .get(checkAuth, getAllBudgets);
+  .post(authenticate, authorizeCreation(Page, 'pageId'), createBudget)
+  .get(authenticate, authorizeAccess(Budget), getAllBudgets);
 
 router.route('/:id')
-  .get(checkAuth, getBudget)
-  .patch(checkAuth, updateBudget)
-  .delete(checkAuth, deleteBudget);
+  .get(authenticate, authorizeAccess(Budget), getBudget)
+  .patch(authenticate, authorizeAccess(Budget), updateBudget)
+  .delete(authenticate, authorizeAccess(Budget), deleteBudget);
 
-router.get('/:id/expenses', checkAuth, getBudgetExpenses);
+router.get('/:id/expenses', authenticate, authorizeAccess(Budget), getBudgetExpenses);
 
 export default router;

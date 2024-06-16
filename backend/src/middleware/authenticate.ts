@@ -1,17 +1,12 @@
-import { RequestHandler, Request } from 'express';
+import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../models';
-import type { UserType } from '../models/user';
 
 interface JWTPayload {
   id: string
 }
 
-interface AuthRequest extends Request {
-  user?: UserType
-}
-
-const checkAuth: RequestHandler = async (req: AuthRequest, res, next) => {
+const authenticate: RequestHandler = async (req, res, next) => {
   const sessionCookie = req.cookies.jwt;
 
   if (!sessionCookie) {
@@ -30,8 +25,8 @@ const checkAuth: RequestHandler = async (req: AuthRequest, res, next) => {
 
     return next();
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid token' });
+    return res.status(401).json('Invalid token');
   }
 };
 
-export default checkAuth;
+export default authenticate;

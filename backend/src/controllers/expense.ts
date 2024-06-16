@@ -1,39 +1,27 @@
 import { Request, Response } from 'express';
 import { UpdateOptions } from 'sequelize';
-import { dontExist, isInt } from '../lib/validations';
+import { isInt } from '../lib/utils/validations';
 import { Expense } from '../models';
+import expenseSchema from '../schemas/expense';
 
 // Create
 async function createExpense(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
-  const name = req.body?.name;
-  const amount = req.body?.amount;
-  const date = req.body?.date;
-  const budgetId = req.body?.budgetId;
+  const { error, value } = expenseSchema.validate(req.body);
 
-  // Create base for bad req error message, it will have
-  // the key of the data that's wrong appended at the end
-  let badReqErrorMsj = 'Bad request, missing data: ';
-
-  // Validate which elements where not passed in the request
-  const { error, errorElements } = dontExist({ name, amount });
-
-  // If an error where found complete the error msg with the errorElements
-  //  array and send it
   if (error) {
-    const errorFieldsStr = `${errorElements.join(', ').trim()}.`;
-    badReqErrorMsj += errorFieldsStr;
-    return res.status(400).json(badReqErrorMsj);
+    return res.status(400).json(error.details[0].message);
   }
 
   try {
     const newExpense = await Expense.create({
-      name,
-      amount,
-      date,
-      BudgetId: budgetId,
+      name: value.name,
+      amount: value.amount,
+      date: value.date,
+      BudgetId: value.budgetId,
+      UserId: req.user.id,
     });
 
     return res.status(201).json({ expense: newExpense });

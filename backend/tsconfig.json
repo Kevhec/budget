@@ -3,4 +3,9 @@
   "compilerOptions": {
     "moduleResolution": "Node16",
   },
+  "files": ["./types/express.d.ts"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
 }

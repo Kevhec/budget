@@ -1,6 +1,10 @@
 module.exports = {
   root: true,
-  env: { browser: true, node: true, es2020: true },
+  env: {
+    browser: true,
+    node: true,
+    es2020: true
+  },
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -12,8 +16,8 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: [
-      "./frontend/tsconfig.json",
-      "./backend/tsconfig.json"
+      './frontend/tsconfig.json',
+      './backend/tsconfig.json'
     ]
   },
   plugins: ['react-refresh'],

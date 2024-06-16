@@ -1,8 +1,10 @@
 import type { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { User } from '../models';
 import { guestSchema, userSchema } from '../schemas/user';
+import generateJWT from '../lib/utils/generateJWT';
+import convert from '../lib/utils/convert';
+import { REMEMBER_ME_EXPIRATION_TIME_DAYS, SESSION_EXPIRATION_TIME_DAYS } from '../lib/constants';
 
 const signUp = async (req: Request, res: Response) => {
   const { error, value } = userSchema.validate(req.body);
@@ -27,15 +29,6 @@ const signUp = async (req: Request, res: Response) => {
     // If user is successfully created, generate a jwt using env secret key
     // and send it through a cookie to the client
     if (newUser) {
-      const token = jwt.sign({ id: newUser.id }, process.env.SECRET_KEY || '', {
-        expiresIn: '7d',
-      });
-
-      res.cookie('jwt', token, {
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly: true,
-      });
-
       // Send user
       return res.status(201).json(newUser);
     }
@@ -46,9 +39,14 @@ const signUp = async (req: Request, res: Response) => {
   }
 };
 
-const login = async (req: Request, res: Response) => {
+const logIn = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
+
+    // Set different token expiration time if user want's to be remembered
+    const expirationTime = remember
+      ? REMEMBER_ME_EXPIRATION_TIME_DAYS
+      : SESSION_EXPIRATION_TIME_DAYS;
 
     // Find user by their email
     const user = await User.findOne({
@@ -63,26 +61,29 @@ const login = async (req: Request, res: Response) => {
 
       // If match generate a jwt using secret key
       if (isSame) {
-        const token = jwt.sign({ id: user.id }, process.env.SECRET_KEY || '', {
-          expiresIn: '7d',
-        });
+        const token = generateJWT({ id: user.id }, convert(expirationTime, 'day', 'second'));
 
         res.cookie('jwt', token, {
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: convert(expirationTime, 'day', 'ms'),
           httpOnly: true,
         });
 
         // send user data
-        return res.status(201).send(user);
+        return res.status(201).json(user);
       }
 
-      return res.status(401).send('Authentication failed');
+      return res.status(401).json('Authentication failed');
     }
-    return res.status(401).send('Authentication failed');
+    return res.status(401).json('Authentication failed');
   } catch (error: any) {
     console.error(error.message);
     return res.status(500).json('Internal server error');
   }
+};
+
+const logOut = async (req: Request, res: Response) => {
+  res.clearCookie('jwt', { httpOnly: true });
+  res.status(200).json({ message: 'Logged out successfully' });
 };
 
 const loginAsGuest = async (req: Request, res: Response) => {
@@ -92,18 +93,20 @@ const loginAsGuest = async (req: Request, res: Response) => {
     return res.status(400).json(error.details[0].message);
   }
 
+  // Create a new user with guest role and provided username
   try {
     const newGuest = await User.create({
       ...value,
       role: 'guest',
     });
 
-    const token = jwt.sign({ id: newGuest.id }, process.env.SECRET_KEY || '', {
-      expiresIn: '7d',
-    });
+    // generate jwt for guest user with one week expiration in order to avoid
+    // unused guest users in database
+    const token = generateJWT({ id: newGuest.id }, convert(7, 'day', 'second'));
 
+    // set the same maxAge for cookies but in ms
     res.cookie('jwt', token, {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: convert(7, 'day', 'ms'),
       httpOnly: true,
     });
 
@@ -116,6 +119,7 @@ const loginAsGuest = async (req: Request, res: Response) => {
 
 export {
   signUp,
-  login,
+  logIn,
+  logOut,
   loginAsGuest,
 };
