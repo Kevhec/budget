@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import User from '../src/models/user';
+import User from '../src/database/models/user';
 
 declare global {
   namespace Express {

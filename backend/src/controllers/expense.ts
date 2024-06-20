@@ -1,27 +1,27 @@
 import { Request, Response } from 'express';
 import { UpdateOptions } from 'sequelize';
 import { isInt } from '../lib/utils/validations';
-import { Expense } from '../models';
-import expenseSchema from '../schemas/expense';
+import { Expense } from '../database/models';
 
 // Create
 async function createExpense(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
-  const { error, value } = expenseSchema.validate(req.body);
-
-  if (error) {
-    return res.status(400).json(error.details[0].message);
-  }
+  const {
+    name,
+    amount,
+    date,
+    budgetId,
+  } = req.body;
 
   try {
     const newExpense = await Expense.create({
-      name: value.name,
-      amount: value.amount,
-      date: value.date,
-      BudgetId: value.budgetId,
-      UserId: req.user.id,
+      name,
+      amount,
+      date,
+      BudgetId: budgetId,
+      UserId: req.user?.id,
     });
 
     return res.status(201).json({ expense: newExpense });
@@ -40,7 +40,11 @@ async function getAllExpenses(
   res: Response,
 ): Promise<Response | undefined> {
   try {
-    const expenses = await Expense.findAll();
+    const expenses = await Expense.findAll({
+      where: {
+        UserId: req.user?.id,
+      },
+    });
 
     if (!expenses.length) {
       return res.status(404).json('No expenses where found');
@@ -60,21 +64,18 @@ async function getExpense(
   const expenseId = req.params.id;
 
   try {
-    if (!isInt(expenseId)) {
-      return res.status(400).json('Id must be an integer');
-    }
-
-    const budget = await Expense.findOne({
+    const expense = await Expense.findOne({
       where: {
         id: expenseId,
+        UserId: req.user?.id,
       },
     });
 
-    if (!budget) {
+    if (!expense) {
       return res.status(404).json(`Expense not found for specified id: ${expenseId}`);
     }
 
-    return res.status(200).json(budget);
+    return res.status(200).json(expense);
   } catch (error: any) {
     console.error('ERROR: ', error.message);
     return res.status(500).json('Internal server error');

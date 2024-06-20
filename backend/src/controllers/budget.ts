@@ -1,25 +1,23 @@
 import { Request, Response } from 'express';
-import { UpdateOptions } from 'sequelize';
-import { Budget, Expense } from '../models';
-import { isInt } from '../lib/utils/validations';
-import budgetSchema from '../schemas/budget';
+import { Budget, Expense } from '../database/models';
 
 // Create
 async function createBudget(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
-  const { error, value } = budgetSchema.validate(req.body);
-
-  if (error) {
-    return res.status(400).json(error.details[0].message);
-  }
+  const {
+    name,
+    amount,
+    pageId,
+  } = req.body;
 
   try {
     const newBudget = await Budget.create({
-      name: value.name,
-      PageId: value.pageId,
-      UserId: req.user.id,
+      name,
+      amount,
+      PageId: pageId,
+      UserId: req.user?.id,
     });
 
     return res.status(201).json({ budget: newBudget });
@@ -35,7 +33,11 @@ async function getAllBudgets(
   res: Response,
 ): Promise<Response | undefined> {
   try {
-    const budgets = await Budget.findAll();
+    const budgets = await Budget.findAll({
+      where: {
+        UserId: req.user?.id,
+      },
+    });
 
     if (!budgets.length) {
       return res.status(404).json('No budgets where found');
@@ -55,13 +57,10 @@ async function getBudget(
   const budgetId = req.params.id;
 
   try {
-    if (!isInt(budgetId)) {
-      return res.status(400).json('Id must be an integer');
-    }
-
     const budget = await Budget.findOne({
       where: {
         id: budgetId,
+        UserId: req.user?.id,
       },
     });
 
@@ -83,13 +82,10 @@ async function getBudgetExpenses(
   try {
     const budgetId = req.params.id;
 
-    if (!isInt(budgetId)) {
-      return res.status(400).json('Id must be an integer');
-    }
-
     const expenses = await Budget.findOne({
       where: {
         id: budgetId,
+        UserId: req.user?.id,
       },
       include: Expense,
     });
@@ -110,41 +106,23 @@ async function updateBudget(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
+  const budgetId = req.params.id;
+  const reqBody = req.body;
+
+  if (Object.keys(reqBody).length === 0) {
+    return res.status(400).json({ message: 'Request body cannot be empty' });
+  }
+
   try {
-    const budgetId = req.params.id;
-    const reqBody = req.body;
-    const fieldsToUpdate = Object.keys(reqBody);
+    const budget = await Budget.findByPk(budgetId);
 
-    if (!budgetId) {
-      return res.status(400).json({ message: 'Bad request, id not found' });
+    if (!budget) {
+      return res.status(404).json(`Budget not found for specified id: ${budgetId}`);
     }
 
-    if (Object.keys(reqBody).length === 0) {
-      return res.status(400).json({ message: 'Request body cannot be empty' });
-    }
-
-    const options: UpdateOptions = {
-      where: {
-        id: budgetId,
-      },
-    };
-
-    options.fields = fieldsToUpdate;
-
-    const [, [updatedBudget]] = await Budget.update(
-      reqBody,
-      {
-        ...options,
-        returning: true,
-      },
-    );
-
-    if (!updatedBudget) {
-      return res.status(404).json({ message: 'Resource not found' });
-    }
+    const updatedBudget = await budget.update(reqBody);
 
     return res.status(200).json(updatedBudget);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('ERROR: ', error.message);
     return res.status(500).json('Internal server error');
@@ -159,13 +137,10 @@ async function deleteBudget(
   const budgetId = req.params.id;
 
   try {
-    if (!isInt(budgetId)) {
-      return res.status(400).json('Id must be an integer');
-    }
-
     await Budget.destroy({
       where: {
         id: budgetId,
+        UserId: req.user?.id,
       },
     });
 

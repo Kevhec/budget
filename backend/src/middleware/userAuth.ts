@@ -1,6 +1,6 @@
 // importing modules
 import { RequestHandler } from 'express';
-import { User } from '../models';
+import { User } from '../database/models';
 // Assigning db.users to User variable
 
 // Function to check if username or email already exist in the database
@@ -23,8 +23,8 @@ const saveUser: RequestHandler = async (req, res, next) => {
     }
 
     return next();
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    console.error('ERROR: ', error.message);
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

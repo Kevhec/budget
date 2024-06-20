@@ -14,7 +14,7 @@ function authorizeCreation(
         const relatedElement = await relatedModel?.findOne({
           where: {
             id: relatedId,
-            UserId: user.id,
+            UserId: user?.id,
           },
         });
 
@@ -27,6 +27,7 @@ function authorizeCreation(
 
       return next();
     } catch (error: any) {
+      console.error('ERROR: ', error.message);
       return res.status(401).json('Invalid token');
     }
   });

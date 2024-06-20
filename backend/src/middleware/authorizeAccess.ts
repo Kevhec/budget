@@ -1,22 +1,29 @@
 import { Request, Response, NextFunction } from 'express';
 import { Model, ModelStatic } from 'sequelize';
 
+interface Element extends Model {
+  UserId?: string
+}
+
 function authorizeAccess(
-  model: ModelStatic<Model>,
+  model: ModelStatic<Element>,
 ) {
   return (async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { user } = req;
-      const { id } = req.body;
+      const { id } = req.params;
 
       const element = await model.findOne({
         where: {
           id,
-          UserId: user?.id,
         },
       });
 
       if (!element) {
+        return res.status(404).json('Resource not found');
+      }
+
+      if (element.UserId !== user?.id) {
         return res.status(403).json('Forbidden: You do not have access to this resource');
       }
 
@@ -24,7 +31,8 @@ function authorizeAccess(
 
       return next();
     } catch (error: any) {
-      return res.status(401).json('Invalid token');
+      console.error('ERROR: ', error.message);
+      return res.status(500).json({ message: 'Internal server error' });
     }
   });
 }

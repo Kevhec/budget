@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { User } from '../models';
-import { guestSchema, userSchema } from '../schemas/user';
+import { User } from '../database/models';
+import { guestSchema, userSchema } from '../database/schemas/user';
 import generateJWT from '../lib/utils/generateJWT';
 import convert from '../lib/utils/convert';
 import { REMEMBER_ME_EXPIRATION_TIME_DAYS, SESSION_EXPIRATION_TIME_DAYS } from '../lib/constants';
@@ -61,7 +61,7 @@ const logIn = async (req: Request, res: Response) => {
 
       // If match generate a jwt using secret key
       if (isSame) {
-        const token = generateJWT({ id: user.id }, convert(expirationTime, 'day', 'second'));
+        const token = generateJWT({ id: user?.id }, convert(expirationTime, 'day', 'second'));
 
         res.cookie('jwt', token, {
           maxAge: convert(expirationTime, 'day', 'ms'),

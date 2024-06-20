@@ -1,21 +1,23 @@
-import {
-  CreationOptional,
-  DataTypes, InferAttributes, InferCreationAttributes, Model,
-} from 'sequelize';
-import sequelize from '../config/database';
+import { DataTypes, Model } from 'sequelize';
+import SequelizeConnection from '../SequelizeConnection';
 
-export interface UserType extends Model<
-InferAttributes<UserType>, InferCreationAttributes<UserType>
-> {
-  id: CreationOptional<number>
-  username: CreationOptional<string>,
-  email: CreationOptional<string>,
-  password: CreationOptional<string>,
-  pagesCount: CreationOptional<number>,
-  role: CreationOptional<string>,
+const sequelize = SequelizeConnection.getInstance();
+
+export default class User extends Model {
+  declare id: string;
+
+  declare username: string;
+
+  declare email: string;
+
+  declare password: string;
+
+  declare pagesCount: number;
+
+  declare role: string;
 }
 
-const User = sequelize.define<UserType>('User', {
+User.init({
   id: {
     primaryKey: true,
     type: DataTypes.UUID,
@@ -51,8 +53,8 @@ const User = sequelize.define<UserType>('User', {
     defaultValue: 'user',
   },
 }, {
-  tableName: 'users',
+  sequelize,
   timestamps: true,
+  tableName: 'users',
+  modelName: 'User',
 });
-
-export default User;

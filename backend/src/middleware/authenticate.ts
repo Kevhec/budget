@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../models';
+import { User } from '../database/models';
 
 interface JWTPayload {
   id: string
@@ -24,7 +24,8 @@ const authenticate: RequestHandler = async (req, res, next) => {
     req.user = user;
 
     return next();
-  } catch (error) {
+  } catch (error: any) {
+    console.error('ERROR: ', error.message);
     return res.status(401).json('Invalid token');
   }
 };

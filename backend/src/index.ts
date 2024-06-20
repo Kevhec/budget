@@ -2,9 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import sequelize from './config/database';
 import responseInterceptor from './middleware/interceptors';
-import { budgetRoutes, expenseRoutes, userRoutes } from './router';
+import {
+  budgetRoutes, expenseRoutes, pageRouter, userRoutes,
+} from './router';
+import SequelizeConnection from './database/SequelizeConnection';
+
+const sequelize = SequelizeConnection.getInstance();
 
 const app = express();
 const PORT = 3000;
@@ -21,6 +25,7 @@ app.use(responseInterceptor);
 app.use('/api/user', userRoutes);
 app.use('/api/budget', budgetRoutes);
 app.use('/api/expense', expenseRoutes);
+app.use('/api/page', pageRouter);
 
 sequelize.sync({ force: true }).then(() => {
   console.log('Database has been re sync');

@@ -6,7 +6,8 @@ import saveUser from '../middleware/userAuth';
 
 const router = Router();
 
-// User creation route
+// User creation route{
+// router.get('/', getInfo)
 router.post('/signup', saveUser, signUp);
 router.post('/guest', loginAsGuest);
 router.post('/logout', logOut);
