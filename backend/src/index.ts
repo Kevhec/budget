@@ -4,7 +4,8 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import responseInterceptor from './middleware/interceptors';
 import {
-  budgetRoutes, expenseRoutes, pageRouter, userRoutes,
+  budgetRoutes, transactionRoutes, pageRouter, userRoutes,
+  categoryRouter,
 } from './router';
 import SequelizeConnection from './database/SequelizeConnection';
 
@@ -24,8 +25,9 @@ app.use(responseInterceptor);
 
 app.use('/api/user', userRoutes);
 app.use('/api/budget', budgetRoutes);
-app.use('/api/expense', expenseRoutes);
+app.use('/api/transaction', transactionRoutes);
 app.use('/api/page', pageRouter);
+app.use('/api/category', categoryRouter);
 
 sequelize.sync({ force: true }).then(() => {
   console.log('Database has been re sync');

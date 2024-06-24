@@ -15,6 +15,10 @@ export default class User extends Model {
   declare pagesCount: number;
 
   declare role: string;
+
+  declare confirmed: boolean;
+
+  declare token: string;
 }
 
 User.init({
@@ -45,12 +49,29 @@ User.init({
   pagesCount: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
-    defaultValue: 0,
+    defaultValue: 1,
   },
   role: {
     type: DataTypes.STRING,
     allowNull: false,
     defaultValue: 'user',
+  },
+  token: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    defaultValue: DataTypes.UUIDV4,
+  },
+  confirmed: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+    set(value) {
+      if (this.getDataValue('role') === 'guest') {
+        this.setDataValue('confirmed', true);
+      } else {
+        this.setDataValue('confirmed', value);
+      }
+    },
   },
 }, {
   sequelize,

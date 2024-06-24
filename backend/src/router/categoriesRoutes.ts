@@ -1,54 +1,51 @@
 import { Router } from 'express';
 import {
-  createBudget,
-  deleteBudget,
-  getAllBudgets,
-  getBudget,
-  updateBudget,
-  getBudgetExpenses,
-} from '../controllers/budget';
+  createCategory,
+  deleteCategory,
+  getAllCategories,
+  getCategory,
+  updateCategory,
+} from '../controllers/category';
 import authenticate from '../middleware/authenticate';
-import { Budget, Page } from '../database/models';
+import { Category, Budget } from '../database/models';
 import authorizeAccess from '../middleware/authorizeAccess';
 import authorizeCreation from '../middleware/authorizeCreation';
 import validateSchema from '../middleware/validateSchema';
-import { createBudgetSchema, updateBudgetSchema } from '../database/schemas/budget';
 import { getObjectById } from '../database/schemas/general';
+import { createCategorySchema, updateCategorySchema } from '../database/schemas/category';
 
 const router = Router();
 
 router.route('/')
   .post(
-    validateSchema(createBudgetSchema),
+    validateSchema(createCategorySchema),
     authenticate,
-    authorizeCreation(Page, 'pageId'),
-    createBudget,
+    authorizeCreation(Budget, 'budgetId'),
+    createCategory,
   )
   .get(
     authenticate,
-    getAllBudgets,
+    getAllCategories,
   );
 
 router.route('/:id')
   .get(
     validateSchema(getObjectById),
     authenticate,
-    authorizeAccess(Budget),
-    getBudget,
+    authorizeAccess(Category),
+    getCategory,
   )
   .patch(
-    validateSchema(updateBudgetSchema),
+    validateSchema(updateCategorySchema),
     authenticate,
-    authorizeAccess(Budget),
-    updateBudget,
+    authorizeAccess(Category),
+    updateCategory,
   )
   .delete(
     validateSchema(getObjectById),
     authenticate,
     authorizeAccess(Budget),
-    deleteBudget,
+    deleteCategory,
   );
-
-router.get('/:id/transactions', authenticate, authorizeAccess(Budget), getBudgetExpenses);
 
 export default router;

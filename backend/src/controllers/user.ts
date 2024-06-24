@@ -5,6 +5,7 @@ import { guestSchema, userSchema } from '../database/schemas/user';
 import generateJWT from '../lib/utils/generateJWT';
 import convert from '../lib/utils/convert';
 import { REMEMBER_ME_EXPIRATION_TIME_DAYS, SESSION_EXPIRATION_TIME_DAYS } from '../lib/constants';
+import verificationEmail from '../lib/utils/verificationEmail';
 
 const signUp = async (req: Request, res: Response) => {
   const { error, value } = userSchema.validate(req.body);
@@ -28,14 +29,40 @@ const signUp = async (req: Request, res: Response) => {
 
     // If user is successfully created, generate a jwt using env secret key
     // and send it through a cookie to the client
-    if (newUser) {
-      // Send user
-      return res.status(201).json(newUser);
+    if (!newUser) {
+      return res.status(409).json('Details are not correct');
     }
-    return res.status(409).json('Details are not correct');
+
+    // Testing email delivered@resend.dev
+    await verificationEmail('delivered@resend.dev', newUser.token);
+
+    // Send user
+    return res.status(201).json(newUser);
   } catch (e: any) {
     console.error(e.message);
     return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const confirm = async (req: Request, res: Response) => {
+  const { token } = req.params;
+
+  try {
+    const userToConfirm = await User.findOne({ where: { token } });
+
+    if (!userToConfirm) {
+      return res.status(404).json('Invalid or expired token.');
+    }
+
+    await userToConfirm.update({
+      token: null,
+      confirmed: true,
+    });
+
+    return res.status(200).json('User confirmed successfully.');
+  } catch (e: any) {
+    console.error(e.message);
+    return res.status(500).json('Internal server error');
   }
 };
 
@@ -56,23 +83,22 @@ const logIn = async (req: Request, res: Response) => {
     });
 
     // If user is found, compare provided password with bcrypt
-    if (user) {
-      const isSame = await bcrypt.compare(password, user.password);
-
-      // If match generate a jwt using secret key
-      if (isSame) {
-        const token = generateJWT({ id: user?.id }, convert(expirationTime, 'day', 'second'));
-
-        res.cookie('jwt', token, {
-          maxAge: convert(expirationTime, 'day', 'ms'),
-          httpOnly: true,
-        });
-
-        // send user data
-        return res.status(201).json(user);
-      }
-
+    if (!user) {
       return res.status(401).json('Authentication failed');
+    }
+    const isSame = await bcrypt.compare(password, user.password);
+
+    // If match generate a jwt using secret key
+    if (isSame) {
+      const token = generateJWT({ id: user?.id }, convert(expirationTime, 'day', 'second'));
+
+      res.cookie('jwt', token, {
+        maxAge: convert(expirationTime, 'day', 'ms'),
+        httpOnly: true,
+      });
+
+      // send user data
+      return res.status(201).json(user);
     }
     return res.status(401).json('Authentication failed');
   } catch (error: any) {
@@ -117,9 +143,28 @@ const loginAsGuest = async (req: Request, res: Response) => {
   }
 };
 
+const getInfo = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json('User not found.');
+    }
+
+    return res.status(200).json(user);
+  } catch (e: any) {
+    console.error(e.message);
+    return res.status(500).json('Internal server error');
+  }
+};
+
 export {
   signUp,
+  confirm,
   logIn,
   logOut,
   loginAsGuest,
+  getInfo,
 };

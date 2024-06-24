@@ -2,10 +2,16 @@ import { DataTypes, ForeignKey, Model } from 'sequelize';
 import SequelizeConnection from '../SequelizeConnection';
 import User from './user';
 import Budget from './budget';
+import Category from './category';
 
 const sequelize = SequelizeConnection.getInstance();
 
-export default class Expense extends Model {
+export enum TransactionType {
+  INCOME = 'income',
+  EXPENSE = 'expense',
+}
+
+export default class Transaction extends Model {
   declare id: number;
 
   declare name: string;
@@ -14,12 +20,16 @@ export default class Expense extends Model {
 
   declare date: Date;
 
-  declare UserId: ForeignKey<User['id']>;
+  declare type: TransactionType;
 
-  declare BudgetId: ForeignKey<Budget['id']>;
+  declare categoryId: ForeignKey<Category['id']> | null;
+
+  declare userId: ForeignKey<User['id']>;
+
+  declare budgetId: ForeignKey<Budget['id']>;
 }
 
-Expense.init({
+Transaction.init({
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
@@ -32,6 +42,10 @@ Expense.init({
   },
   amount: {
     type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  type: {
+    type: DataTypes.ENUM(...Object.values(TransactionType)),
     allowNull: false,
   },
   date: {

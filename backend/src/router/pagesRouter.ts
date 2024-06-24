@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import {
-  createPage, deletePage, getAllPages, updatePage,
+  createPage, deletePage, getAllPages, getPage, getPageBudget, updatePage,
 } from '../controllers/page';
 import validateSchema from '../middleware/validateSchema';
 import authenticate from '../middleware/authenticate';
 import { Page } from '../database/models';
-import { createPageSchema, getAndDeletePageSchema, updatePageSchema } from '../database/schemas/page';
-import { getBudget } from '../controllers/budget';
+import { createPageSchema, updatePageSchema } from '../database/schemas/page';
 import authorizeAccess from '../middleware/authorizeAccess';
+import { getObjectById } from '../database/schemas/general';
 
 const router = Router();
 
@@ -24,9 +24,9 @@ router.route('/')
 
 router.route('/:id')
   .get(
-    validateSchema(getAndDeletePageSchema),
+    validateSchema(getObjectById),
     authenticate,
-    getBudget,
+    getPage,
   )
   .patch(
     validateSchema(updatePageSchema),
@@ -35,9 +35,12 @@ router.route('/:id')
     updatePage,
   )
   .delete(
-    validateSchema(getAndDeletePageSchema),
+    validateSchema(getObjectById),
     authenticate,
     authorizeAccess(Page),
     deletePage,
   );
+
+router.get('/:id/budget', authenticate, authorizeAccess(Page), getPageBudget);
+
 export default router;

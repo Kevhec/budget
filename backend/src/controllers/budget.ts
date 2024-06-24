@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Budget, Expense } from '../database/models';
+import { Budget, Transaction } from '../database/models';
 
 // Create
 async function createBudget(
@@ -8,16 +8,27 @@ async function createBudget(
 ): Promise<Response | undefined> {
   const {
     name,
-    amount,
+    initialBalance,
     pageId,
   } = req.body;
 
   try {
+    const relatedBudget = await Budget.findOne({
+      where: {
+        pageId,
+      },
+    });
+
+    if (relatedBudget) {
+      return res.status(400).json({ error: 'Page is already linked to a budget' });
+    }
+
     const newBudget = await Budget.create({
       name,
-      amount,
-      PageId: pageId,
-      UserId: req.user?.id,
+      initialBalance,
+      currentBalance: initialBalance,
+      pageId,
+      userId: req.user?.id,
     });
 
     return res.status(201).json({ budget: newBudget });
@@ -35,7 +46,7 @@ async function getAllBudgets(
   try {
     const budgets = await Budget.findAll({
       where: {
-        UserId: req.user?.id,
+        userId: req.user?.id,
       },
     });
 
@@ -60,7 +71,7 @@ async function getBudget(
     const budget = await Budget.findOne({
       where: {
         id: budgetId,
-        UserId: req.user?.id,
+        userId: req.user?.id,
       },
     });
 
@@ -85,9 +96,9 @@ async function getBudgetExpenses(
     const expenses = await Budget.findOne({
       where: {
         id: budgetId,
-        UserId: req.user?.id,
+        userId: req.user?.id,
       },
-      include: Expense,
+      include: Transaction,
     });
 
     if (!expenses) {
@@ -140,7 +151,7 @@ async function deleteBudget(
     await Budget.destroy({
       where: {
         id: budgetId,
-        UserId: req.user?.id,
+        userId: req.user?.id,
       },
     });
 

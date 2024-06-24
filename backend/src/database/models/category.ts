@@ -1,42 +1,48 @@
 import { DataTypes, ForeignKey, Model } from 'sequelize';
 import SequelizeConnection from '../SequelizeConnection';
 import User from './user';
-import Page from './page';
+import Budget from './budget';
 
 const sequelize = SequelizeConnection.getInstance();
 
-export default class Budget extends Model {
+export default class Category extends Model {
   declare id: number;
 
-  declare initialBalance: string;
+  declare name: string;
 
-  declare currentBalance: string;
+  declare limitAmount: string;
+
+  declare color: string;
 
   declare UserId: ForeignKey<User['id']>;
 
-  declare PageId: ForeignKey<Page['id']>;
+  declare BudgetId: ForeignKey<Budget['id']>;
 }
 
-Budget.init({
+Category.init({
   id: {
     type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
     allowNull: false,
     autoIncrement: true,
   },
-  initialBalance: {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  limitAmount: {
     type: DataTypes.DECIMAL(18, 2),
     allowNull: false,
     defaultValue: 0.00,
   },
-  currentBalance: {
-    type: DataTypes.DECIMAL(18, 2),
+  color: {
+    type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 0.00,
+    defaultValue: '#000000',
   },
 }, {
   sequelize,
   timestamps: true,
-  tableName: 'budgets',
-  modelName: 'Budget',
+  tableName: 'categories',
+  modelName: 'Category',
 });

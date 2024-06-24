@@ -7,7 +7,6 @@ const sequelize = SequelizeConnection.getInstance();
 const createPage = async (req: Request, res: Response) => {
   const {
     name,
-    initialAmount,
   } = req.body;
 
   try {
@@ -17,8 +16,7 @@ const createPage = async (req: Request, res: Response) => {
 
       const page = await Page.create({
         name: pageName,
-        UserId: req.user?.id,
-        initialAmount,
+        userId: req.user?.id,
       }, { transaction: t });
 
       await user?.update({
@@ -39,10 +37,10 @@ const getPage = async (req: Request, res: Response) => {
   const pageId = req.params.id;
 
   try {
-    const page = Page.findOne({
+    const page = await Page.findOne({
       where: {
         id: pageId,
-        UserId: req.user?.id,
+        userId: req.user?.id,
       },
     });
 
@@ -61,7 +59,7 @@ const getPage = async (req: Request, res: Response) => {
 const getAllPages = async (req: Request, res: Response) => {
   const pages = await Page.findAll({
     where: {
-      UserId: req.user?.id,
+      userId: req.user?.id,
     },
   });
 
@@ -72,22 +70,22 @@ const getAllPages = async (req: Request, res: Response) => {
   return res.status(200).json(pages);
 };
 
-const getPageBudgets = async (req: Request, res: Response) => {
+const getPageBudget = async (req: Request, res: Response) => {
   const pageId = req.params.id;
 
-  const budgets = await Page.findOne({
+  const pageWithBudget = await Page.findOne({
     where: {
       id: pageId,
-      UserId: req.user?.id,
+      userId: req.user?.id,
     },
     include: Budget,
   });
 
-  if (!budgets) {
+  if (!pageWithBudget) {
     return res.status(404).json(`Page not found for specified id: ${pageId}`);
   }
 
-  return res.status(200).json(budgets);
+  return res.status(200).json(pageWithBudget);
 };
 
 const updatePage = async (req: Request, res: Response) => {
@@ -123,7 +121,7 @@ const deletePage = async (req: Request, res: Response) => {
       await Page.destroy({
         where: {
           id: pageId,
-          UserId: req.user?.id,
+          userId: req.user?.id,
         },
         transaction: t,
       });
@@ -149,7 +147,7 @@ export {
   createPage,
   getPage,
   getAllPages,
-  getPageBudgets,
+  getPageBudget,
   updatePage,
   deletePage,
 };

@@ -1,31 +1,38 @@
 import Budget from './budget';
-import Expense from './expense';
+import Transaction from './transaction';
 import Page from './page';
 import User from './user';
+import Category from './category';
 
 // Associate user with all of the other models
 // so they can be protected by auth
-User.hasMany(Page);
-User.hasMany(Budget);
-User.hasMany(Expense);
+User.hasMany(Page, { foreignKey: 'userId' });
+User.hasMany(Budget, { foreignKey: 'userId' });
+User.hasMany(Transaction, { foreignKey: 'userId' });
+User.hasMany(Category, { foreignKey: 'userId' });
 
-Page.belongsTo(User);
-Budget.belongsTo(User);
-Expense.belongsTo(User);
+Page.belongsTo(User, { foreignKey: 'userId' });
+Budget.belongsTo(User, { foreignKey: 'userId' });
+Transaction.belongsTo(User, { foreignKey: 'userId' });
+Category.belongsTo(User, { foreignKey: 'userId' });
 
-// Each page can have many budgets
-// but one budget can belong to only one page
-Page.hasMany(Budget);
-Budget.belongsTo(Page);
+// Each page can have only one budget
+Page.hasOne(Budget, { foreignKey: 'pageId' });
+Budget.belongsTo(Page, { foreignKey: 'pageId' });
 
-// One budget has many expenses
-// but any expense can only have one associated budget
-Budget.hasMany(Expense);
-Expense.belongsTo(Budget);
+// One budget has many transactions
+Budget.hasMany(Transaction, { foreignKey: 'budgetId' });
+Transaction.belongsTo(Budget, { foreignKey: 'budgetId' });
+
+// One category can have many transactions
+// but a transaction can have only one category
+Category.hasMany(Transaction, { foreignKey: 'categoryId' });
+Transaction.belongsTo(Category, { foreignKey: 'categoryId' });
 
 export {
-  Budget,
-  Expense,
   User,
   Page,
+  Budget,
+  Category,
+  Transaction,
 };

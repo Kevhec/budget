@@ -1,11 +1,13 @@
 import budgetRoutes from './budgetsRoutes';
-import expenseRoutes from './expensesRoutes';
+import transactionRoutes from './transactionsRoutes';
 import userRoutes from './userRoutes';
 import pageRouter from './pagesRouter';
+import categoryRouter from './categoriesRoutes';
 
 export {
   budgetRoutes,
-  expenseRoutes,
+  transactionRoutes,
   userRoutes,
   pageRouter,
+  categoryRouter,
 };

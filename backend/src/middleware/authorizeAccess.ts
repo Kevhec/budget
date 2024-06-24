@@ -1,9 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { Model, ModelStatic } from 'sequelize';
-
-interface Element extends Model {
-  UserId?: string
-}
+import { ModelStatic } from 'sequelize';
+import { Element } from '../../types/express';
 
 function authorizeAccess(
   model: ModelStatic<Element>,
@@ -23,7 +20,7 @@ function authorizeAccess(
         return res.status(404).json('Resource not found');
       }
 
-      if (element.UserId !== user?.id) {
+      if (element.userId !== user?.id) {
         return res.status(403).json('Forbidden: You do not have access to this resource');
       }
 

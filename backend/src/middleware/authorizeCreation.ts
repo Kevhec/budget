@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { Model, ModelStatic } from 'sequelize';
 
+interface ProtectedModel extends Model {
+  userId?: string
+}
+
 function authorizeCreation(
-  relatedModel?: ModelStatic<Model>,
+  relatedModel?: ModelStatic<ProtectedModel>,
   relatedIdField?: string,
 ) {
   return (async (req: Request, res: Response, next: NextFunction) => {
@@ -11,14 +15,13 @@ function authorizeCreation(
       const relatedId = req.body[relatedIdField || ''];
 
       if (relatedId) {
-        const relatedElement = await relatedModel?.findOne({
-          where: {
-            id: relatedId,
-            UserId: user?.id,
-          },
-        });
+        const relatedElement = await relatedModel?.findByPk(relatedId);
 
         if (!relatedElement) {
+          return res.status(404).json('Resource not found');
+        }
+
+        if (user?.id !== relatedElement.userId) {
           return res.status(403).json('Forbidden: You can not create in this resource');
         }
 

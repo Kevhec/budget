@@ -10,9 +10,7 @@ export default class Page extends Model {
 
   declare name: string;
 
-  declare initialAmount: number;
-
-  declare UserId: ForeignKey<User['id']>;
+  declare userId: ForeignKey<User['id']>;
 }
 
 Page.init({
@@ -27,14 +25,10 @@ Page.init({
     allowNull: false,
     defaultValue: 'Page',
   },
-  initialAmount: {
-    type: DataTypes.DECIMAL(18, 2),
-    allowNull: false,
-    defaultValue: 0.00,
-  },
 }, {
   sequelize,
   timestamps: true,
+  paranoid: true,
   tableName: 'pages',
   modelName: 'Page',
 });
