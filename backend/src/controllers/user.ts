@@ -34,7 +34,7 @@ const signUp = async (req: Request, res: Response) => {
     }
 
     // Testing email delivered@resend.dev
-    await verificationEmail('delivered@resend.dev', newUser.token);
+    await verificationEmail('delivered@resend.dev', newUser.token || '');
 
     // Send user
     return res.status(201).json(newUser);

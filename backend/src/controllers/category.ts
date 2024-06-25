@@ -9,17 +9,13 @@ async function createCategory(
   const {
     name,
     color,
-    budgetId,
-    limitAmount,
   } = req.body;
 
   try {
     const newCategory = await Category.create({
       name,
       color,
-      budgetId,
-      limitAmount,
-      userId: req.user?.id,
+      userId: req.user?.id || '',
     });
 
     return res.status(201).json({ category: newCategory });

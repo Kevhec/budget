@@ -25,7 +25,6 @@ router.route('/')
   )
   .get(
     authenticate,
-    authorizeAccess(Transaction),
     getAllTransactions,
   );
 

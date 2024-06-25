@@ -17,8 +17,8 @@ Transaction.belongsTo(User, { foreignKey: 'userId' });
 Category.belongsTo(User, { foreignKey: 'userId' });
 
 // Each page can have only one budget
-Page.hasOne(Budget, { foreignKey: 'pageId' });
-Budget.belongsTo(Page, { foreignKey: 'pageId' });
+/* Page.hasOne(Budget, { foreignKey: 'pageId' });
+Budget.belongsTo(Page, { foreignKey: 'pageId' }); */
 
 // One budget has many transactions
 Budget.hasMany(Transaction, { foreignKey: 'budgetId' });

@@ -1,22 +1,20 @@
-import { DataTypes, ForeignKey, Model } from 'sequelize';
+import {
+  CreationOptional,
+  DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model,
+} from 'sequelize';
 import SequelizeConnection from '../SequelizeConnection';
 import User from './user';
-import Budget from './budget';
 
 const sequelize = SequelizeConnection.getInstance();
 
-export default class Category extends Model {
-  declare id: number;
+class Category extends Model<InferAttributes<Category>, InferCreationAttributes<Category>> {
+  declare id: CreationOptional<number>;
 
   declare name: string;
 
-  declare limitAmount: string;
-
   declare color: string;
 
-  declare UserId: ForeignKey<User['id']>;
-
-  declare BudgetId: ForeignKey<Budget['id']>;
+  declare userId: ForeignKey<User['id']>;
 }
 
 Category.init({
@@ -30,11 +28,6 @@ Category.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  limitAmount: {
-    type: DataTypes.DECIMAL(18, 2),
-    allowNull: false,
-    defaultValue: 0.00,
-  },
   color: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -46,3 +39,5 @@ Category.init({
   tableName: 'categories',
   modelName: 'Category',
 });
+
+export default Category;

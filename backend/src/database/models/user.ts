@@ -1,10 +1,14 @@
-import { DataTypes, Model } from 'sequelize';
+import {
+  CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model,
+} from 'sequelize';
 import SequelizeConnection from '../SequelizeConnection';
+import Budget from './budget';
 
 const sequelize = SequelizeConnection.getInstance();
 
-export default class User extends Model {
-  declare id: string;
+export default class User
+  extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+  declare id: CreationOptional<string>;
 
   declare username: string;
 
@@ -12,13 +16,11 @@ export default class User extends Model {
 
   declare password: string;
 
-  declare pagesCount: number;
-
   declare role: string;
 
   declare confirmed: boolean;
 
-  declare token: string;
+  declare token: string | null;
 }
 
 User.init({
@@ -46,11 +48,6 @@ User.init({
     allowNull: true,
     defaultValue: null,
   },
-  pagesCount: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: false,
-    defaultValue: 1,
-  },
   role: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -65,7 +62,7 @@ User.init({
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false,
-    set(value) {
+    set(value: boolean) {
       if (this.getDataValue('role') === 'guest') {
         this.setDataValue('confirmed', true);
       } else {
@@ -78,4 +75,13 @@ User.init({
   timestamps: true,
   tableName: 'users',
   modelName: 'User',
+  hooks: {
+    afterCreate: async (user) => {
+      await Budget.create({
+        name: 'General',
+        isGeneral: true,
+        userId: user.id,
+      });
+    },
+  },
 });

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Budget, Page, User } from '../database/models';
+import { Budget, Page /* , User */ } from '../database/models';
 import SequelizeConnection from '../database/SequelizeConnection';
 
 const sequelize = SequelizeConnection.getInstance();
@@ -11,17 +11,17 @@ const createPage = async (req: Request, res: Response) => {
 
   try {
     const newPage = await sequelize.transaction(async (t) => {
-      const user = await User.findByPk(req.user?.id);
-      const pageName = name || `Page ${user?.pagesCount}`;
+      /* const user = await User.findByPk(req.user?.id); */
+      const pageName = name;
 
       const page = await Page.create({
         name: pageName,
         userId: req.user?.id,
       }, { transaction: t });
 
-      await user?.update({
+      /* await user?.update({
         pagesCount: user.pagesCount + 1,
-      }, { transaction: t });
+      }, { transaction: t }); */
 
       return page;
     });
@@ -117,7 +117,7 @@ const deletePage = async (req: Request, res: Response) => {
 
   try {
     const deleteInformation = await sequelize.transaction(async (t) => {
-      const user = await User.findByPk(req.user?.id);
+      /*       const user = await User.findByPk(req.user?.id); */
       await Page.destroy({
         where: {
           id: pageId,
@@ -125,10 +125,6 @@ const deletePage = async (req: Request, res: Response) => {
         },
         transaction: t,
       });
-
-      await user?.update({
-        pagesCount: user.pagesCount - 1,
-      }, { transaction: t });
 
       return {
         message: 'Budget deleted successfully',

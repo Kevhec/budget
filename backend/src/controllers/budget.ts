@@ -8,27 +8,18 @@ async function createBudget(
 ): Promise<Response | undefined> {
   const {
     name,
-    initialBalance,
-    pageId,
+    totalAmount,
+    startDate,
+    endDate,
   } = req.body;
 
   try {
-    const relatedBudget = await Budget.findOne({
-      where: {
-        pageId,
-      },
-    });
-
-    if (relatedBudget) {
-      return res.status(400).json({ error: 'Page is already linked to a budget' });
-    }
-
     const newBudget = await Budget.create({
       name,
-      initialBalance,
-      currentBalance: initialBalance,
-      pageId,
-      userId: req.user?.id,
+      totalAmount,
+      startDate,
+      endDate,
+      userId: req.user?.id || '',
     });
 
     return res.status(201).json({ budget: newBudget });
@@ -131,6 +122,10 @@ async function updateBudget(
       return res.status(404).json(`Budget not found for specified id: ${budgetId}`);
     }
 
+    if (budget?.isGeneral) {
+      return res.status(400).json('Cannot modify the general budget.');
+    }
+
     const updatedBudget = await budget.update(reqBody);
 
     return res.status(200).json(updatedBudget);
@@ -148,12 +143,22 @@ async function deleteBudget(
   const budgetId = req.params.id;
 
   try {
-    await Budget.destroy({
+    const budget = await Budget.findOne({
       where: {
         id: budgetId,
         userId: req.user?.id,
       },
     });
+
+    if (!budget) {
+      return res.status(404).json(`Budget not found for id: ${budgetId}`);
+    }
+
+    if (budget?.isGeneral) {
+      return res.status(400).json('Cannot delete the general budget');
+    }
+
+    await budget?.destroy();
 
     return res.status(200).json({
       message: 'Budget deleted successfully',

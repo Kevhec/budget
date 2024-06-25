@@ -1,4 +1,7 @@
-import { DataTypes, ForeignKey, Model } from 'sequelize';
+import {
+  CreationOptional,
+  DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model,
+} from 'sequelize';
 import SequelizeConnection from '../SequelizeConnection';
 import User from './user';
 import Budget from './budget';
@@ -11,10 +14,18 @@ export enum TransactionType {
   EXPENSE = 'expense',
 }
 
-export default class Transaction extends Model {
-  declare id: number;
+export enum FrequencyType {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  YEARLY = 'yearly',
+}
 
-  declare name: string;
+class Transaction
+  extends Model<InferAttributes<Transaction>, InferCreationAttributes<Transaction>> {
+  declare id: CreationOptional<number>;
+
+  declare description: string;
 
   declare amount: number;
 
@@ -22,9 +33,13 @@ export default class Transaction extends Model {
 
   declare type: TransactionType;
 
-  declare categoryId: ForeignKey<Category['id']> | null;
+  /*   declare frequency: FrequencyType;
+
+  declare endDate: Date; */
 
   declare userId: ForeignKey<User['id']>;
+
+  declare categoryId: ForeignKey<Category['id']> | null;
 
   declare budgetId: ForeignKey<Budget['id']>;
 }
@@ -36,7 +51,7 @@ Transaction.init({
     allowNull: false,
     autoIncrement: true,
   },
-  name: {
+  description: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -53,9 +68,36 @@ Transaction.init({
     allowNull: false,
     defaultValue: Date.now(),
   },
+/*   frequency: {
+    type: DataTypes.ENUM('daily', 'weekly', 'monthly', 'yearly'),
+    allowNull: true,
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+  }, */
 }, {
   sequelize,
   timestamps: true,
-  tableName: 'expenses',
-  modelName: 'Expense',
+  tableName: 'transactions',
+  modelName: 'Transaction',
+  hooks: {
+    beforeCreate: async (transaction) => {
+      const generalBudget = await Budget.findOne({
+        where: {
+          userId: transaction.userId,
+          isGeneral: true,
+        },
+      });
+
+      if (!generalBudget) {
+        throw new Error('No general budget found for the current user');
+      }
+
+      // eslint-disable-next-line no-param-reassign
+      transaction.budgetId = generalBudget.id;
+    },
+  },
 });
+
+export default Transaction;

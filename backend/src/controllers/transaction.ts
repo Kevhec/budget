@@ -1,9 +1,5 @@
 import { Request, Response } from 'express';
-import { isInt } from '../lib/utils/validations';
-import { Budget, Transaction } from '../database/models';
-import SequelizeConnection from '../database/SequelizeConnection';
-
-const sequelize = SequelizeConnection.getInstance();
+import { Transaction } from '../database/models';
 
 // Create
 async function createTransaction(
@@ -11,47 +7,27 @@ async function createTransaction(
   res: Response,
 ): Promise<Response | undefined> {
   const {
-    name,
+    description,
     amount,
     date,
     type,
     categoryId,
     budgetId,
+    /*     endDate,
+    frequency, */
   } = req.body;
 
   try {
-    const newTransaction = await sequelize.transaction(async (t) => {
-      const budget = await Budget.findByPk(budgetId);
-
-      if (!budget) {
-        throw new Error(`Budget with id ${budgetId} not found`);
-      }
-
-      const transaction = await Transaction.create({
-        name,
-        amount,
-        date,
-        type,
-        categoryId,
-        budgetId,
-        userId: req.user?.id,
-      }, { transaction: t });
-
-      let newBudgetBalance = 0;
-
-      const currentBalance = parseFloat(budget.currentBalance);
-
-      if (type === 'income') {
-        newBudgetBalance = currentBalance + amount;
-      } else if (type === 'expense') {
-        newBudgetBalance = currentBalance - amount;
-      }
-
-      await budget?.update({
-        currentBalance: newBudgetBalance.toFixed(2),
-      }, { transaction: t });
-
-      return transaction;
+    const newTransaction = await Transaction.create({
+      description,
+      amount,
+      date,
+      type,
+      categoryId,
+      budgetId,
+      /*       endDate,
+      frequency, */
+      userId: req.user?.id || '',
     });
 
     return res.status(201).json({ expense: newTransaction });
@@ -151,10 +127,6 @@ async function deleteTransaction(
   const budgetId = req.params.id;
 
   try {
-    if (!isInt(budgetId)) {
-      return res.status(400).json('Id must be an integer');
-    }
-
     await Transaction.destroy({
       where: {
         id: budgetId,

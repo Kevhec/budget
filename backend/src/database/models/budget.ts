@@ -1,20 +1,26 @@
-import { DataTypes, ForeignKey, Model } from 'sequelize';
+import {
+  CreationOptional,
+  DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model,
+} from 'sequelize';
 import SequelizeConnection from '../SequelizeConnection';
-import User from './user';
-import Page from './page';
+import type User from './user';
 
 const sequelize = SequelizeConnection.getInstance();
 
-export default class Budget extends Model {
-  declare id: number;
+class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budget>> {
+  declare id: CreationOptional<number>;
 
-  declare initialBalance: string;
+  declare name: string;
 
-  declare currentBalance: string;
+  declare totalAmount: CreationOptional<string>;
 
-  declare UserId: ForeignKey<User['id']>;
+  declare startDate: CreationOptional<Date>;
 
-  declare PageId: ForeignKey<Page['id']>;
+  declare endDate: CreationOptional<Date>;
+
+  declare isGeneral: CreationOptional<boolean>;
+
+  declare userId: ForeignKey<User['id']>;
 }
 
 Budget.init({
@@ -24,15 +30,30 @@ Budget.init({
     allowNull: false,
     autoIncrement: true,
   },
-  initialBalance: {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'Budget',
+  },
+  totalAmount: {
     type: DataTypes.DECIMAL(18, 2),
     allowNull: false,
     defaultValue: 0.00,
   },
-  currentBalance: {
-    type: DataTypes.DECIMAL(18, 2),
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+  },
+  isGeneral: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: 0.00,
+    defaultValue: false,
   },
 }, {
   sequelize,
@@ -40,3 +61,5 @@ Budget.init({
   tableName: 'budgets',
   modelName: 'Budget',
 });
+
+export default Budget;
