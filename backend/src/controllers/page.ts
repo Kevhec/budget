@@ -27,8 +27,10 @@ const createPage = async (req: Request, res: Response) => {
     });
 
     return res.status(201).json({ page: newPage });
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 };
@@ -49,8 +51,10 @@ const getPage = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json(page);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
   return 0;
@@ -106,8 +110,10 @@ const updatePage = async (req: Request, res: Response) => {
     const updatedPage = await page.update(reqBody);
 
     return res.status(200).json(updatedPage);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 };
@@ -133,8 +139,10 @@ const deletePage = async (req: Request, res: Response) => {
     });
 
     return res.status(200).json(deleteInformation);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 };

@@ -6,6 +6,8 @@ import generateJWT from '../lib/utils/generateJWT';
 import convert from '../lib/utils/convert';
 import { REMEMBER_ME_EXPIRATION_TIME_DAYS, SESSION_EXPIRATION_TIME_DAYS } from '../lib/constants';
 import verificationEmail from '../lib/utils/verificationEmail';
+import sanitizeObject from '../lib/utils/sanitizeObject';
+import setCookie from '../lib/utils/setCookie';
 
 const signUp = async (req: Request, res: Response) => {
   const { error, value } = userSchema.validate(req.body);
@@ -36,10 +38,16 @@ const signUp = async (req: Request, res: Response) => {
     // Testing email delivered@resend.dev
     await verificationEmail('delivered@resend.dev', newUser.token || '');
 
+    const plainUserObj = newUser.toJSON();
+
+    const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
+
     // Send user
-    return res.status(201).json(newUser);
-  } catch (e: any) {
-    console.error(e.message);
+    return res.status(201).json(sanitizedUser);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error(e.message);
+    }
     return res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -60,8 +68,10 @@ const confirm = async (req: Request, res: Response) => {
     });
 
     return res.status(200).json('User confirmed successfully.');
-  } catch (e: any) {
-    console.error(e.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 };
@@ -95,14 +105,21 @@ const logIn = async (req: Request, res: Response) => {
       res.cookie('jwt', token, {
         maxAge: convert(expirationTime, 'day', 'ms'),
         httpOnly: true,
+        sameSite: 'none',
       });
 
+      const plainUserObj = user.toJSON();
+
+      const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
+
       // send user data
-      return res.status(201).json(user);
+      return res.status(201).json(sanitizedUser);
     }
     return res.status(401).json('Authentication failed');
-  } catch (error: any) {
-    console.error(error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 };
@@ -131,31 +148,41 @@ const loginAsGuest = async (req: Request, res: Response) => {
     const token = generateJWT({ id: newGuest.id }, convert(7, 'day', 'second'));
 
     // set the same maxAge for cookies but in ms
-    res.cookie('jwt', token, {
+    setCookie(res, 'jwt', token, {
       maxAge: convert(7, 'day', 'ms'),
-      httpOnly: true,
     });
 
+    const plainUserObj = newGuest.toJSON();
+
+    const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'email']);
+
     // Send user
-    return res.status(201).json(newGuest);
-  } catch (e: any) {
+    return res.status(201).json(sanitizedUser);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      console.error('Error: ', e.message);
+    }
     return res.status(500).json('Internal server error');
   }
 };
 
 const getInfo = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
   try {
-    const user = await User.findByPk(id);
+    const { user } = req;
 
     if (!user) {
       return res.status(404).json('User not found.');
     }
 
-    return res.status(200).json(user);
-  } catch (e: any) {
-    console.error(e.message);
+    const plainUserObj = user.toJSON();
+
+    const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'email']);
+
+    return res.status(200).json(sanitizedUser);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 };

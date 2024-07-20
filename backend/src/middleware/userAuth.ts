@@ -23,8 +23,10 @@ const saveUser: RequestHandler = async (req, res, next) => {
     }
 
     return next();
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json({ message: 'Internal server error' });
   }
 };

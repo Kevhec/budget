@@ -23,8 +23,10 @@ async function createBudget(
     });
 
     return res.status(201).json({ budget: newBudget });
-  } catch (e: any) {
-    console.error('ERROR: ', e.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json({ message: 'Internal server error' });
   }
 }
@@ -46,8 +48,10 @@ async function getAllBudgets(
     }
 
     return res.status(200).json(budgets);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -71,8 +75,10 @@ async function getBudget(
     }
 
     return res.status(200).json(budget);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -97,8 +103,10 @@ async function getBudgetExpenses(
     }
 
     return res.status(200).json(expenses);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -129,8 +137,10 @@ async function updateBudget(
     const updatedBudget = await budget.update(reqBody);
 
     return res.status(200).json(updatedBudget);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -165,8 +175,10 @@ async function deleteBudget(
       deletedBudgetId: parseInt(budgetId, 10),
     });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }

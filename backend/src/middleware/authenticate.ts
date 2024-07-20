@@ -24,8 +24,10 @@ const authenticate: RequestHandler = async (req, res, next) => {
     req.user = user;
 
     return next();
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(401).json('Invalid token');
   }
 };

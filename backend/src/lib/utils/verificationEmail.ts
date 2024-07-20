@@ -41,7 +41,7 @@ const verificationEmail = async (to: string, token: string) => {
               color: #666666;
               line-height: 1.6;
             }
-            
+
             p:not(last-child) {
               margin-bottom: 1rem;
             }
@@ -54,19 +54,19 @@ const verificationEmail = async (to: string, token: string) => {
               text-decoration: none;
               padding: 10px 20px;
               margin-top: 20px;
-              margin-inline: auto; 
+              margin-inline: auto;
               border-radius: 5px;
             }
 
             .button:hover {
               background-color: #0056b3;
             }
-            
+
             .small-text {
               font-size: .85rem;
               text-align: center;
             }
-            
+
             .bold {
               font-size: 700;
             }
@@ -76,7 +76,7 @@ const verificationEmail = async (to: string, token: string) => {
         <body>
           <div class="container">
             <h1>¡Hola!</h1>
-            <p>Porfavor verifica tu dirección de email para completar el proceso de registro en la aplicación <span class="bold">Budget</span>. ¡Sólo haz click en el siguiente enlace!</p>
+            <p>Por favor verifica tu dirección de email para completar el proceso de registro en la aplicación <span class="bold">Budget</span>. ¡Sólo haz click en el siguiente enlace!</p>
             <a class="button" href="${frontendUrl}/verify?token=${token}" target="_blank">Verificar Email</a>
             <p class="small-text">Si no te registraste en este servicio, puede ignorar este email.</p>
             <p>¡Saludos!</p>
@@ -90,9 +90,13 @@ const verificationEmail = async (to: string, token: string) => {
     console.log(response);
 
     return response;
-  } catch (error: any) {
-    console.error(error.message);
-    throw new Error(error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      throw new Error(error.message);
+    }
+
+    return 0;
   }
 };
 

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { DatabaseError } from 'sequelize';
 import { Transaction } from '../database/models';
 
 // Create
@@ -31,9 +32,15 @@ async function createTransaction(
     });
 
     return res.status(201).json({ expense: newTransaction });
-  } catch (e: any) {
-    if (e.parent.code === '23503') {
-      return res.status(409).json(e.parent.detail);
+  } catch (error: unknown) {
+    if (error instanceof DatabaseError) {
+      const sequelizeError = error as { parent?: { code?: string, detail?: string } };
+
+      if (sequelizeError.parent && sequelizeError.parent.code === '23503') {
+        if (sequelizeError.parent && sequelizeError.parent.code === '23503') {
+          return res.status(409).json(sequelizeError.parent.detail);
+        }
+      }
     }
 
     return res.status(500).json({ message: 'Internal server error' });
@@ -57,8 +64,10 @@ async function getAllTransactions(
     }
 
     return res.status(200).json(transactions);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -82,8 +91,10 @@ async function getTransaction(
     }
 
     return res.status(200).json(transaction);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -110,10 +121,15 @@ async function updateTransaction(
     const updatedTransaction = await transaction.update(reqBody);
 
     return res.status(200).json(updatedTransaction);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
-    if (error.parent.code === '23503') {
-      return res.status(409).json(error.parent.detail);
+  } catch (error: unknown) {
+    if (error instanceof DatabaseError) {
+      const sequelizeError = error as { parent?: { code?: string, detail?: string } };
+
+      if (sequelizeError.parent && sequelizeError.parent.code === '23503') {
+        if (sequelizeError.parent && sequelizeError.parent.code === '23503') {
+          return res.status(409).json(sequelizeError.parent.detail);
+        }
+      }
     }
     return res.status(500).json('Internal server error');
   }
@@ -139,8 +155,10 @@ async function deleteTransaction(
       deletedBudgetId: parseInt(budgetId, 10),
     });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }

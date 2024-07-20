@@ -16,9 +16,13 @@ const sendEmail = async (from: string, to: string, subject: string, html: string
     }
 
     return data;
-  } catch (error: any) {
-    console.error(error.message);
-    throw new Error(error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error(error.message);
+      throw new Error(error.message);
+    }
+
+    return 0;
   }
 };
 

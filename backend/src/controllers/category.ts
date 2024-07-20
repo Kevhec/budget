@@ -19,8 +19,10 @@ async function createCategory(
     });
 
     return res.status(201).json({ category: newCategory });
-  } catch (e: any) {
-    console.error('ERROR: ', e.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json({ message: 'Internal server error' });
   }
 }
@@ -42,8 +44,10 @@ async function getAllCategories(
     }
 
     return res.status(200).json(categories);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -67,8 +71,10 @@ async function getCategory(
     }
 
     return res.status(200).json(category);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -95,8 +101,10 @@ async function updateCategory(
     const updatedCategory = await category.update(reqBody);
 
     return res.status(200).json(updatedCategory);
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }
@@ -121,8 +129,10 @@ async function deleteCategory(
       deletedCategoryId: parseInt(categoryId, 10),
     });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error('ERROR: ', error.message);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
     return res.status(500).json('Internal server error');
   }
 }

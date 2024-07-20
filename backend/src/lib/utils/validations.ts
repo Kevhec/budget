@@ -8,7 +8,7 @@ function isInt(number: string) {
   return !Number.isNaN(parsedNumber);
 }
 
-function dontExist(elements: Record<string, any>): DoExist {
+function dontExist(elements: Record<string, unknown>): DoExist {
   let error = false;
   const errorElements: string[] = [];
 

@@ -77,6 +77,10 @@ User.init({
   modelName: 'User',
   hooks: {
     afterCreate: async (user) => {
+      if (user.role === 'guest') {
+        await user.update({ confirmed: true });
+      }
+
       await Budget.create({
         name: 'General',
         isGeneral: true,
