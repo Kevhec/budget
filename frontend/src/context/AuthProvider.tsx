@@ -11,7 +11,7 @@ interface Props {
 export interface AuthContextType {
   auth: User
   setAuth: React.Dispatch<React.SetStateAction<User>>
-  logOut: () => Promise<MessageResponse>
+  handleLogOut: () => Promise<MessageResponse>
   loading: boolean
   createGuest: ({ username }: { username: string }) => Promise<AuthResponse>
 }
@@ -45,24 +45,18 @@ export function AuthProvider({ children }: Props) {
     getAuth();
   }, []);
 
-  /*   const checkAuth = async () => {
-    try {
-      setLoading(true);
-      const newAuth = await authUser();
-      setAuth(newAuth.data);
-    } catch (error: any) {
-      throw new Error(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }; */
+  const handleLogOut = async () => {
+    const response = await logOut();
+    setAuth(initialAuthState);
+    return response;
+  };
 
   const contextValue = useMemo<AuthContextType>(() => ({
     auth,
     loading,
     setAuth,
     createGuest,
-    logOut,
+    handleLogOut,
   }), [auth, loading]);
 
   return (

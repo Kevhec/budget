@@ -18,7 +18,7 @@ async function createCategory(
       userId: req.user?.id || '',
     });
 
-    return res.status(201).json({ category: newCategory });
+    return res.status(201).json({ data: { category: newCategory } });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -43,7 +43,7 @@ async function getAllCategories(
       return res.status(404).json('No categories where found');
     }
 
-    return res.status(200).json(categories);
+    return res.status(200).json({ data: categories });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -70,7 +70,7 @@ async function getCategory(
       return res.status(404).json(`Category not found for specified id: ${categoryId}`);
     }
 
-    return res.status(200).json(category);
+    return res.status(200).json({ data: category });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -100,7 +100,7 @@ async function updateCategory(
 
     const updatedCategory = await category.update(reqBody);
 
-    return res.status(200).json(updatedCategory);
+    return res.status(200).json({ data: updatedCategory });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -125,8 +125,10 @@ async function deleteCategory(
     });
 
     return res.status(200).json({
-      message: 'Category deleted successfully',
-      deletedCategoryId: parseInt(categoryId, 10),
+      data: {
+        message: 'Category deleted successfully',
+        deletedCategoryId: parseInt(categoryId, 10),
+      },
     });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: unknown) {

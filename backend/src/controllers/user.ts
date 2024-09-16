@@ -40,10 +40,11 @@ const signUp = async (req: Request, res: Response) => {
 
     const plainUserObj = newUser.toJSON();
 
+    // Sanitize user object in order to avoid sending sensitive data to frontend
     const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
 
     // Send user
-    return res.status(201).json(sanitizedUser);
+    return res.status(201).json({ data: sanitizedUser });
   } catch (e: unknown) {
     if (e instanceof Error) {
       console.error(e.message);
@@ -56,18 +57,20 @@ const confirm = async (req: Request, res: Response) => {
   const { token } = req.params;
 
   try {
+    // Find user which token matches the one sent to it's email
     const userToConfirm = await User.findOne({ where: { token } });
 
     if (!userToConfirm) {
       return res.status(404).json('Invalid or expired token.');
     }
 
+    // Update user's record as a confirmed user
     await userToConfirm.update({
       token: null,
       confirmed: true,
     });
 
-    return res.status(200).json('User confirmed successfully.');
+    return res.status(200).json({ data: 'User confirmed successfully.' });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -98,7 +101,7 @@ const logIn = async (req: Request, res: Response) => {
     }
     const isSame = await bcrypt.compare(password, user.password);
 
-    // If match generate a jwt using secret key
+    // If it's a match, generate a jwt and send it through a session cookie
     if (isSame) {
       const token = generateJWT({ id: user?.id }, convert(expirationTime, 'day', 'second'));
 
@@ -110,10 +113,11 @@ const logIn = async (req: Request, res: Response) => {
 
       const plainUserObj = user.toJSON();
 
+      // Sanitize user object to send it to client for profiling purposes
       const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
 
       // send user data
-      return res.status(201).json(sanitizedUser);
+      return res.status(201).json({ data: sanitizedUser });
     }
     return res.status(401).json('Authentication failed');
   } catch (error: unknown) {
@@ -125,8 +129,23 @@ const logIn = async (req: Request, res: Response) => {
 };
 
 const logOut = async (req: Request, res: Response) => {
-  res.clearCookie('jwt', { httpOnly: true });
-  res.status(200).json({ message: 'Logged out successfully' });
+  const { user } = req;
+
+  try {
+    // If user is a guest delete it's account so db is not overloaded with guest accounts
+    if (user?.role === 'guest') {
+      await user.destroy();
+    }
+
+    // If it's a normal user just clear the session cookie
+    res.clearCookie('jwt', { httpOnly: true });
+    return res.status(200).json({ data: { message: 'Logged out successfully' } });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(error.message);
+    }
+    return res.status(500).json('Internal server error');
+  }
 };
 
 const loginAsGuest = async (req: Request, res: Response) => {
@@ -157,7 +176,7 @@ const loginAsGuest = async (req: Request, res: Response) => {
     const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'email']);
 
     // Send user
-    return res.status(201).json(sanitizedUser);
+    return res.status(201).json({ data: sanitizedUser });
   } catch (e: unknown) {
     if (e instanceof Error) {
       console.error('Error: ', e.message);
@@ -176,9 +195,10 @@ const getInfo = async (req: Request, res: Response) => {
 
     const plainUserObj = user.toJSON();
 
+    // Remove sensitive or unnecessary data from user object to use for profiling purposes
     const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'email']);
 
-    return res.status(200).json(sanitizedUser);
+    return res.status(200).json({ data: sanitizedUser });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);

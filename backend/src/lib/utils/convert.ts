@@ -9,10 +9,13 @@ const conversionFactors: Record<TimeUnit, number> = {
 };
 
 function convert(value: number, from: TimeUnit, to: TimeUnit) {
+  // Value in ms equivalent to the "from" unit
   const fromFactor = conversionFactors[from];
+  // Equivalence of the "to" factor
   const toFactor = conversionFactors[to];
 
-  return (value * fromFactor) / toFactor;
+  // Both are used to define a complete conversion factor
+  return value * (fromFactor / toFactor);
 }
 
 export default convert;

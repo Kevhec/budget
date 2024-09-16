@@ -26,7 +26,7 @@ const createPage = async (req: Request, res: Response) => {
       return page;
     });
 
-    return res.status(201).json({ page: newPage });
+    return res.status(201).json({ data: { page: newPage } });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -50,7 +50,7 @@ const getPage = async (req: Request, res: Response) => {
       return res.status(404).json(`Page not found for specified id: ${pageId}`);
     }
 
-    return res.status(200).json(page);
+    return res.status(200).json({ data: page });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -71,7 +71,7 @@ const getAllPages = async (req: Request, res: Response) => {
     return res.status(404).json('No pages where found');
   }
 
-  return res.status(200).json(pages);
+  return res.status(200).json({ data: pages });
 };
 
 const getPageBudget = async (req: Request, res: Response) => {
@@ -89,7 +89,7 @@ const getPageBudget = async (req: Request, res: Response) => {
     return res.status(404).json(`Page not found for specified id: ${pageId}`);
   }
 
-  return res.status(200).json(pageWithBudget);
+  return res.status(200).json({ data: pageWithBudget });
 };
 
 const updatePage = async (req: Request, res: Response) => {
@@ -109,7 +109,7 @@ const updatePage = async (req: Request, res: Response) => {
 
     const updatedPage = await page.update(reqBody);
 
-    return res.status(200).json(updatedPage);
+    return res.status(200).json({ data: updatedPage });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -138,7 +138,7 @@ const deletePage = async (req: Request, res: Response) => {
       };
     });
 
-    return res.status(200).json(deleteInformation);
+    return res.status(200).json({ data: deleteInformation });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);

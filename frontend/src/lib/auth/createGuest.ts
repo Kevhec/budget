@@ -11,6 +11,8 @@ async function createGuest({ username }: Params): Promise<AuthResponse> {
       username,
     });
 
+    console.log(data);
+
     return data;
   } catch (error: any) {
     throw new Error(error.response.data.message);

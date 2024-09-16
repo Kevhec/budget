@@ -27,7 +27,7 @@ Transaction.belongsTo(Budget, { foreignKey: 'budgetId' });
 // One category can have many transactions
 // but a transaction can have only one category
 Category.hasMany(Transaction, { foreignKey: 'categoryId' });
-Transaction.belongsTo(Category, { foreignKey: 'categoryId' });
+Transaction.belongsTo(Category, { foreignKey: 'categoryId', as: 'category' });
 
 export {
   User,

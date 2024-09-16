@@ -5,6 +5,19 @@ interface FormattedBody<T> {
   status: number,
   data?: T,
   error?: string,
+  meta?: {
+    totalItems: number,
+    itemCount: number,
+    itemsPerPage: number,
+    totalPages: number,
+    currentPage: number,
+  },
+  links?: {
+    first?: string,
+    previous?: string,
+    next?: string,
+    last?: string,
+  },
 }
 
 const responseInterceptor: RequestHandler = (req, res, next) => {
@@ -26,7 +39,15 @@ const responseInterceptor: RequestHandler = (req, res, next) => {
     if (statusCode >= 400) {
       formattedBody.error = body;
     } else {
-      formattedBody.data = body;
+      formattedBody.data = body.data;
+
+      if (body.meta) {
+        formattedBody.meta = body.meta;
+      }
+
+      if (body.links) {
+        formattedBody.links = body.links;
+      }
     }
     // Call the original res.send method with the formatted body
     return oldDotJson.call(res, formattedBody);

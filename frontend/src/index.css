@@ -10,7 +10,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 211 100% 50%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -29,6 +29,13 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --darkGray: 210 10% 23%;
+    --softGray: 0 0% 86%;
+    --blueishGray: 208 7% 46%;
+    --secondaryGreen: 134 61% 41%;
+    --secondaryYellow: 45 100% 51%;
+    --font-inter: "Inter", sans-serif;
+    --font-open-sans: "Open Sans", sans-serif;
   }
 
   .dark {
@@ -56,6 +63,10 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+
+  body {
+    font-family: var(--font-inter);
   }
 }
 

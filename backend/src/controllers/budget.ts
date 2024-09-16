@@ -22,7 +22,7 @@ async function createBudget(
       userId: req.user?.id || '',
     });
 
-    return res.status(201).json({ budget: newBudget });
+    return res.status(201).json({ data: { budget: newBudget } });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -47,7 +47,7 @@ async function getAllBudgets(
       return res.status(404).json('No budgets where found');
     }
 
-    return res.status(200).json(budgets);
+    return res.status(200).json({ data: budgets });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -74,7 +74,7 @@ async function getBudget(
       return res.status(404).json(`Budget not found for specified id: ${budgetId}`);
     }
 
-    return res.status(200).json(budget);
+    return res.status(200).json({ data: budget });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -102,7 +102,7 @@ async function getBudgetExpenses(
       return res.status(404).json(`No budget where found for id ${budgetId}`);
     }
 
-    return res.status(200).json(expenses);
+    return res.status(200).json({ data: expenses });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -136,7 +136,7 @@ async function updateBudget(
 
     const updatedBudget = await budget.update(reqBody);
 
-    return res.status(200).json(updatedBudget);
+    return res.status(200).json({ data: updatedBudget });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -171,8 +171,10 @@ async function deleteBudget(
     await budget?.destroy();
 
     return res.status(200).json({
-      message: 'Budget deleted successfully',
-      deletedBudgetId: parseInt(budgetId, 10),
+      data: {
+        message: 'Budget deleted successfully',
+        deletedBudgetId: parseInt(budgetId, 10),
+      },
     });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: unknown) {
