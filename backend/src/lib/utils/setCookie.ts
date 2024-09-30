@@ -1,11 +1,13 @@
 import { CookieOptions, type Response } from 'express';
 
 const setCookie = (res: Response, name: string, val: string, options: CookieOptions = {}) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   const defaultOptions: CookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // true if in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'None' for production, 'Lax' for development
-    // Domain can be specified if needed
+    secure: isProduction,
+    path: '/',
+    sameSite: isProduction ? 'none' : 'lax',
   };
 
   // Merge default options with provided options

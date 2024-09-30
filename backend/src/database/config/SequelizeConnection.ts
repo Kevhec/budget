@@ -1,7 +1,4 @@
 import { Dialect, Sequelize } from 'sequelize';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 class SequelizeConnection {
   private static instance: Sequelize;

@@ -1,5 +1,4 @@
 import Joi from 'joi';
-import { positiveInteger } from './general';
 
 const createBudgetSchema = Joi.object({
   name: Joi.string().required(),
@@ -9,7 +8,7 @@ const createBudgetSchema = Joi.object({
 });
 
 const updateBudgetSchema = Joi.object({
-  id: positiveInteger.required(),
+  id: Joi.string().guid().required(),
   name: Joi.string(),
   totalAmount: Joi.number().precision(2).positive(),
   startDate: Joi.date(),

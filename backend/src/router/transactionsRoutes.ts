@@ -3,6 +3,7 @@ import {
   createTransaction,
   deleteTransaction,
   getAllTransactions,
+  getBalance,
   getTransaction,
   updateTransaction,
 } from '../controllers/transaction';
@@ -11,8 +12,8 @@ import { Budget, Transaction } from '../database/models';
 import authorizeCreation from '../middleware/authorizeCreation';
 import authorizeAccess from '../middleware/authorizeAccess';
 import validateSchema from '../middleware/validateSchema';
-import { createTransactionSchema, updateTransactionSchema } from '../database/schemas/transaction';
-import { getObjectById } from '../database/schemas/general';
+import { createTransactionSchema, getBalanceSchema, updateTransactionSchema } from '../database/schemas/transaction';
+import { getObjectByUUID } from '../database/schemas/general';
 
 const router = Router();
 
@@ -28,9 +29,16 @@ router.route('/')
     getAllTransactions,
   );
 
+router.route('/balance')
+  .get(
+    validateSchema(getBalanceSchema),
+    authenticate,
+    getBalance,
+  );
+
 router.route('/:id')
   .get(
-    validateSchema(getObjectById),
+    validateSchema(getObjectByUUID),
     authenticate,
     authorizeAccess(Transaction),
     getTransaction,
@@ -42,7 +50,7 @@ router.route('/:id')
     updateTransaction,
   )
   .delete(
-    validateSchema(getObjectById),
+    validateSchema(getObjectByUUID),
     authenticate,
     authorizeAccess(Transaction),
     deleteTransaction,

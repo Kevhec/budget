@@ -1,7 +1,7 @@
 import {
   CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model,
 } from 'sequelize';
-import SequelizeConnection from '../SequelizeConnection';
+import SequelizeConnection from '../config/SequelizeConnection';
 import Budget from './budget';
 
 const sequelize = SequelizeConnection.getInstance();
@@ -28,6 +28,7 @@ User.init({
     primaryKey: true,
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
+    allowNull: false,
   },
   username: {
     type: DataTypes.STRING,
@@ -85,6 +86,7 @@ User.init({
         name: 'General',
         isGeneral: true,
         userId: user.id,
+        startDate: new Date(),
       });
     },
   },

@@ -13,7 +13,7 @@ import authorizeAccess from '../middleware/authorizeAccess';
 import authorizeCreation from '../middleware/authorizeCreation';
 import validateSchema from '../middleware/validateSchema';
 import { createBudgetSchema, updateBudgetSchema } from '../database/schemas/budget';
-import { getObjectById } from '../database/schemas/general';
+import { getObjectByUUID } from '../database/schemas/general';
 
 const router = Router();
 
@@ -31,7 +31,7 @@ router.route('/')
 
 router.route('/:id')
   .get(
-    validateSchema(getObjectById),
+    validateSchema(getObjectByUUID),
     authenticate,
     authorizeAccess(Budget),
     getBudget,
@@ -43,7 +43,7 @@ router.route('/:id')
     updateBudget,
   )
   .delete(
-    validateSchema(getObjectById),
+    validateSchema(getObjectByUUID),
     authenticate,
     authorizeAccess(Budget),
     deleteBudget,

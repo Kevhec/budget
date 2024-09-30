@@ -22,7 +22,7 @@ import guestSchema from '@/schemas/guest';
 import useAuth from '@/hooks/useAuth';
 
 export default function Guest() {
-  const { createGuest, setAuth } = useAuth();
+  const { loginGuest } = useAuth();
 
   const form = useForm<z.infer<typeof guestSchema>>({
     resolver: zodResolver(guestSchema),
@@ -32,9 +32,7 @@ export default function Guest() {
   });
 
   const onSubmit = async (value: z.infer<typeof guestSchema>) => {
-    const { data } = await createGuest({ username: value.username });
-    const newGuest = data;
-    setAuth(newGuest);
+    loginGuest({ username: value.username });
     return 0;
   };
 

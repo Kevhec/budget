@@ -1,23 +1,21 @@
 import express from 'express';
 import cors, { CorsOptions } from 'cors';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import { SequelizeStorage, Umzug } from 'umzug';
 import responseInterceptor from './middleware/interceptors';
 import {
   budgetRoutes, transactionRoutes, pageRouter, userRoutes,
   categoryRouter,
 } from './router';
-import SequelizeConnection from './database/SequelizeConnection';
+import SequelizeConnection from './database/config/SequelizeConnection';
 
 const sequelize = SequelizeConnection.getInstance();
 
 const app = express();
 const PORT = 3000;
 
-dotenv.config();
-
 // CORS Options
-const allowedDomains = [process.env.FRONTEND_URL_DEVELOPMENT, process.env.FRONTEND_URL_PRODUCTION];
+const allowedDomains = [process.env.FRONTEND_URL];
 const corsOptions: CorsOptions = {
   origin(origin, callback) {
     if (allowedDomains.indexOf(origin) !== -1 || !origin) {
@@ -42,8 +40,25 @@ app.use('/api/transaction', transactionRoutes);
 app.use('/api/page', pageRouter);
 app.use('/api/category', categoryRouter);
 
-sequelize.sync({ force: true }).then(() => {
-  console.log('Database has been re sync');
+sequelize.sync().then(() => {
+  console.log('Database synchronized');
+});
+
+// UMZUG (migrations tool)
+const runMigrations = async () => {
+  const umzug = new Umzug({
+    migrations: { glob: 'src/database/migrations/*.js' },
+    context: sequelize.getQueryInterface(),
+    storage: new SequelizeStorage({ sequelize }),
+    logger: console,
+  });
+
+  await umzug.up();
+};
+
+runMigrations().catch((error) => {
+  console.error('Migration failed:', error);
+  process.exit(1);
 });
 
 /* const errorHandler: ErrorRequestHandler = (err, req, res, next) => {

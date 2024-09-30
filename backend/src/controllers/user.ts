@@ -99,22 +99,24 @@ const logIn = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json('Authentication failed');
     }
+
     const isSame = await bcrypt.compare(password, user.password);
 
     // If it's a match, generate a jwt and send it through a session cookie
     if (isSame) {
       const token = generateJWT({ id: user?.id }, convert(expirationTime, 'day', 'second'));
 
-      res.cookie('jwt', token, {
-        maxAge: convert(expirationTime, 'day', 'ms'),
-        httpOnly: true,
-        sameSite: 'none',
+      setCookie(res, 'jwt', token, {
+        maxAge:
+          process.env.NODE_ENV === 'development'
+            ? 99999999999999
+            : convert(expirationTime, 'day', 'ms'),
       });
 
       const plainUserObj = user.toJSON();
 
       // Sanitize user object to send it to client for profiling purposes
-      const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
+      const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'updatedAt', 'createdAt']);
 
       // send user data
       return res.status(201).json({ data: sanitizedUser });
@@ -188,6 +190,7 @@ const loginAsGuest = async (req: Request, res: Response) => {
 const getInfo = async (req: Request, res: Response) => {
   try {
     const { user } = req;
+    console.log(user);
 
     if (!user) {
       return res.status(404).json('User not found.');
@@ -196,7 +199,7 @@ const getInfo = async (req: Request, res: Response) => {
     const plainUserObj = user.toJSON();
 
     // Remove sensitive or unnecessary data from user object to use for profiling purposes
-    const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'email']);
+    const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
 
     return res.status(200).json({ data: sanitizedUser });
   } catch (error: unknown) {

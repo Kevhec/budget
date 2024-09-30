@@ -1,8 +1,6 @@
 import sendEmail from '../resend';
 
-const frontendUrl = process.env.NODE_ENV === 'production'
-  ? process.env.FRONTEND_URL_PRODUCTION
-  : process.env.FRONTEND_URL_DEVELOPMENT;
+const frontendUrl = process.env.FRONTEND_URL;
 
 const verificationEmail = async (to: string, token: string) => {
   try {
