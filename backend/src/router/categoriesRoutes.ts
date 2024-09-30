@@ -4,6 +4,7 @@ import {
   deleteCategory,
   getAllCategories,
   getCategory,
+  getCategoriesMonthlyBalance,
   updateCategory,
 } from '../controllers/category';
 import authenticate from '../middleware/authenticate';
@@ -11,7 +12,7 @@ import { Category, Budget } from '../database/models';
 import authorizeAccess from '../middleware/authorizeAccess';
 import authorizeCreation from '../middleware/authorizeCreation';
 import validateSchema from '../middleware/validateSchema';
-import { getObjectById } from '../database/schemas/general';
+import { getObjectByUUID } from '../database/schemas/general';
 import { createCategorySchema, updateCategorySchema } from '../database/schemas/category';
 
 const router = Router();
@@ -28,11 +29,16 @@ router.route('/')
     getAllCategories,
   );
 
+router.get(
+  '/balance/',
+  authenticate,
+  getCategoriesMonthlyBalance,
+);
+
 router.route('/:id')
   .get(
-    validateSchema(getObjectById),
+    validateSchema(getObjectByUUID),
     authenticate,
-    authorizeAccess(Category),
     getCategory,
   )
   .patch(
@@ -42,7 +48,7 @@ router.route('/:id')
     updateCategory,
   )
   .delete(
-    validateSchema(getObjectById),
+    validateSchema(getObjectByUUID),
     authenticate,
     authorizeAccess(Budget),
     deleteCategory,

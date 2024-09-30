@@ -2,7 +2,7 @@ import {
   CreationOptional,
   DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model,
 } from 'sequelize';
-import SequelizeConnection from '../SequelizeConnection';
+import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
 
 const sequelize = SequelizeConnection.getInstance();
@@ -25,10 +25,10 @@ class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budg
 
 Budget.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     allowNull: false,
-    autoIncrement: true,
   },
   name: {
     type: DataTypes.STRING,

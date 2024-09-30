@@ -29,6 +29,7 @@ export const TransactionsContext = createContext<ContextType>({
 });
 
 function TransactionsProvider({ children }: PropsWithChildren) {
+  // Get initial transaction page from database
   const {
     transactions, setDate, setLimit, setPage,
   } = useTransactions({
@@ -49,8 +50,11 @@ function TransactionsProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (transactions) {
+      // This should only be changed by the table
       setPaginatedTransactions(transactions);
 
+      // If fetched page one, update recentTransactions
+      // TODO: Handle cases when it's first page but with filters applied like older date
       if (transactions.meta?.currentPage === 1) {
         const newRecentTransactions = transactions?.data?.slice(0, 4) || [];
         setRecentTransactions(newRecentTransactions);
@@ -58,6 +62,8 @@ function TransactionsProvider({ children }: PropsWithChildren) {
     }
   }, [transactions]);
 
+  // Update recent and paginated on new transaction
+  // TODO: Call backend if paginated is not on first page for consistency
   const addTransaction = useCallback((transaction: Transaction) => {
     const newRecent = [transaction, ...recentTransactions]
       .slice(0, 4);

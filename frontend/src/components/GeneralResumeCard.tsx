@@ -35,7 +35,7 @@ export default function GeneralResumeCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <Typography className="font-bold text-3xl">
+        <Typography className="font-bold text-lg md:text-3xl">
           {formattedMoney}
         </Typography>
         <Typography className="text-sm">

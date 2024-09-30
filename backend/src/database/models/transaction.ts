@@ -2,7 +2,7 @@ import {
   CreationOptional,
   DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model,
 } from 'sequelize';
-import SequelizeConnection from '../SequelizeConnection';
+import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';
 import Budget from './budget';
 import Category from './category';
@@ -46,10 +46,10 @@ class Transaction
 
 Transaction.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
     allowNull: false,
-    autoIncrement: true,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
   },
   description: {
     type: DataTypes.STRING,

@@ -1,63 +1,51 @@
 import {
-  createContext, useEffect, useMemo, useState,
+  createContext, useEffect, useMemo, useReducer,
 } from 'react';
-import { authUser, logOut, createGuest } from '@/lib/auth';
-import { AuthResponse, MessageResponse, User } from '@/types';
+import {
+  AuthContextType,
+  AuthLoginGuest,
+  AuthReducer,
+  type AuthLoginUser,
+} from '@/types';
+import { authReducer, initialAuthState } from '@/reducers/auth/authReducer';
+import {
+  login as loginAction,
+  logout as logoutAction,
+  checkAuth as checkAuthAction,
+  loginGuest as loginGuestAction,
+} from '@/reducers/auth/authActions';
 
 interface Props {
   children: React.ReactNode
 }
 
-export interface AuthContextType {
-  auth: User
-  setAuth: React.Dispatch<React.SetStateAction<User>>
-  handleLogOut: () => Promise<MessageResponse>
-  loading: boolean
-  createGuest: ({ username }: { username: string }) => Promise<AuthResponse>
-}
-
-const initialAuthState = {
-  id: null,
-  username: null,
-  role: null,
-  confirmed: false,
-};
-
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: Props) {
-  const [auth, setAuth] = useState<User>(initialAuthState);
-  const [loading, setLoading] = useState(false);
+  const [state, dispatch] = useReducer<AuthReducer>(authReducer, initialAuthState);
 
   useEffect(() => {
-    const getAuth = async () => {
-      try {
-        setLoading(true);
-        const newAuth = await authUser();
-        setAuth(newAuth.data);
-      } catch (error: any) {
-        throw new Error(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getAuth();
+    checkAuthAction(dispatch);
   }, []);
 
-  const handleLogOut = async () => {
-    const response = await logOut();
-    setAuth(initialAuthState);
-    return response;
+  const login = (credentials: AuthLoginUser) => {
+    loginAction(dispatch, credentials);
+  };
+
+  const logout = () => {
+    logoutAction(dispatch);
+  };
+
+  const loginGuest = (credentials: AuthLoginGuest) => {
+    loginGuestAction(dispatch, credentials);
   };
 
   const contextValue = useMemo<AuthContextType>(() => ({
-    auth,
-    loading,
-    setAuth,
-    createGuest,
-    handleLogOut,
-  }), [auth, loading]);
+    state,
+    loginGuest,
+    login,
+    logout,
+  }), [state]);
 
   return (
     <AuthContext.Provider value={contextValue}>

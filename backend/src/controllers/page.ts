@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Budget, Page /* , User */ } from '../database/models';
-import SequelizeConnection from '../database/SequelizeConnection';
+import SequelizeConnection from '../database/config/SequelizeConnection';
 
 const sequelize = SequelizeConnection.getInstance();
 

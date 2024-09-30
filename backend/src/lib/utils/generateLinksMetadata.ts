@@ -21,9 +21,7 @@ interface LinkMetadata {
   }
 }
 
-const backendUrl = process.env.NODE_ENV === 'production'
-  ? process.env.BACKEND_URL_PRODUCTION
-  : process.env.BACKEND_URL_DEVELOPMENT;
+const backendUrl = process.env.BACKEND_URL_PRODUCTION;
 
 function generateLinksMetadata<T>({
   count, rows, offset, limit = 10,

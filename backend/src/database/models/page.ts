@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { DataTypes, ForeignKey, Model } from 'sequelize';
-import SequelizeConnection from '../SequelizeConnection';
+import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';
 
 const sequelize = SequelizeConnection.getInstance();
@@ -15,10 +15,10 @@ export default class Page extends Model {
 
 Page.init({
   id: {
-    type: DataTypes.INTEGER.UNSIGNED,
     primaryKey: true,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     allowNull: false,
-    autoIncrement: true,
   },
   name: {
     type: DataTypes.STRING,

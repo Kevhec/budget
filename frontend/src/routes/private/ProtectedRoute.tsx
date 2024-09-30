@@ -7,10 +7,10 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children }: Props) {
-  const { auth } = useAuth();
+  const { state } = useAuth();
   const location = useLocation();
 
-  if (auth && !auth?.id) {
+  if (state.user && !state.user?.id) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 

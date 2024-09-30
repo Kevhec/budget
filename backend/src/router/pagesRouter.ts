@@ -7,7 +7,7 @@ import authenticate from '../middleware/authenticate';
 import { Page } from '../database/models';
 import { createPageSchema, updatePageSchema } from '../database/schemas/page';
 import authorizeAccess from '../middleware/authorizeAccess';
-import { getObjectById } from '../database/schemas/general';
+import { getObjectByUUID } from '../database/schemas/general';
 
 const router = Router();
 
@@ -24,7 +24,7 @@ router.route('/')
 
 router.route('/:id')
   .get(
-    validateSchema(getObjectById),
+    validateSchema(getObjectByUUID),
     authenticate,
     getPage,
   )
@@ -35,7 +35,7 @@ router.route('/:id')
     updatePage,
   )
   .delete(
-    validateSchema(getObjectById),
+    validateSchema(getObjectByUUID),
     authenticate,
     authorizeAccess(Page),
     deletePage,

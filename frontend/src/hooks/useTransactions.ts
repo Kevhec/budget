@@ -28,7 +28,7 @@ function useTransactions({ initialPage, initialLimit, initialDate }: Params) {
         const { data } = await axiosClient.get(`http://localhost:3000/api/transaction/?offset=${offset}&limit=${limit}&month=${year}-${month}`);
 
         if (data) {
-          const newTransactions: PaginatedApiResponse<Transaction[]> = data.data;
+          const newTransactions: PaginatedApiResponse<Transaction[]> = data;
           setTransactions(newTransactions);
         }
       } catch (error: any) {

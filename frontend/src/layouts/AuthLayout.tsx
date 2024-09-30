@@ -2,9 +2,9 @@ import { Navigate, Outlet } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
 
 export default function AuthLayout() {
-  const { auth } = useAuth();
+  const { state } = useAuth();
 
-  if (auth && auth?.id) {
+  if (state.user && state.user?.id) {
     return <Navigate to="/app/dashboard" replace />;
   }
 

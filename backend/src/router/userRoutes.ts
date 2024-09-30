@@ -14,7 +14,7 @@ router.get('/', authenticate, getInfo);
 router.post('/signup', saveUser, signUp);
 router.post('/guest', loginAsGuest);
 router.post('/logout', authenticate, logOut);
-router.get('/login', logIn);
+router.post('/login', logIn);
 router.post('/confirm/:token', confirm);
 
 export default router;

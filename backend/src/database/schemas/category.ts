@@ -1,5 +1,4 @@
 import Joi from 'joi';
-import { positiveInteger } from './general';
 
 const createCategorySchema = Joi.object({
   name: Joi.string().required(),
@@ -7,7 +6,7 @@ const createCategorySchema = Joi.object({
 });
 
 const updateCategorySchema = Joi.object({
-  id: positiveInteger.required(),
+  id: Joi.string().guid().required(),
   name: Joi.string(),
   color: Joi.string(),
 }).min(2);

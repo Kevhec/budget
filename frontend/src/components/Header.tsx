@@ -2,7 +2,7 @@ import {
   ChevronDown, LogOut, Menu, Moon, Settings, User,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
 import { Avatar, AvatarFallback/* , AvatarImage */ } from './ui/avatar';
 import {
@@ -16,18 +16,22 @@ import {
 } from './ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import {
+  Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger,
+} from './ui/sheet';
 import Navigation from './Navigation';
 
 export default function Header() {
-  const { auth, handleLogOut } = useAuth();
+  const { state, logout } = useAuth();
   const navigation = useNavigate();
   const [avatarFallback, setAvatarFallback] = useState<string>('');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState<boolean>(false);
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (auth && auth.username) {
-      const { username } = auth;
+    if (state.user && state.user.username) {
+      const { username } = state.user;
       const usernameWordSplit = username.trim().toUpperCase().split(' ');
       const singleWord = usernameWordSplit.length === 1;
 
@@ -41,14 +45,18 @@ export default function Header() {
 
       setAvatarFallback(newAvatarFallback);
     }
-  }, [auth]);
+  }, [state.user]);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [location]);
 
   const handleDropdown = (isOpen: boolean) => {
     setIsProfileDropdownOpen(isOpen);
   };
 
-  const handleLogOutUser = async () => {
-    await handleLogOut();
+  const handleLogOutUser = () => {
+    logout();
     navigation('/');
   };
 
@@ -58,7 +66,7 @@ export default function Header() {
 
   return (
     <header className="px-2 py-4 gap-x-2 bg-white flex justify-between items-center">
-      <Sheet>
+      <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" className="md:hidden">
             <Menu className="h-5 w-5" />
@@ -66,6 +74,8 @@ export default function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs font-openSans bg-[#343A40] text-white border-none">
+          <SheetTitle className="sr-only">Menú de la aplicación</SheetTitle>
+          <SheetDescription className="sr-only">Navega a través de budget</SheetDescription>
           <p className="text-3xl font-semibold mb-32 font-openSans">Budget</p>
           <Navigation />
         </SheetContent>
@@ -74,7 +84,7 @@ export default function Header() {
         ¡Hola!
         {' '}
         <span className="font-bold">
-          {auth?.username || ''}
+          {state.user?.username || ''}
         </span>
       </p>
       <DropdownMenu onOpenChange={handleDropdown}>

@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
-import { DatabaseError, Op } from 'sequelize';
+import {
+  DatabaseError, fn, literal, Op,
+} from 'sequelize';
 import { Category, Transaction } from '../database/models';
 import generateLinksMetadata from '../lib/utils/generateLinksMetadata';
+import generateDateRange from '../lib/utils/generateDateRange';
+import { BalanceData, BalanceResponse, MonthData } from '../lib/types';
 
 // Create
 async function createTransaction(
@@ -20,12 +24,19 @@ async function createTransaction(
   } = req.body;
 
   try {
+    const generalCategory = await Category.findOne({
+      where: {
+        name: 'General',
+        isDefault: true,
+      },
+    });
+
     const newTransaction = await Transaction.create({
       description,
       amount,
       date,
       type,
-      categoryId,
+      categoryId: categoryId || generalCategory?.id,
       budgetId,
       /*       endDate,
       frequency, */
@@ -54,6 +65,8 @@ async function createTransaction(
       }
     }
 
+    console.log(error);
+
     return res.status(500).json({ message: 'Internal server error' });
   }
 }
@@ -66,9 +79,20 @@ async function getAllTransactions(
   const transactionId = req.params.id;
   const { offset, limit, month } = req.query;
 
+  // Convert to string to ensure types
+  let strOffset;
+  let strLimit;
+  let strMonth;
+
+  if (offset) strOffset = String(offset);
+
+  if (limit) strLimit = String(limit);
+
+  if (month) strMonth = String(month);
+
   // offset conversion from data type assigned by req.query into integer
-  const intOffset = parseInt(String(offset), 10);
-  const intLimit = parseInt(String(limit), 10);
+  const intOffset = parseInt(strOffset || '', 10);
+  const intLimit = parseInt(strLimit || '', 10);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
@@ -77,15 +101,15 @@ async function getAllTransactions(
 
   if (month) {
     // If month is provided use it for filtering, formatted as YYYY-MM
-    const [year, monthNumber] = String(month).split('-');
+    const dateRange = generateDateRange({ fromDate: strMonth });
 
-    // Define time range for sequelize between clause
-    const startOfMonth = new Date(Number(year), Number(monthNumber) - 1, 1);
-    const endOfMonth = new Date(Number(year), Number(monthNumber), 0);
+    if (dateRange) {
+      const [start, end] = dateRange;
 
-    whereClause.createdAt = {
-      [Op.between]: [startOfMonth, endOfMonth],
-    };
+      whereClause.createdAt = {
+        [Op.between]: [start, end],
+      };
+    }
   }
 
   try {
@@ -147,6 +171,93 @@ async function getTransaction(
     }
 
     return res.status(200).json({ data: transaction });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
+    return res.status(500).json('Internal server error');
+  }
+}
+
+// TODO
+async function getBalance(
+  req: Request,
+  res: Response,
+): Promise<Response | undefined> {
+  const { from, to } = req.query;
+
+  let strFrom;
+  let strTo;
+
+  if (from) strFrom = String(from);
+  if (to) strTo = String(to);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const whereClause: any = {
+    userId: req.user?.id,
+  };
+
+  const dateRange = generateDateRange({ fromDate: strFrom, toDate: strTo, untilToday: !strTo });
+
+  if (dateRange) {
+    const [start, end] = dateRange;
+
+    whereClause.createdAt = {
+      [Op.between]: [start, end],
+    };
+  }
+
+  try {
+    const balanceResponse = await Transaction.findAll({
+      where: whereClause,
+      attributes: [
+        [fn('EXTRACT', literal('YEAR from "createdAt"')), 'year'],
+        [fn('EXTRACT', literal('MONTH from "createdAt"')), 'month'],
+        [fn('SUM', literal('CASE WHEN "type" = \'income\' THEN "amount" ELSE 0 END')), 'totalIncome'],
+        [fn('SUM', literal('CASE WHEN "type" = \'expense\' THEN "amount" ELSE 0 END')), 'totalExpense'],
+        [fn('SUM', literal(
+          `CASE
+            WHEN "type" = 'income' THEN "amount"
+            WHEN "type" = 'expense' THEN - "amount"
+          END`,
+        )), 'balance'],
+      ],
+      group: [
+        fn('EXTRACT', literal('YEAR from "createdAt"')),
+        fn('EXTRACT', literal('MONTH from "createdAt"')),
+      ],
+      order: [
+        [fn('EXTRACT', literal('YEAR from "createdAt"')), 'ASC'],
+        [fn('EXTRACT', literal('MONTH from "createdAt"')), 'ASC'],
+      ],
+    });
+
+    if (!balanceResponse.length) {
+      const notFoundMessage = 'No balance found';
+      return res.status(404).json(notFoundMessage);
+    }
+
+    const formattedRes: BalanceData = {};
+
+    balanceResponse.forEach((item) => {
+      const {
+        year, month, totalIncome, totalExpense, balance,
+      } = item.dataValues as unknown as BalanceResponse;
+
+      const monthData: MonthData = {
+        totalIncome,
+        totalExpense,
+        balance,
+      };
+
+      formattedRes[year] ||= {};
+
+      formattedRes[year][month] = monthData;
+    });
+
+    return res.status(200).json({
+      data: formattedRes,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -225,6 +336,7 @@ export {
   createTransaction,
   getAllTransactions,
   getTransaction,
+  getBalance,
   updateTransaction,
   deleteTransaction,
 };

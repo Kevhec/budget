@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import { Category } from '../database/models';
+import { fn, literal, Op } from 'sequelize';
+import { Category, Transaction } from '../database/models';
+import generateDateRange from '../lib/utils/generateDateRange';
 
 // Create
 async function createCategory(
@@ -15,6 +17,7 @@ async function createCategory(
     const newCategory = await Category.create({
       name,
       color,
+      isDefault: false,
       userId: req.user?.id || '',
     });
 
@@ -35,7 +38,10 @@ async function getAllCategories(
   try {
     const categories = await Category.findAll({
       where: {
-        userId: req.user?.id,
+        [Op.or]: [
+          { isDefault: true },
+          { userId: req.user?.id },
+        ],
       },
     });
 
@@ -62,7 +68,10 @@ async function getCategory(
     const category = await Category.findOne({
       where: {
         id: categoryId,
-        userId: req.user?.id,
+        [Op.or]: [
+          { isDefault: true },
+          { userId: req.user?.id },
+        ],
       },
     });
 
@@ -72,6 +81,65 @@ async function getCategory(
 
     return res.status(200).json({ data: category });
   } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
+    return res.status(500).json('Internal server error');
+  }
+}
+
+async function getCategoriesMonthlyBalance(
+  req: Request,
+  res: Response,
+): Promise<Response | undefined> {
+  const userId = req.user?.id;
+
+  const [start, end] = generateDateRange({});
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const whereClause: any = {
+    userId,
+    createdAt: {
+      [Op.between]: [start, end],
+    },
+  };
+
+  try {
+    const balance = await Transaction.findAll({
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          where: {
+            [Op.or]: [
+              { isDefault: true },
+              { userId },
+            ],
+          },
+        },
+      ],
+      where: whereClause,
+      attributes: [
+        [fn('SUM', literal('CASE WHEN "type" = \'income\' THEN "amount" ELSE 0 END')), 'totalIncome'],
+        [fn('SUM', literal('CASE WHEN "type" = \'expense\' THEN "amount" ELSE 0 END')), 'totalExpense'],
+      ],
+      group: ['categoryId', 'category.id'],
+    });
+
+    if (!balance.length) {
+      return res.status(404).json('No balance found');
+    }
+
+    return res.status(200).json({
+      data: {
+        month: {
+          [`${start?.getMonth()}`]: [
+            ...balance,
+          ],
+        },
+      },
+    });
+  } catch (error) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
     }
@@ -143,6 +211,7 @@ export {
   createCategory,
   getAllCategories,
   getCategory,
+  getCategoriesMonthlyBalance,
   updateCategory,
   deleteCategory,
 };
