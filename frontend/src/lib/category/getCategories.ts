@@ -3,7 +3,7 @@ import { ApiResponse, Category } from '@/types';
 
 async function getCategories() {
   try {
-    const { data } = await axiosClient<ApiResponse<Category[]>>('http://localhost:3000/api/category/');
+    const { data } = await axiosClient.get<ApiResponse<Category[]>>('/category/');
 
     const categories = data.data;
 
@@ -11,9 +11,8 @@ async function getCategories() {
       return categories;
     }
     return null;
-  } catch (error) {
-    console.log(error);
-    return null;
+  } catch (error: any) {
+    throw new Error(error);
   }
 }
 

@@ -15,7 +15,7 @@ import validateSchema from '../middleware/validateSchema';
 import { getObjectByUUID } from '../database/schemas/general';
 import { createCategorySchema, updateCategorySchema } from '../database/schemas/category';
 
-const router = Router();
+const router: Router = Router();
 
 router.route('/')
   .post(

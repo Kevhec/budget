@@ -23,7 +23,7 @@ export enum FrequencyType {
 
 class Transaction
   extends Model<InferAttributes<Transaction>, InferCreationAttributes<Transaction>> {
-  declare id: CreationOptional<number>;
+  declare id: CreationOptional<string>;
 
   declare description: string;
 
@@ -81,23 +81,6 @@ Transaction.init({
   timestamps: true,
   tableName: 'transactions',
   modelName: 'Transaction',
-  hooks: {
-    beforeCreate: async (transaction) => {
-      const generalBudget = await Budget.findOne({
-        where: {
-          userId: transaction.userId,
-          isGeneral: true,
-        },
-      });
-
-      if (!generalBudget) {
-        throw new Error('No general budget found for the current user');
-      }
-
-      // eslint-disable-next-line no-param-reassign
-      transaction.budgetId = generalBudget.id;
-    },
-  },
 });
 
 export default Transaction;

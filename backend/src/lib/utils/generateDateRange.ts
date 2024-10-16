@@ -1,5 +1,5 @@
 import { dateStringRegex } from '../constants';
-import extractYearAndMonth from './extractYearAndMonth';
+import { extractYearAndMonth } from './time';
 
 interface Params {
   fromDate?: string

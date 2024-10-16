@@ -132,11 +132,8 @@ async function getCategoriesMonthlyBalance(
 
     return res.status(200).json({
       data: {
-        month: {
-          [`${start?.getMonth()}`]: [
-            ...balance,
-          ],
-        },
+        month: start?.getMonth(),
+        balance,
       },
     });
   } catch (error) {

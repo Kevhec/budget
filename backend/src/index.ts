@@ -8,6 +8,7 @@ import {
   categoryRouter,
 } from './router';
 import SequelizeConnection from './database/config/SequelizeConnection';
+import startCronManager from './lib/cron_manager';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -40,9 +41,11 @@ app.use('/api/transaction', transactionRoutes);
 app.use('/api/page', pageRouter);
 app.use('/api/category', categoryRouter);
 
-sequelize.sync().then(() => {
+sequelize.sync().then(async () => {
   console.log('Database synchronized');
 });
+
+startCronManager();
 
 // UMZUG (migrations tool)
 const runMigrations = async () => {

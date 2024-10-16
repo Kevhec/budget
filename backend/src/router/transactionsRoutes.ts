@@ -15,7 +15,7 @@ import validateSchema from '../middleware/validateSchema';
 import { createTransactionSchema, getBalanceSchema, updateTransactionSchema } from '../database/schemas/transaction';
 import { getObjectByUUID } from '../database/schemas/general';
 
-const router = Router();
+const router: Router = Router();
 
 router.route('/')
   .post(

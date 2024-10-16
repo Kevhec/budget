@@ -1,46 +1,50 @@
 import { z } from 'zod';
+import { budgetSchema, transactionSchema } from '@/schemas/creation';
+import useTransactions from '@/hooks/useTransactions';
+import { CreateBudgetParams, CreateTransactionParams } from '@/types';
+import useBudgets from '@/hooks/useBudgets';
 import TransactionForm from './forms/TransactionForm';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from '../ui/dialog';
 import { Button } from '../ui/button';
-import transactionSchema from '@/schemas/creation';
-import { createTransaction } from '@/lib/transaction';
-import useGetTransactions from '@/hooks/useGetTransactions';
+import BudgetForm from './forms/BudgetForm';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface Props {
-  type: 'transaction'/*  | 'budget' | 'category' */
+  type: 'transaction' | 'budget'
   label: string
 }
 
 const formMapping = {
   transaction: TransactionForm,
-};
-
-const submitCallbackMapping = {
-  transaction: createTransaction,
+  budget: BudgetForm,
 };
 
 const schemaMapping = {
   transaction: transactionSchema,
+  budget: budgetSchema,
 };
 
 export default function CreationDialog({ type, label }: Props) {
-  const { addTransaction } = useGetTransactions();
+  const { createTransaction } = useTransactions();
+  const { createBudget } = useBudgets();
 
-  const FormComponent = formMapping[type];
-  const creationCallback = submitCallbackMapping[type];
   const schema = schemaMapping[type];
 
-  const formId = `${type}Form`;
+  const FormComponent = formMapping[type];
+  const formId = `${type}-creation-form`;
 
   const handleSubmit = async (value: z.infer<typeof schema>) => {
-    const newRecord = await creationCallback(value);
-
-    if (!newRecord) return;
-
-    if (type === 'transaction') {
-      addTransaction(newRecord);
+    switch (type) {
+      case 'transaction':
+        createTransaction(value as CreateTransactionParams);
+        break;
+      case 'budget':
+        createBudget(value as CreateBudgetParams);
+        break;
+      default:
+        throw new Error(`Unhandled creation type: ${type}`);
     }
   };
 
@@ -49,21 +53,23 @@ export default function CreationDialog({ type, label }: Props) {
       <DialogTrigger>
         {label}
       </DialogTrigger>
-      <DialogContent className="max-w-sm w-[calc(100%-1rem)] rounded-sm">
+      <DialogContent className="p-0 max-w-md w-[calc(100%-2rem)] rounded-sm">
         <DialogDescription className="sr-only">
           Crea un nuevo recurso para
           {' '}
-          {type}
+          {label}
         </DialogDescription>
-        <DialogHeader>
+        <DialogHeader className="p-6 pb-0">
           <DialogTitle>
             Crear
             {' '}
             {label}
           </DialogTitle>
         </DialogHeader>
-        <FormComponent onSubmit={handleSubmit} formId={formId} />
-        <DialogFooter>
+        <ScrollArea className="max-h-[26rem]">
+          <FormComponent className="p-6 pt-0" onSubmit={handleSubmit} formId={formId} />
+        </ScrollArea>
+        <DialogFooter className="p-6 pt-0">
           <Button form={formId} type="submit">Crear</Button>
         </DialogFooter>
       </DialogContent>

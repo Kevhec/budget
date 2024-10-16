@@ -1,6 +1,8 @@
 import type { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { User } from '../database/models';
+import {
+  Budget, Category, Transaction, User,
+} from '../database/models';
 import { guestSchema, userSchema } from '../database/schemas/user';
 import generateJWT from '../lib/utils/generateJWT';
 import convert from '../lib/utils/convert';
@@ -8,6 +10,9 @@ import { REMEMBER_ME_EXPIRATION_TIME_DAYS, SESSION_EXPIRATION_TIME_DAYS } from '
 import verificationEmail from '../lib/utils/verificationEmail';
 import sanitizeObject from '../lib/utils/sanitizeObject';
 import setCookie from '../lib/utils/setCookie';
+import SequelizeConnection from '../database/config/SequelizeConnection';
+
+const sequelize = SequelizeConnection.getInstance();
 
 const signUp = async (req: Request, res: Response) => {
   const { error, value } = userSchema.validate(req.body);
@@ -136,7 +141,40 @@ const logOut = async (req: Request, res: Response) => {
   try {
     // If user is a guest delete it's account so db is not overloaded with guest accounts
     if (user?.role === 'guest') {
-      await user.destroy();
+      const t = await sequelize.transaction();
+
+      try {
+        await Transaction.destroy({
+          where: {
+            userId: user.id,
+          },
+          transaction: t,
+        });
+
+        await Category.destroy({
+          where: {
+            userId: user.id,
+          },
+          transaction: t,
+        });
+
+        await Budget.destroy({
+          where: {
+            userId: user.id,
+          },
+          transaction: t,
+        });
+
+        await user.destroy();
+
+        await t.commit();
+
+        res.clearCookie('jwt', { httpOnly: true });
+        return res.status(200).json({ data: { message: 'Logged out successfully' } });
+      } catch (error) {
+        await t.rollback();
+        return res.status(500).json('Internal server error during guest deletion');
+      }
     }
 
     // If it's a normal user just clear the session cookie
@@ -190,7 +228,6 @@ const loginAsGuest = async (req: Request, res: Response) => {
 const getInfo = async (req: Request, res: Response) => {
   try {
     const { user } = req;
-    console.log(user);
 
     if (!user) {
       return res.status(404).json('User not found.');

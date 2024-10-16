@@ -3,22 +3,22 @@ module.exports = {
   env: {
     browser: true,
     node: true,
-    es2020: true
+    es2020: true,
   },
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
     'airbnb',
-    'airbnb-typescript'
+    'airbnb-typescript',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: [
       './frontend/tsconfig.json',
-      './backend/tsconfig.json'
-    ]
+      './backend/tsconfig.json',
+    ],
   },
   plugins: ['react-refresh'],
   rules: {
@@ -29,31 +29,38 @@ module.exports = {
     'linebreak-style': ['error', 'windows'],
     '@typescript-eslint/no-explicit-any': 0,
   },
+  settings: {
+    'import/resolver': {
+      typescript: {
+        project: [
+          './frontend/tsconfig.json',
+          './backend/tsconfig.json',
+        ],
+      },
+    },
+  },
   overrides: [
     {
       files: ['./backend/**/*'],
-      extends: [
-        'airbnb-base', 
-        'plugin:@typescript-eslint/recommended'
-      ],
+      extends: ['airbnb-base', 'plugin:@typescript-eslint/recommended'],
       rules: {
         'no-console': 'off',
         'react/prop-types': 'off',
         'no-use-before-define': 'off',
-        "no-shadow": "off",
-        "@typescript-eslint/no-shadow": "warn",
-        'import/extensions': 'off'
+        'no-shadow': 'off',
+        '@typescript-eslint/no-shadow': 'warn',
+        'import/extensions': 'off',
       },
       env: {
-        node: true
-      }
+        node: true,
+      },
     },
     {
       files: ['./frontend/**/*'],
       extends: [
         'airbnb',
         'airbnb-typescript',
-        'plugin:react-hooks/recommended'
+        'plugin:react-hooks/recommended',
       ],
       plugins: ['react'],
       rules: {
@@ -61,22 +68,22 @@ module.exports = {
         'import/extensions': 'off',
         'react/jsx-props-no-spreading': 'off',
         'react/prop-types': 'off',
-        'react/require-default-props': 'off'
+        'react/require-default-props': 'off',
       },
       env: {
-        browser: true
+        browser: true,
       },
       settings: {
         react: {
-          version: 'detect'
-        }
-      }
+          version: 'detect',
+        },
+      },
     },
     {
       files: ['./frontend/src/components/**/*'],
       rules: {
-        'import/prefer-default-export': 'off'
-      }
-    }
-  ]
+        'import/prefer-default-export': 'off',
+      },
+    },
+  ],
 };

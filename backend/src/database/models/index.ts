@@ -3,6 +3,8 @@ import Transaction from './transaction';
 import Page from './page';
 import User from './user';
 import Category from './category';
+import CronTask from './cronTask';
+import CronJob from './cronJobs';
 
 // Associate user with all of the other models
 // so they can be protected by auth
@@ -22,7 +24,13 @@ Budget.belongsTo(Page, { foreignKey: 'pageId' }); */
 
 // One budget has many transactions
 Budget.hasMany(Transaction, { foreignKey: 'budgetId' });
-Transaction.belongsTo(Budget, { foreignKey: 'budgetId' });
+Transaction.belongsTo(Budget, { foreignKey: 'budgetId', as: 'budget' });
+
+CronTask.hasOne(Budget, { foreignKey: 'cronTaskId' });
+Budget.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
+
+CronTask.hasMany(CronJob, { foreignKey: 'cronTaskId', as: 'cronJobs' });
+CronJob.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
 
 // One category can have many transactions
 // but a transaction can have only one category

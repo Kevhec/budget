@@ -9,7 +9,7 @@ import { createPageSchema, updatePageSchema } from '../database/schemas/page';
 import authorizeAccess from '../middleware/authorizeAccess';
 import { getObjectByUUID } from '../database/schemas/general';
 
-const router = Router();
+const router: Router = Router();
 
 router.route('/')
   .post(

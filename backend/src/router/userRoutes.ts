@@ -7,7 +7,7 @@ import {
 import saveUser from '../middleware/userAuth';
 import authenticate from '../middleware/authenticate';
 
-const router = Router();
+const router: Router = Router();
 
 // User creation route{
 router.get('/', authenticate, getInfo);

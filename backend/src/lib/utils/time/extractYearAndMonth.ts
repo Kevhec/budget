@@ -1,5 +1,4 @@
 export default function extractYearAndMonth(dateString?: string) {
-  console.log(typeof dateString);
   if (!dateString) {
     return null;
   }

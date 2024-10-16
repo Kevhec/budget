@@ -65,7 +65,7 @@ export default function Header() {
   });
 
   return (
-    <header className="px-2 py-4 gap-x-2 bg-white flex justify-between items-center">
+    <header className="px-4 py-4 gap-x-2 bg-white flex justify-between items-center">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" className="md:hidden">

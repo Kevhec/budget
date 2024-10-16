@@ -6,6 +6,7 @@ import {
   getBudget,
   updateBudget,
   getBudgetExpenses,
+  getBudgetBalance,
 } from '../controllers/budget';
 import authenticate from '../middleware/authenticate';
 import { Budget, Page } from '../database/models';
@@ -15,7 +16,7 @@ import validateSchema from '../middleware/validateSchema';
 import { createBudgetSchema, updateBudgetSchema } from '../database/schemas/budget';
 import { getObjectByUUID } from '../database/schemas/general';
 
-const router = Router();
+const router: Router = Router();
 
 router.route('/')
   .post(
@@ -28,6 +29,12 @@ router.route('/')
     authenticate,
     getAllBudgets,
   );
+
+router.get(
+  '/balance',
+  authenticate,
+  getBudgetBalance,
+);
 
 router.route('/:id')
   .get(

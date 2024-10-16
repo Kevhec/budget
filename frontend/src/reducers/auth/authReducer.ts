@@ -12,7 +12,10 @@ const initialAuthState: AuthState = {
   loading: false,
 };
 
-function authReducer(state: AuthState, action: AuthAction) {
+function authReducer(
+  state: AuthState,
+  action: AuthAction,
+): AuthState {
   switch (action.type) {
     case AuthActionType.LOGIN:
       return ({

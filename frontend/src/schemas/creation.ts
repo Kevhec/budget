@@ -1,6 +1,7 @@
 import { z } from 'zod';
+import concurrenceSchema from './concurrence';
 
-const TYPES = ['expense', 'income'] as const;
+const TRANSACTION_TYPES = ['expense', 'income'] as const;
 
 const transactionSchema = z.object({
   description: z
@@ -19,17 +20,39 @@ const transactionSchema = z.object({
     .date()
     .optional(),
   type: z
-    .enum(TYPES),
+    .enum(TRANSACTION_TYPES),
   budgetId: z
-    .coerce
-    .number()
-    .int()
+    .string()
+    .uuid()
     .optional(),
   categoryId: z
-    .coerce
-    .number()
-    .int()
+    .string()
+    .uuid()
     .optional(),
 });
 
-export default transactionSchema;
+const budgetSchema = z.object({
+  name: z
+    .string()
+    .min(2, {
+      message: 'El nombre debe tener por lo menos dos caracteres',
+    })
+    .max(50, {
+      message: 'El nombre no debe superar los 50 caracteres',
+    }),
+  totalAmount: z
+    .coerce
+    .number()
+    .positive(),
+  startDate: z
+    .date(),
+  endDate: z
+    .date(),
+  testPicker: z
+    .date(),
+}).merge(concurrenceSchema);
+
+export {
+  transactionSchema,
+  budgetSchema,
+};
