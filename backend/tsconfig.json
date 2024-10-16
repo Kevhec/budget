@@ -2,15 +2,17 @@
   "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
     "moduleResolution": "Node16",
-    "baseUrl": ".", // Ensure this is included
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@lib/*": ["src/lib/*"]
+      "@lib/*": ["src/lib/*"],
+      "@database/*": ["src/database/*"]
     },
     "allowJs": true,
-    "noEmit": false, // Ensure this is false to allow emitting .js files
-    "outDir": "./dist", // Set an output directory for compiled files
-    "rootDir": "./src" // Specify the root directory for TypeScript files
+    "noEmit": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true
   },
   "files": ["./types/express.d.ts"],
   "include": [
@@ -18,5 +20,8 @@
     "src/**/*.tsx",
     "src/**/*.js",
     "src/database/config/config.js"
-  ]
+  ],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }

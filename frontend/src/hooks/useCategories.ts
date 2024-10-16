@@ -1,12 +1,13 @@
 import { useContext } from 'react';
-import { CategoriesContext, CategoriesContextType } from '@/context/CategoriesProvider';
+import { CategoriesContext } from '@/context/CategoriesProvider';
+import { CategoriesContextType } from '@/types';
 
 function useCategories(): CategoriesContextType {
-  const authContext = useContext(CategoriesContext);
-  if (authContext === undefined || authContext === null) {
+  const categoriesContext = useContext(CategoriesContext);
+  if (categoriesContext === undefined || categoriesContext === null) {
     throw new Error('useCategories must be used within an CategoriesProvider');
   }
-  return authContext;
+  return categoriesContext;
 }
 
 export default useCategories;

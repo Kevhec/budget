@@ -6,7 +6,7 @@ import User from './user';
 const sequelize = SequelizeConnection.getInstance();
 
 export default class Page extends Model {
-  declare id: number;
+  declare id: string;
 
   declare name: string;
 

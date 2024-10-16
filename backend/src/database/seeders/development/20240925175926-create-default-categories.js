@@ -133,7 +133,6 @@ module.exports = {
     const t = await queryInterface.sequelize.transaction();
 
     try {
-      console.log('TRYING');
       await queryInterface.bulkInsert('categories', categories, { t });
 
       await t.commit();

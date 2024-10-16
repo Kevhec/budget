@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import getBalance from '@/lib/balance/getBalance';
 import GeneralResumeCard from '@/components/GeneralResumeCard';
-import useGetTransactions from '@/hooks/useGetTransactions';
 import { MonthData } from '@/types';
 import {
   Tabs, TabsContent, TabsList, TabsTrigger,
 } from '@/components/ui/tabs';
+import useTransactions from '@/hooks/useTransactions';
 
 export default function GeneralResume() {
   const [balance, setBalance] = useState<MonthData>();
-  const { recentTransactions } = useGetTransactions();
+  const { state: { recentTransactions } } = useTransactions();
 
   useEffect(() => {
     const getData = async () => {

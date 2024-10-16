@@ -7,4 +7,11 @@ function formatMoney(number: number) {
   }).format(number);
 }
 
-export default formatMoney;
+const suffixNumberFormatter = Intl.NumberFormat('en', {
+  notation: 'compact',
+});
+
+export {
+  formatMoney,
+  suffixNumberFormatter,
+};

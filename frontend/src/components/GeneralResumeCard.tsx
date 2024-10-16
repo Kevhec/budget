@@ -1,10 +1,10 @@
-import { cn } from '@/lib/utils';
+import { cn, getMonthFromDate } from '@/lib/utils';
+import { formatMoney } from '@/lib/formatNumber';
+import { Months } from '@/types';
 import {
   Card, CardContent, CardHeader, CardTitle,
 } from './ui/card';
-import formatMoney from '@/lib/formatNumber';
 import Typography from './Typography';
-import { Months } from '@/types';
 
 interface Props {
   variant?: 'default' | 'income' | 'expense'
@@ -25,7 +25,7 @@ export default function GeneralResumeCard({
   const formattedMoney = formatMoney(value);
 
   const date = new Date();
-  const currentMonth = date.toLocaleString('default', { month: 'long' });
+  const currentMonth = getMonthFromDate(date);
 
   return (
     <Card className={resumeCardClasses}>

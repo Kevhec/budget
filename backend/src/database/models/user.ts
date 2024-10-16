@@ -2,7 +2,6 @@ import {
   CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model,
 } from 'sequelize';
 import SequelizeConnection from '../config/SequelizeConnection';
-import Budget from './budget';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -81,13 +80,6 @@ User.init({
       if (user.role === 'guest') {
         await user.update({ confirmed: true });
       }
-
-      await Budget.create({
-        name: 'General',
-        isGeneral: true,
-        userId: user.id,
-        startDate: new Date(),
-      });
     },
   },
 });

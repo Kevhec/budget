@@ -36,6 +36,24 @@
     --secondaryYellow: 45 100% 51%;
     --font-inter: "Inter", sans-serif;
     --font-open-sans: "Open Sans", sans-serif;
+    --category-General: 0 0% 66%;
+    --category-Vivienda: 5 100% 69%;
+    --category-Comestibles: 80 60% 35%;
+    --category-Transporte: 207 44% 49%;
+    --category-Entretenimiento: 35 100% 64%;
+    --category-ComidasFuera: 28 87% 67%;
+    --category-Salud: 146 50% 36%;
+    --category-CuidadoPersonal: 330 100% 71%;
+    --category-Ropa: 260 60% 65%;
+    --category-PagodeDeudas: 25 76% 31%;
+    --category-AhorroseInversiones: 120 61% 34%;
+    --category-Educación: 195 37% 44%;
+    --category-RegalosyDonaciones: 25 75% 47%;
+    --category-Seguros: 210 13% 50%;
+    --category-Suscripciones: 9 100% 64%;
+    --category-Viajes: 51 100% 50%;
+    --category-Mascotas: 302 59% 65%;
+    --category-CuidadoInfantil: 33 100% 50%;
   }
 
   .dark {
@@ -77,4 +95,8 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.recharts-wrapper svg{
+  overflow: inherit !important;
 }

@@ -1,9 +1,18 @@
 import { Request, Response } from 'express';
+import { fn, literal, Op } from 'sequelize';
 import { Budget, Transaction } from '../database/models';
+import generateDateRange from '../lib/utils/generateDateRange';
+import generateCronExpression from '../lib/cron_manager/generateCronExpression';
+import CronTask from '../database/models/cronTask';
+import CronJob from '../database/models/cronJobs';
+import { createBudget as createBudgetJob } from '../lib/jobs';
+import { Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
+import { CreateBudgetRequestBody, JobTypes, TypedRequest } from '../lib/types';
+import { sanitizeObject } from '../lib/utils';
 
 // Create
 async function createBudget(
-  req: Request,
+  req: TypedRequest<CreateBudgetRequestBody>,
   res: Response,
 ): Promise<Response | undefined> {
   const {
@@ -11,18 +20,76 @@ async function createBudget(
     totalAmount,
     startDate,
     endDate,
+    recurrence,
+    timeZone,
   } = req.body;
 
   try {
-    const newBudget = await Budget.create({
+    let taskId: null | string = null;
+
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+
+    if (recurrence) {
+      const { occurrence, time, weekDay } = recurrence;
+      const { minute, hour } = time;
+
+      const cronExpression = generateCronExpression({
+        occurrence: {
+          type: occurrence.type,
+          steps: occurrence.steps,
+        },
+        startDate: startDateObj,
+        time: {
+          minute,
+          hour,
+        },
+        weekDay,
+      });
+
+      const newTask = await CronTask.create({
+        cronExpression,
+        endDate: endDateObj,
+        timeZone,
+      });
+
+      const job = await CronJob.create({
+        jobName: JobTypes.CREATE_BUDGET,
+        jobArgs: {
+          name,
+          totalAmount,
+          endDate,
+          userId: req.user?.id || '',
+          cronTaskId: newTask.id,
+        },
+        cronTaskId: newTask.id,
+      });
+
+      const typedJob = job as unknown as Job;
+
+      taskId = newTask.id;
+
+      scheduleCronTask({
+        cronExpression,
+        endDate: endDateObj,
+        timezone: timeZone,
+        taskId,
+        jobs: [typedJob],
+      });
+    }
+
+    const newBudget = await createBudgetJob({
       name,
       totalAmount,
-      startDate,
-      endDate,
+      startDate: startDateObj,
+      endDate: endDateObj,
       userId: req.user?.id || '',
+      cronTaskId: taskId,
     });
 
-    return res.status(201).json({ data: { budget: newBudget } });
+    const sanitizedBudget = sanitizeObject(newBudget.toJSON(), ['cronTaskId']);
+
+    return res.status(201).json({ data: { budget: sanitizedBudget } });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -40,6 +107,9 @@ async function getAllBudgets(
     const budgets = await Budget.findAll({
       where: {
         userId: req.user?.id,
+      },
+      attributes: {
+        exclude: ['cronTaskId'],
       },
     });
 
@@ -67,6 +137,9 @@ async function getBudget(
       where: {
         id: budgetId,
         userId: req.user?.id,
+      },
+      attributes: {
+        exclude: ['cronTaskId'],
       },
     });
 
@@ -111,6 +184,59 @@ async function getBudgetExpenses(
   }
 }
 
+async function getBudgetBalance(
+  req: Request,
+  res: Response,
+): Promise<Response | undefined> {
+  const userId = req.user?.id;
+
+  const [start, end] = generateDateRange({});
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const whereClause: any = {
+    userId,
+    createdAt: {
+      [Op.between]: [start, end],
+    },
+  };
+
+  try {
+    const balance = await Transaction.findAll({
+      include: [
+        {
+          model: Budget,
+          as: 'budget',
+          where: {
+            userId,
+          },
+        },
+      ],
+      where: whereClause,
+      attributes: [
+        [fn('SUM', literal('CASE WHEN "type" = \'income\' THEN "amount" ELSE 0 END')), 'totalIncome'],
+        [fn('SUM', literal('CASE WHEN "type" = \'expense\' THEN "amount" ELSE 0 END')), 'totalExpense'],
+      ],
+      group: ['budgetId', 'budget.id'],
+    });
+
+    if (!balance.length) {
+      return res.status(404).json('No balance found');
+    }
+
+    return res.status(200).json({
+      data: {
+        month: start?.getMonth(),
+        balance,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('ERROR: ', error.message);
+    }
+    return res.status(500).json('Internal server error');
+  }
+}
+
 // Update
 async function updateBudget(
   req: Request,
@@ -130,13 +256,11 @@ async function updateBudget(
       return res.status(404).json(`Budget not found for specified id: ${budgetId}`);
     }
 
-    if (budget?.isGeneral) {
-      return res.status(400).json('Cannot modify the general budget.');
-    }
-
     const updatedBudget = await budget.update(reqBody);
 
-    return res.status(200).json({ data: updatedBudget });
+    const sanitizedBudget = sanitizeObject(updatedBudget.toJSON(), ['cronTaskId']);
+
+    return res.status(200).json({ data: sanitizedBudget });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -164,10 +288,6 @@ async function deleteBudget(
       return res.status(404).json(`Budget not found for id: ${budgetId}`);
     }
 
-    if (budget?.isGeneral) {
-      return res.status(400).json('Cannot delete the general budget');
-    }
-
     await budget?.destroy();
 
     return res.status(200).json({
@@ -189,6 +309,7 @@ export {
   createBudget,
   getAllBudgets,
   getBudget,
+  getBudgetBalance,
   updateBudget,
   deleteBudget,
   getBudgetExpenses,

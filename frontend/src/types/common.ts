@@ -15,3 +15,8 @@ export interface LoadingAction<T> {
   type: T,
   payload: boolean
 }
+
+export type FormProps<T> = {
+  onSubmit: (data: T) => void | Promise<void>;
+  formId: string
+};

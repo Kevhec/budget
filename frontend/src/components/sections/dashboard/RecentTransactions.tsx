@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Transaction } from '@/types';
 import TransactionResumeCard from '@/components/TransactionResumeCard';
 import Typography from '@/components/Typography';
-import useGetTransactions from '@/hooks/useGetTransactions';
+import useTransactions from '@/hooks/useTransactions';
+import { Separator } from '@/components/ui/separator';
 
 export default function RecentTransactions() {
-  const { recentTransactions } = useGetTransactions();
+  const { state: { recentTransactions } } = useTransactions();
   const [
     transactionsWithPlaceholder,
     setTransactionsWithPlaceholders,
@@ -31,21 +32,33 @@ export default function RecentTransactions() {
 
   return (
     <div className="relative">
-      {transactionsWithPlaceholder.map((transaction) => {
+      {transactionsWithPlaceholder.map((transaction, i) => {
         const {
           description, date, amount, type, category, hidden,
         } = transaction;
 
+        let fallbackId;
+
+        if (!transaction.id) {
+          fallbackId = crypto.randomUUID();
+        }
+
         return (
-          <TransactionResumeCard
-            key={crypto.randomUUID()}
-            description={description}
-            date={date}
-            amount={amount}
-            type={type}
-            category={category}
-            hidden={hidden}
-          />
+          <React.Fragment key={transaction.id || fallbackId}>
+            <TransactionResumeCard
+              description={description}
+              date={date}
+              amount={amount}
+              type={type}
+              category={category}
+              hidden={hidden}
+            />
+            {
+              transactionsWithPlaceholder.length - 1 !== i && (
+                <Separator decorative />
+              )
+            }
+          </React.Fragment>
         );
       })}
       {

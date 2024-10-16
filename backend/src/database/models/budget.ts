@@ -4,21 +4,22 @@ import {
 } from 'sequelize';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
+import CronTask from './cronTask';
 
 const sequelize = SequelizeConnection.getInstance();
 
 class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budget>> {
-  declare id: CreationOptional<number>;
+  declare id: CreationOptional<string>;
 
   declare name: string;
 
-  declare totalAmount: CreationOptional<string>;
+  declare totalAmount: CreationOptional<number>;
 
   declare startDate: CreationOptional<Date>;
 
   declare endDate: CreationOptional<Date>;
 
-  declare isGeneral: CreationOptional<boolean>;
+  declare cronTaskId: ForeignKey<CronTask['id']> | null;
 
   declare userId: ForeignKey<User['id']>;
 }
@@ -42,18 +43,13 @@ Budget.init({
   },
   startDate: {
     type: DataTypes.DATE,
-    allowNull: true,
-    defaultValue: null,
+    allowNull: false,
+    defaultValue: new Date(),
   },
   endDate: {
     type: DataTypes.DATE,
-    allowNull: true,
-    defaultValue: null,
-  },
-  isGeneral: {
-    type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: false,
+    defaultValue: new Date(),
   },
 }, {
   sequelize,

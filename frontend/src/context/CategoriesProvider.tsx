@@ -1,35 +1,26 @@
 import {
-  createContext, PropsWithChildren, useEffect, useMemo, useState,
+  createContext, PropsWithChildren, useEffect, useMemo, useReducer,
 } from 'react';
-import { Category } from '@/types';
-import getCategories from '@/lib/category/getCategories';
+import { CategoriesContextType, CategoryReducer } from '@/types';
+import { categoryReducer, initialCategoriesState } from '@/reducers/category/categoryReducer';
+import {
+  syncCategories as syncCategoriesAction,
+  getBalance as getBalanceAction,
+} from '@/reducers/category/categoryActions';
 
-export interface CategoriesContextType {
-  categories: Category[] | null
-}
-
-export const CategoriesContext = createContext<CategoriesContextType>({
-  categories: [],
-});
+export const CategoriesContext = createContext<CategoriesContextType | null>(null);
 
 function CategoriesProvider({ children }: PropsWithChildren) {
-  const [categories, setCategories] = useState<Category[] | null>([]);
+  const [state, dispatch] = useReducer<CategoryReducer>(categoryReducer, initialCategoriesState);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const newCategories = await getCategories();
-        setCategories(newCategories);
-      } catch (error: any) {
-        throw new Error(error.message);
-      }
-    };
-    fetchCategories();
+    syncCategoriesAction(dispatch);
+    getBalanceAction(dispatch);
   }, []);
 
   const contextValue = useMemo(() => ({
-    categories,
-  }), [categories]);
+    state,
+  }), [state]);
 
   return (
     <CategoriesContext.Provider value={contextValue}>

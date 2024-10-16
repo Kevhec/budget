@@ -1,25 +1,50 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
-import React from ,'react'
-import { ChartContainer, ChartTooltip } from '../ui/chart'
-import { Pie, PieChart } from 'recharts'
+import { Pie, PieChart } from 'recharts';
+import {
+  ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent,
+} from '../ui/chart';
+import { formatMoney, suffixNumberFormatter } from '@/lib/formatNumber';
+import { Separator } from '../ui/separator';
 
-type Props = {}
+interface Props {
+  chartData: any[]
+  chartConfig: Record<string, any>
+  dataKey: string
+  nameKey: string
+}
 
-export default function ChartPie({}: Props) {
+export default function ChartPie({
+  chartData, chartConfig, dataKey, nameKey,
+}: Props) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer>
-          <PieChart>
-            <ChartTooltip />
-            <Pie data={chartData} dataKey={dataKey} />
-          </PieChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  )
+    <ChartContainer
+      config={chartConfig}
+      className="mx-auto aspect-square max-h-[250px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+    >
+      <PieChart accessibilityLayer>
+        <ChartTooltip
+          content={(
+            <ChartTooltipContent
+              customValueFormatter={formatMoney}
+              className="money"
+              hideLabel
+            />
+          )}
+        />
+        <Pie
+          data={chartData}
+          dataKey={dataKey}
+          nameKey={nameKey}
+          label={(data) => `$ ${suffixNumberFormatter.format(data.value)}`}
+        />
+        <Separator />
+        <ChartLegend
+          wrapperStyle={{
+            bottom: '0px',
+          }}
+          content={<ChartLegendContent />}
+          className="-translate-y-2 flex-wrap gap-x-3 gap-y-2 [&>*]:basis-1/4 [&>*]:justify-center"
+        />
+      </PieChart>
+    </ChartContainer>
+  );
 }

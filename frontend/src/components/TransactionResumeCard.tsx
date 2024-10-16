@@ -1,12 +1,12 @@
 import { format } from '@formkit/tempo';
 import { cn } from '@/lib/utils';
+import { Category } from '@/types';
+import { formatMoney } from '@/lib/formatNumber';
 import Typography from './Typography';
 import {
   Card, CardContent,
 } from './ui/card';
 import { Badge } from './ui/badge';
-import { Category } from '@/types';
-import formatMoney from '@/lib/formatNumber';
 
 type Props = {
   description?: string
@@ -23,7 +23,7 @@ export default function TransactionResumeCard({
   const amountClasses = cn({
     'text-secondaryGreen': type === 'income',
     'text-secondaryYellow': type === 'expense',
-  }, 'flex-1 text-center font-openSans');
+  }, 'flex-1 text-end font-openSans');
 
   const containerClasses = cn({
     invisible: hidden,
@@ -31,15 +31,23 @@ export default function TransactionResumeCard({
 
   return (
     <Card tabIndex={hidden ? 0 : 1} className={containerClasses}>
-      <CardContent className="flex items-center p-0 gap-y-4">
-        <div className="flex-1 font-inter">
-          <Typography className="capitalize font-medium">{description || 'Placeholder'}</Typography>
-          <Typography className="text-blueishGray text-sm">{format(date || new Date(), 'medium')}</Typography>
+      <CardContent className="p-0 gap-y-4">
+        <div className="flex-1 font-inter flex justify-between mb-2">
+          <Typography className="capitalize font-medium truncate max-w-32" title={description}>{description || 'Placeholder'}</Typography>
+          <Badge
+            style={{
+              backgroundColor: category?.color,
+            }}
+          >
+            {category?.name ?? 'Sin categoría'}
+          </Badge>
         </div>
-        <Typography className={amountClasses}>
-          {formatMoney(amount || 0)}
-        </Typography>
-        <Badge>{category?.name ?? 'Sin categoría'}</Badge>
+        <div className="flex justify-between">
+          <Typography className="text-blueishGray text-sm">{format(date || new Date(), 'medium')}</Typography>
+          <Typography className={amountClasses}>
+            {formatMoney(amount || 0)}
+          </Typography>
+        </div>
       </CardContent>
     </Card>
   );

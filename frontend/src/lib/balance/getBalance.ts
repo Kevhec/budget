@@ -1,6 +1,6 @@
 import axiosClient from '@/config/axios';
+import { BalanceData } from '@types';
 import { dateStringRegex } from '../constants';
-import { BalanceData } from '@/types';
 
 async function getBalance(from?: string, to?: string) {
   const badParams = [];

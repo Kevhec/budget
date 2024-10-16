@@ -179,7 +179,6 @@ async function getTransaction(
   }
 }
 
-// TODO
 async function getBalance(
   req: Request,
   res: Response,

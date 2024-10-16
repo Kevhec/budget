@@ -15,7 +15,11 @@ const authenticate: RequestHandler = async (req, res, next) => {
 
   try {
     const decodedJWT = jwt.verify(sessionCookie, process.env.SECRET_KEY || '') as JWTPayload;
-    const user = await User.findByPk(decodedJWT.id);
+    const user = await User.findByPk(decodedJWT.id, {
+      attributes: {
+        exclude: ['password'],
+      },
+    });
 
     if (!user) {
       return res.status(401).json('User not found');
