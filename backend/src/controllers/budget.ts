@@ -9,6 +9,10 @@ import { createBudget as createBudgetJob } from '../lib/jobs';
 import { Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
 import { CreateBudgetRequestBody, JobTypes, TypedRequest } from '../lib/types';
 import { sanitizeObject } from '../lib/utils';
+import generateNextExecutionDate from '../lib/cron_manager/generateNexExecutionDate';
+import getDateTimeDifference from '../lib/utils/time/getDateTimeDifference';
+
+// TODO: Sanitize returned objects to not return userId
 
 // Create
 async function createBudget(
@@ -21,36 +25,49 @@ async function createBudget(
     startDate,
     endDate,
     recurrence,
-    timeZone,
   } = req.body;
 
   try {
     let taskId: null | string = null;
 
     const startDateObj = new Date(startDate);
-    const endDateObj = new Date(endDate);
+
+    // When recurrence is provided, end date refers to the moment to stop repeating
+    let endDateObj = new Date(endDate);
 
     if (recurrence) {
-      const { occurrence, time, weekDay } = recurrence;
-      const { minute, hour } = time;
+      const {
+        concurrence, time, weekDay, endDate: recEndDateStr,
+      } = recurrence;
+      const { minute, hour, timezone } = time;
+      const { steps, type } = concurrence;
+
+      const recurrenceEndDate = recEndDateStr ? new Date(recEndDateStr) : null;
 
       const cronExpression = generateCronExpression({
-        occurrence: {
-          type: occurrence.type,
-          steps: occurrence.steps,
+        concurrence: {
+          type,
+          steps,
         },
         startDate: startDateObj,
         time: {
           minute,
           hour,
+          timezone,
         },
         weekDay,
       });
 
+      const nextExecutionDate = generateNextExecutionDate(cronExpression, { tz: timezone });
+
+      endDateObj = nextExecutionDate;
+
+      const intervalMilliseconds = getDateTimeDifference(startDateObj, nextExecutionDate);
+
       const newTask = await CronTask.create({
         cronExpression,
-        endDate: endDateObj,
-        timeZone,
+        endDate: recurrenceEndDate || null,
+        timezone,
       });
 
       const job = await CronJob.create({
@@ -58,7 +75,7 @@ async function createBudget(
         jobArgs: {
           name,
           totalAmount,
-          endDate,
+          intervalMilliseconds,
           userId: req.user?.id || '',
           cronTaskId: newTask.id,
         },
@@ -72,7 +89,7 @@ async function createBudget(
       scheduleCronTask({
         cronExpression,
         endDate: endDateObj,
-        timezone: timeZone,
+        timezone,
         taskId,
         jobs: [typedJob],
       });

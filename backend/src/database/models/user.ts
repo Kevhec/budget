@@ -5,6 +5,7 @@ import SequelizeConnection from '../config/SequelizeConnection';
 
 const sequelize = SequelizeConnection.getInstance();
 
+// TODO: Pedir fecha de cumpleaños para hacer °°diseño°°° emocional °°°°°°
 export default class User
   extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<string>;

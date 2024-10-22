@@ -4,6 +4,7 @@ import {
 } from '@/types';
 import { Dispatch } from 'react';
 import axiosClient from '@/config/axios';
+import formatBudgetForApi from '@/lib/budget/formatBudgetForApi';
 import { initialBudgetState } from './budgetReducer';
 
 async function syncBudgets(
@@ -49,12 +50,20 @@ async function createBudget(
   const currentPage = currentPaginated.meta?.currentPage;
   const currentLimit = currentPaginated.meta?.itemsPerPage;
 
+  console.log(budget);
+
+  const formattedBudget = formatBudgetForApi(budget);
+
   try {
     const { data } = await axiosClient.post('/budget', {
-      ...budget,
+      ...formattedBudget,
     });
 
+    console.log(data);
+
     const newBudget: Budget = data.data.budget;
+
+    console.log(newBudget);
 
     dispatch({
       type: BudgetActionType.CREATE_BUDGET,
@@ -69,6 +78,7 @@ async function createBudget(
       });
     }
   } catch (error) {
+    console.log(error);
     dispatch({
       type: BudgetActionType.CREATE_BUDGET,
       payload: null,

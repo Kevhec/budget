@@ -45,11 +45,14 @@ const budgetSchema = z.object({
     .number()
     .positive(),
   startDate: z
-    .date(),
+    .date({
+      required_error: 'Este campo es obligatorio',
+    }),
+  withEndDate: z
+    .enum(['true', 'false']),
   endDate: z
-    .date(),
-  testPicker: z
-    .date(),
+    .date()
+    .optional(),
 }).merge(concurrenceSchema);
 
 export {

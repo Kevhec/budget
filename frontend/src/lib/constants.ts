@@ -25,6 +25,11 @@ const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'satur
 
 const DEFAULT_CONCURRENCES = ['none', 'custom', 'daily', 'weekly', 'monthly', 'yearly'] as const;
 
+const DAY_NAMES_SPANISH = ['domingo', 'lunes', 'martes', 'miércoles',
+  'jueves', 'viernes', 'sábado'] as const;
+
+const ENGLISH_ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth'] as const;
+
 export {
   dateStringRegex,
   initialPaginatedState,
@@ -32,4 +37,6 @@ export {
   CONCURRENCE_TYPE,
   DEFAULT_CONCURRENCES,
   WEEKDAYS,
+  DAY_NAMES_SPANISH,
+  ENGLISH_ORDINALS,
 };

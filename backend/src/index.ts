@@ -45,8 +45,6 @@ sequelize.sync().then(async () => {
   console.log('Database synchronized');
 });
 
-startCronManager();
-
 // UMZUG (migrations tool)
 const runMigrations = async () => {
   const umzug = new Umzug({
@@ -63,6 +61,8 @@ runMigrations().catch((error) => {
   console.error('Migration failed:', error);
   process.exit(1);
 });
+
+startCronManager();
 
 /* const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.log('Middleware executed');

@@ -18,14 +18,18 @@ import { cn } from '@/lib/utils';
 import {
   Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from '@/components/ui/command';
+import { useEffect } from 'react';
 
 type Props = {
   onSubmit: (value: z.infer<typeof transactionSchema>) => void
   formId: string
   className?: string
+  dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-export default function TransactionForm({ onSubmit, formId, className }: Props) {
+export default function TransactionForm({
+  onSubmit, formId, className, dirtyChecker,
+}: Props) {
   const { state: { categories } } = useCategories();
   const form = useForm<z.infer<typeof transactionSchema>>({
     resolver: zodResolver(transactionSchema),
@@ -36,6 +40,14 @@ export default function TransactionForm({ onSubmit, formId, className }: Props) 
       categoryId: categories.find((category) => category.name === 'General')?.id,
     },
   });
+
+  const { formState: { isDirty } } = form;
+
+  useEffect(() => {
+    if (dirtyChecker) {
+      dirtyChecker(isDirty);
+    }
+  }, [isDirty, dirtyChecker]);
 
   const containerClasses = cn('flex flex-col gap-2', className);
 

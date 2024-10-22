@@ -7,6 +7,7 @@ import User from './user';
 
 const sequelize = SequelizeConnection.getInstance();
 
+// TODO: Limitar categorías a 10
 class Category extends Model<InferAttributes<Category>, InferCreationAttributes<Category>> {
   declare id: CreationOptional<string>;
 

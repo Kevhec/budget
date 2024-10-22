@@ -10,7 +10,7 @@ export interface Job {
 
 interface Params {
   cronExpression: string
-  endDate: Date
+  endDate?: Date
   timezone: string
   taskId: string
   jobs: Job[]

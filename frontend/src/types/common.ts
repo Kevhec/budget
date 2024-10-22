@@ -11,6 +11,24 @@ export type Months =
 'noviembre' |
 'diciembre';
 
+export enum WeekDays {
+  MONDAY = 'monday',
+  TUESDAY = 'tuesday',
+  WEDNESDAY = 'wednesday',
+  THURSDAY = 'thursday',
+  FRIDAY = 'friday',
+  SATURDAY = 'saturday',
+  SUNDAY = 'sunday',
+}
+
+export enum Ordinals {
+  FIRST = 'first',
+  SECOND = 'second',
+  THIRD = 'third',
+  FOURTH = 'fourth',
+  FIFTH = 'fifth',
+}
+
 export interface LoadingAction<T> {
   type: T,
   payload: boolean

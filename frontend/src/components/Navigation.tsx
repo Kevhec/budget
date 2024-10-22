@@ -1,6 +1,6 @@
 import { CircleDollarSign, Clock8, LayoutDashboard } from 'lucide-react';
-import TooltipNavLink from './primitives/NavLink';
 import { cn } from '@/lib/utils';
+import TooltipNavLink from './primitives/NavLink';
 
 const navigationArray = [
   { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
