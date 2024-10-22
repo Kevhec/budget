@@ -35,7 +35,7 @@ export default function Login() {
   };
 
   return (
-    <Card className="mx-auto w-96">
+    <Card className="mx-auto max-w-96 w-full">
       <CardHeader>
         <CardTitle className="text-2xl">Inicio de sesión</CardTitle>
         <CardDescription>

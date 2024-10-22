@@ -5,3 +5,4 @@ export * from './balance';
 export * from './category';
 export * from './transaction';
 export * from './budget';
+export * from './recurrence';

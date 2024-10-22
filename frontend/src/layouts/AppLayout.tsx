@@ -24,7 +24,7 @@ export default function AppLayout() {
       <TransactionsProvider>
         <BudgetProvider>
           <div className="flex min-h-screen max-h-screen font-inter relative">
-            <div className="fixed bottom-2 right-2 z-10">
+            <div className="fixed bottom-2 right-4 z-10">
               <Popover>
                 <PopoverTrigger className="bg-primary rounded-full p-2 text-white">
                   <CirclePlus className="w-9 h-9" />

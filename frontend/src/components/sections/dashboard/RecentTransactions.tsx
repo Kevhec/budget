@@ -54,7 +54,10 @@ export default function RecentTransactions() {
               hidden={hidden}
             />
             {
-              transactionsWithPlaceholder.length - 1 !== i && (
+              (
+                recentTransactions.length !== 0
+                && transactionsWithPlaceholder.length - 1 !== i
+              ) && (
                 <Separator decorative />
               )
             }

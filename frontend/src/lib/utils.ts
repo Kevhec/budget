@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { DAY_NAMES_SPANISH } from './constants';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -21,14 +22,19 @@ export function getMonthFromDate(date: Date) {
   return date.toLocaleString('default', { month: 'long' });
 }
 
-export function nthDay(date: Date, withMonth?: boolean) {
+export function getDayOrdinalNumber(dayNumber: number) {
+  return Math.ceil(dayNumber / 7);
+}
+
+export function nthDay(date: Date = new Date(), withMonth?: boolean) {
   const nth = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto'];
-  const dayNames = ['domingo', 'lunes', 'martes', 'miércoles',
-    'jueves', 'viernes', 'sábado'];
+
   const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-  return `${nth[Math.floor(date.getDate() / 7)]} ${
-    dayNames[date.getDay()]} ${withMonth ? `de ${monthNames[date.getMonth()]}` : ''}`.trim();
+  const dayNumber = date.getDate();
+
+  return `${nth[Math.ceil(dayNumber / 7) - 1]} ${
+    DAY_NAMES_SPANISH[date.getDay()]} ${withMonth ? `de ${monthNames[date.getMonth()]}` : ''}`.trim();
 }
 
 export function getTimezone() {

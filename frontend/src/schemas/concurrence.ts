@@ -20,7 +20,7 @@ const concurrenceSchema = z.object({
     .date()
     .optional(),
   concurrenceMonthSelect: z
-    .string()
+    .enum(['exact', 'ordinal'])
     .optional(),
 });
 

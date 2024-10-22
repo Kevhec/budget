@@ -26,7 +26,7 @@ export enum OccurrenceType {
   YEARLY = 'yearly',
 }
 
-export interface Occurrence {
+export interface Concurrence {
   type: OccurrenceType,
   steps: number,
 }
@@ -52,6 +52,7 @@ export enum Ordinals {
 export interface TimeRecurrence {
   hour: number
   minute: number
+  timezone: string
 }
 
 export type YearData = Record<string, MonthData>;
@@ -59,7 +60,8 @@ export type YearData = Record<string, MonthData>;
 export type BalanceData = Record<string, YearData>;
 
 export interface Recurrence {
-  occurrence: Occurrence
+  endDate?: string
+  concurrence: Concurrence
   weekDay: {
     value: WeekDays
     ordinal: Ordinals
@@ -71,7 +73,9 @@ export interface CreateBudgetParams {
   name: string,
   totalAmount: number,
   startDate: Date,
-  endDate: Date,
+  endDate?: Date,
+  intervalMilliseconds?: number
+  datesOffset?: string | number
   userId: string,
   cronTaskId: string | null,
 }
@@ -91,5 +95,4 @@ export interface CreateBudgetRequestBody {
   startDate: string
   endDate: string
   recurrence: Recurrence
-  timeZone: string
 }

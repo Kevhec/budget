@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import {
-  FieldValues, Path, PathValue, UseFormReturn,
+  FieldValues, Path, UseFormReturn,
+  useWatch,
 } from 'react-hook-form';
 import { cn, nthDay } from '@/lib/utils';
 import {
@@ -25,13 +26,6 @@ import { Period } from '../timePicker/time-picker-utils';
 import { TimePickerInput } from '../timePicker/time-picker-input';
 import { TimePeriodSelect } from '../timePicker/period-select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-
-interface Props<T extends FieldValues = FieldValues> {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  trigger: React.ReactNode
-  form: UseFormReturn<T>
-}
 
 const concurrenceTypes = [
   {
@@ -123,24 +117,27 @@ const weekdaysOptions = [
   },
 ];
 
+interface Props<T extends FieldValues = FieldValues> {
+  trigger: React.ReactNode
+  form: UseFormReturn<T>
+  containerToggler?: React.Dispatch<React.SetStateAction<boolean>>
+}
+
 export default function ConcurrenceDialog<T extends FieldValues>({
-  open,
-  onOpenChange,
   trigger,
   form,
+  containerToggler,
 }: Props<T>) {
-  const [currentSteps, setCurrentSteps] = useState<number | null>(null);
-  const [currentType, setCurrentType] = useState<string | null>(null);
   const [period, setPeriod] = useState<Period>('PM');
+  const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
+  const [currentSteps, currentType] = useWatch({
+    control: form.control,
+    name: ['concurrenceSteps', 'concurrenceType'] as Path<T>[],
+  });
 
   const minuteRef = useRef<HTMLInputElement>(null);
   const hourRef = useRef<HTMLInputElement>(null);
   const periodRef = useRef<HTMLButtonElement>(null);
-
-  const handleStepsChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    const steps = evt.target.value;
-    setCurrentSteps(parseInt(steps, 10));
-  };
 
   const handleSave = async (evt: React.MouseEvent<HTMLButtonElement>) => {
     evt.preventDefault();
@@ -150,18 +147,23 @@ export default function ConcurrenceDialog<T extends FieldValues>({
     );
 
     if (isFormOk) {
-      onOpenChange(false);
+      setDialogOpen(false);
+    }
+
+    if (containerToggler) {
+      containerToggler(false);
     }
   };
 
-  const handleTypeChange = (value: string) => {
-    setCurrentType(value);
-
-    form.setValue('concurrenceType' as Path<T>, value as PathValue<T, Path<T>>);
+  const handleDialogOpen = (open: boolean) => {
+    if (containerToggler && !open) {
+      containerToggler(false);
+    }
+    setDialogOpen(open);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isDialogOpen} onOpenChange={handleDialogOpen}>
       <DialogTrigger
         asChild
       >
@@ -185,7 +187,7 @@ export default function ConcurrenceDialog<T extends FieldValues>({
                 <div className="flex items-center justify-between gap-4">
                   <FormLabel className="whitespace-nowrap">Repetir cada</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} onChangeCapture={handleStepsChange} min={1} className="w-16 text-center" value={field.value} />
+                    <Input type="number" {...field} min={1} className="w-16 text-center" value={field.value} />
                   </FormControl>
                 </div>
                 <FormMessage />
@@ -202,7 +204,7 @@ export default function ConcurrenceDialog<T extends FieldValues>({
                 </FormLabel>
                 <Select
                   defaultValue={field.value}
-                  onValueChange={handleTypeChange}
+                  onValueChange={field.onChange}
                 >
                   <FormControl>
                     <SelectTrigger className="!mt-0 capitalize">
@@ -317,7 +319,7 @@ export default function ConcurrenceDialog<T extends FieldValues>({
                             key={`concurrence-weekday-radio-${weekday.value}`}
                           >
                             <FormControl>
-                              <RadioGroupItem value={weekday.value} className="!sr-only " />
+                              <RadioGroupItem value={weekday.value} className="!sr-only" />
                             </FormControl>
                             <FormLabel className={cn(
                               'p-1.5 aspect-square min-w-[auto] rounded-full bg-slate-100 w-8 grid place-items-center transition-colors',

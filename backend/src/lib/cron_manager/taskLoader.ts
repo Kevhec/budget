@@ -19,7 +19,7 @@ async function loadCronTasks() {
     tasks.forEach((task) => {
       const {
         cronExpression,
-        timeZone,
+        timezone,
         endDate,
         cronJobs,
       } = task;
@@ -30,13 +30,14 @@ async function loadCronTasks() {
 
       scheduleCronTask({
         cronExpression,
-        timezone: timeZone,
-        endDate,
+        timezone,
+        endDate: endDate ? new Date(endDate) : undefined,
         taskId: task.id,
         jobs: cronJobs as unknown as Job[],
       });
     });
   } catch (error) {
+    console.log(error);
     throw new Error('Error loading cron tasks');
   }
 }

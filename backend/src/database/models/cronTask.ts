@@ -12,9 +12,9 @@ class CronTask extends Model<InferAttributes<CronTask>, InferCreationAttributes<
 
   declare cronExpression: CreationOptional<string>;
 
-  declare timeZone: CreationOptional<string>;
+  declare timezone: CreationOptional<string>;
 
-  declare endDate: CreationOptional<Date>;
+  declare endDate: CreationOptional<Date | null>;
 
   declare isFinished: CreationOptional<boolean>;
 
@@ -35,14 +35,14 @@ CronTask.init({
     allowNull: false,
     defaultValue: '* * * * *',
   },
-  timeZone: {
+  timezone: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   endDate: {
     type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: new Date(),
+    allowNull: true,
+    defaultValue: null,
   },
   isFinished: {
     type: DataTypes.BOOLEAN,

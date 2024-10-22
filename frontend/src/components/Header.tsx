@@ -4,6 +4,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
+import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback/* , AvatarImage */ } from './ui/avatar';
 import {
   DropdownMenu,
@@ -14,7 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 import {
   Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger,
