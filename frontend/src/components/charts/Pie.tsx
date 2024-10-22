@@ -1,8 +1,8 @@
 import { Pie, PieChart } from 'recharts';
+import { formatMoney, suffixNumberFormatter } from '@/lib/formatNumber';
 import {
   ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent,
 } from '../ui/chart';
-import { formatMoney, suffixNumberFormatter } from '@/lib/formatNumber';
 import { Separator } from '../ui/separator';
 
 interface Props {

@@ -3,15 +3,23 @@ import {
   Budget, BudgetAction, BudgetActionType, BudgetState, PaginatedApiResponse,
 } from '@/types';
 
+const initialRecentBudgetsState: Budget[] = [];
+
 const initialBudgetState = {
-  budgets:
+  recentBudgets: initialRecentBudgetsState,
+  paginatedBudgets:
     initialPaginatedState as PaginatedApiResponse<Budget[]>,
   loading: false,
 };
 
 function budgetReducer(state: BudgetState, action: BudgetAction) {
   switch (action.type) {
-    case BudgetActionType.SYNC_BUDGETS:
+    case BudgetActionType.SYNC_RECENT:
+      return ({
+        ...state,
+        recentBudgets: action.payload,
+      });
+    case BudgetActionType.SYNC_PAGINATED:
       return ({
         ...state,
         budgets: action.payload,
@@ -20,25 +28,29 @@ function budgetReducer(state: BudgetState, action: BudgetAction) {
     case BudgetActionType.CREATE_BUDGET: {
       const newBudget = action.payload;
 
-      const currentBudgets = state.budgets;
+      if (!newBudget) return state;
 
-      const isFirstPage = currentBudgets.meta?.currentPage === 1;
+      const currentPaginated = state.paginatedBudgets;
+      const isFirstPage = currentPaginated.meta?.currentPage === 1;
 
-      const newBudgets = isFirstPage && currentBudgets.data
+      const updatedRecentBudgets = [newBudget, ...state.recentBudgets].slice(0, 4);
+
+      const newPaginatedData = isFirstPage && currentPaginated.data
         ? [
           newBudget,
-          ...currentBudgets.data,
-        ]?.slice(0, currentBudgets.meta?.itemsPerPage || 30)
-        : currentBudgets.data;
+          ...currentPaginated.data,
+        ]?.slice(0, currentPaginated.meta?.itemsPerPage || 30)
+        : currentPaginated.data;
 
-      const updatedBudgets = {
-        ...currentBudgets,
-        data: newBudgets,
+      const updatedPaginatedBudgets = {
+        ...currentPaginated,
+        data: newPaginatedData,
       };
 
       return ({
         ...state,
-        data: updatedBudgets,
+        recentBudgets: updatedRecentBudgets,
+        paginatedBudgets: updatedPaginatedBudgets,
       });
     }
     case BudgetActionType.SET_LOADING:
@@ -54,4 +66,5 @@ function budgetReducer(state: BudgetState, action: BudgetAction) {
 export {
   budgetReducer,
   initialBudgetState,
+  initialRecentBudgetsState,
 };

@@ -8,7 +8,7 @@ import CronJob from '../database/models/cronJobs';
 import { createBudget as createBudgetJob } from '../lib/jobs';
 import { Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
 import { CreateBudgetRequestBody, JobTypes, TypedRequest } from '../lib/types';
-import { sanitizeObject } from '../lib/utils';
+import { generateLinksMetadata, sanitizeObject } from '../lib/utils';
 import generateNextExecutionDate from '../lib/cron_manager/generateNexExecutionDate';
 import getDateTimeDifference from '../lib/utils/time/getDateTimeDifference';
 
@@ -120,21 +120,63 @@ async function getAllBudgets(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
+  const { offset, limit, month } = req.query;
+
+  // Convert to string to ensure types
+  let strOffset;
+  let strLimit;
+  let strMonth;
+
+  if (offset) strOffset = String(offset);
+
+  if (limit) strLimit = String(limit);
+
+  if (month) strMonth = String(month);
+
+  const intOffset = parseInt(strOffset || '', 10);
+  const intLimit = parseInt(strLimit || '', 10);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const whereClause: any = {
+    userId: req.user?.id,
+  };
+
+  if (month) {
+    // If month is provided use it for filtering, formatted as YYYY-MM
+    const dateRange = generateDateRange({ fromDate: strMonth });
+
+    if (dateRange) {
+      const [start, end] = dateRange;
+
+      whereClause.createdAt = {
+        [Op.between]: [start, end],
+      };
+    }
+  }
+
   try {
-    const budgets = await Budget.findAll({
-      where: {
-        userId: req.user?.id,
-      },
-      attributes: {
-        exclude: ['cronTaskId'],
-      },
+    const { count, rows } = await Budget.findAndCountAll({
+      where: whereClause,
+      offset: intOffset,
+      limit: intLimit,
+      attributes: { exclude: ['cronTaskId'] },
+      order: [['createdAt', 'DESC']],
     });
 
-    if (!budgets.length) {
-      return res.status(404).json('No budgets where found');
+    if (!rows.length) {
+      const notFoundMessage = 'No budgets found';
+      return res.status(404).json(notFoundMessage);
     }
 
-    return res.status(200).json({ data: budgets });
+    const { meta, links } = generateLinksMetadata({
+      count, rows, offset: intOffset, limit: intLimit,
+    });
+
+    return res.status(200).json({
+      data: rows,
+      meta,
+      links,
+    });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
