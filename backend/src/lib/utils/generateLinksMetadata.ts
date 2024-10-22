@@ -21,7 +21,7 @@ interface LinkMetadata {
   }
 }
 
-const backendUrl = process.env.BACKEND_URL_PRODUCTION;
+const backendUrl = process.env.BACKEND_URL;
 
 function generateLinksMetadata<T>({
   count, rows, offset, limit = 10,

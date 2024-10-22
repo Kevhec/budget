@@ -8,6 +8,7 @@ import ChartPie from '@/components/charts/Pie';
 import { ChartConfig } from '@/components/ui/chart';
 import ChartCard from '@/components/charts/ChartCard';
 import { formatMoney } from '@/lib/formatNumber';
+import Typography from '@/components/Typography';
 
 const tabsDefaultValue = 'income';
 
@@ -71,34 +72,41 @@ export default function CategoryBalanceGraph() {
   };
 
   return (
-    <Tabs defaultValue={tabsDefaultValue} onValueChange={onTabChange} value={currentTab} className="w-full bg-white rounded-lg">
-      <TabsList className="w-full justify-start gap-2">
-        <TabsTrigger value="income">Ingresos</TabsTrigger>
-        <TabsTrigger value="expense">Gastos</TabsTrigger>
-      </TabsList>
-      {
-        ['income', 'expense'].map((type) => (
-          <TabsContent key={crypto.randomUUID()} value={type} className="mt-0">
-            {
-              chartData.length === 0 ? (
-                <p>Sin datos</p>
-              ) : (
-                <ChartCard
-                  title={`${type === 'income' ? 'Ingresos' : 'Gastos'} por categoría`}
-                  month={monthBalance?.month ? getMonthFromDate(new Date(0, monthBalance.month - 1)) : ''}
-                >
-                  <ChartPie
-                    chartConfig={chartConfig}
-                    chartData={chartData}
-                    dataKey={type}
-                    nameKey="category"
-                  />
-                </ChartCard>
-              )
-            }
-          </TabsContent>
-        ))
-      }
-    </Tabs>
+    <section>
+      <Tabs defaultValue={tabsDefaultValue} onValueChange={onTabChange} value={currentTab} className="w-full bg-white rounded-lg">
+        <TabsList className="w-full justify-start gap-2">
+          <TabsTrigger value="income">Ingresos</TabsTrigger>
+          <TabsTrigger value="expense">Gastos</TabsTrigger>
+        </TabsList>
+        {
+          ['income', 'expense'].map((type) => (
+            <TabsContent key={crypto.randomUUID()} value={type} className="mt-0 relative">
+              {
+                chartData.length === 0 && (
+                  <Typography className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center whitespace-nowrap">
+                    Gráfico de transacciones
+                    <Typography variant="span" className="block text-sm text-slate-600">
+                      Sin Datos
+                    </Typography>
+                  </Typography>
+                )
+              }
+              <ChartCard
+                title={`${type === 'income' ? 'Ingresos' : 'Gastos'} por categoría`}
+                hidden={chartData.length === 0}
+                month={monthBalance?.month ? getMonthFromDate(new Date(0, monthBalance.month - 1)) : ''}
+              >
+                <ChartPie
+                  chartConfig={chartConfig}
+                  chartData={chartData}
+                  dataKey={type}
+                  nameKey="category"
+                />
+              </ChartCard>
+            </TabsContent>
+          ))
+        }
+      </Tabs>
+    </section>
   );
 }

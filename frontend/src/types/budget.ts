@@ -13,18 +13,25 @@ export interface Budget {
   createdAt: string
   updatedAt: string
   userId: string
+  hidden?: boolean
 }
 
 export type CreateBudgetParams = z.infer<typeof budgetSchema>;
 
 export enum BudgetActionType {
-  SYNC_BUDGETS = 'SYNC_BUDGETS',
+  SYNC_RECENT = 'SYNC_RECENT',
+  SYNC_PAGINATED = 'SYNC_PAGINATED',
   CREATE_BUDGET = 'CREATE_BUDGET',
   SET_LOADING = 'SET_LOADING',
 }
 
-export interface SyncBudgetsAction {
-  type: BudgetActionType.SYNC_BUDGETS
+export interface SyncRecentAction {
+  type: BudgetActionType.SYNC_RECENT
+  payload: Budget[]
+}
+
+export interface SyncPaginatedAction {
+  type: BudgetActionType.SYNC_PAGINATED
   payload: PaginatedApiResponse<Budget[]>
 }
 
@@ -34,12 +41,14 @@ export interface CreateBudgetAction {
 }
 
 export type BudgetAction =
-  | SyncBudgetsAction
+  | SyncRecentAction
+  | SyncPaginatedAction
   | CreateBudgetAction
   | LoadingAction<BudgetActionType.SET_LOADING>;
 
 export interface BudgetState {
-  budgets: PaginatedApiResponse<Budget[]>
+  recentBudgets: Budget[]
+  paginatedBudgets: PaginatedApiResponse<Budget[]>
   loading: boolean
 }
 

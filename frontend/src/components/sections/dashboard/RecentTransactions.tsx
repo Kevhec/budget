@@ -4,6 +4,7 @@ import TransactionResumeCard from '@/components/TransactionResumeCard';
 import Typography from '@/components/Typography';
 import useTransactions from '@/hooks/useTransactions';
 import { Separator } from '@/components/ui/separator';
+import { NavLink } from 'react-router-dom';
 
 export default function RecentTransactions() {
   const { state: { recentTransactions } } = useTransactions();
@@ -31,46 +32,55 @@ export default function RecentTransactions() {
   }, [recentTransactions]);
 
   return (
-    <div className="relative">
-      {transactionsWithPlaceholder.map((transaction, i) => {
-        const {
-          description, date, amount, type, category, hidden,
-        } = transaction;
-
-        let fallbackId;
-
-        if (!transaction.id) {
-          fallbackId = crypto.randomUUID();
+    <section className="rounded-md bg-white p-4">
+      <div className="flex justify-between items-center pb-4">
+        <Typography variant="h2">
+          Últimas transacciones
+        </Typography>
+        <NavLink to="#" className="text-sm text-blueishGray">
+          Ver más
+        </NavLink>
+      </div>
+      <div className="relative">
+        {transactionsWithPlaceholder.map((transaction, i) => {
+          const {
+            description, date, amount, type, category, hidden,
+          } = transaction;
+          let fallbackId;
+          if (!transaction.id) {
+            fallbackId = crypto.randomUUID();
+          }
+          return (
+            <React.Fragment key={transaction.id || fallbackId}>
+              <TransactionResumeCard
+                description={description}
+                date={date}
+                amount={amount}
+                type={type}
+                category={category}
+                hidden={hidden}
+              />
+              {
+                (
+                  recentTransactions.length !== 0
+                  && transactionsWithPlaceholder.length - 1 !== i
+                ) && (
+                  <Separator decorative />
+                )
+              }
+            </React.Fragment>
+          );
+        })}
+        {
+          recentTransactions.length === 0 && (
+            <div className="w-full h-full absolute top-0 right-0 grid place-items-center">
+              <Typography className="text-sm text-slate-600">
+                Sin Datos
+              </Typography>
+            </div>
+          )
         }
-
-        return (
-          <React.Fragment key={transaction.id || fallbackId}>
-            <TransactionResumeCard
-              description={description}
-              date={date}
-              amount={amount}
-              type={type}
-              category={category}
-              hidden={hidden}
-            />
-            {
-              (
-                recentTransactions.length !== 0
-                && transactionsWithPlaceholder.length - 1 !== i
-              ) && (
-                <Separator decorative />
-              )
-            }
-          </React.Fragment>
-        );
-      })}
-      {
-        recentTransactions.length === 0 && (
-          <div className="w-full h-full absolute top-0 right-0 grid place-items-center">
-            <Typography>Sin transacciones</Typography>
-          </div>
-        )
-      }
-    </div>
+      </div>
+    </section>
   );
 }

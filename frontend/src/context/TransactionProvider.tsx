@@ -22,15 +22,15 @@ function TransactionsProvider({ children }: PropsWithChildren) {
     createTransactionAction(dispatch, data, state);
   }, [state]);
 
-  useEffect(() => {
-    syncRecentTransactionsAction(dispatch);
-    syncPaginatedTransactionsAction(dispatch, defaultPaginatedOptions);
-  }, []);
-
   const contextValue = useMemo<TransactionsContextType>(() => ({
     state,
     createTransaction,
   }), [state, createTransaction]);
+
+  useEffect(() => {
+    syncRecentTransactionsAction(dispatch);
+    syncPaginatedTransactionsAction(dispatch, defaultPaginatedOptions);
+  }, []);
 
   return (
     <TransactionsContext.Provider value={contextValue}>

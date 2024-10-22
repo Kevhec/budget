@@ -5,9 +5,43 @@ import {
 import { Dispatch } from 'react';
 import axiosClient from '@/config/axios';
 import formatBudgetForApi from '@/lib/budget/formatBudgetForApi';
-import { initialBudgetState } from './budgetReducer';
+import { initialBudgetState, initialRecentBudgetsState } from './budgetReducer';
 
-async function syncBudgets(
+async function syncRecentBudgets(dispatch: Dispatch<BudgetAction>) {
+  dispatch({
+    type: BudgetActionType.SET_LOADING,
+    payload: true,
+  });
+
+  try {
+    const response = await getPaginatedBudgets({
+      page: 1,
+      limit: 4,
+      date: new Date(),
+    });
+
+    const recentBudgets = response.data;
+
+    if (recentBudgets) {
+      dispatch({
+        type: BudgetActionType.SYNC_RECENT,
+        payload: recentBudgets,
+      });
+    }
+  } catch (error) {
+    dispatch({
+      type: BudgetActionType.SYNC_RECENT,
+      payload: initialRecentBudgetsState,
+    });
+  } finally {
+    dispatch({
+      type: BudgetActionType.SET_LOADING,
+      payload: false,
+    });
+  }
+}
+
+async function syncPaginatedBudgets(
   dispatch: Dispatch<BudgetAction>,
   options: PaginatedParams,
 ) {
@@ -20,13 +54,13 @@ async function syncBudgets(
     const paginatedBudgets = await getPaginatedBudgets(options);
 
     dispatch({
-      type: BudgetActionType.SYNC_BUDGETS,
+      type: BudgetActionType.SYNC_PAGINATED,
       payload: paginatedBudgets,
     });
   } catch (error) {
     dispatch({
-      type: BudgetActionType.SYNC_BUDGETS,
-      payload: initialBudgetState.budgets,
+      type: BudgetActionType.SYNC_PAGINATED,
+      payload: initialBudgetState.paginatedBudgets,
     });
   } finally {
     dispatch({
@@ -46,11 +80,9 @@ async function createBudget(
     payload: true,
   });
 
-  const currentPaginated = state.budgets;
+  const currentPaginated = state.paginatedBudgets;
   const currentPage = currentPaginated.meta?.currentPage;
   const currentLimit = currentPaginated.meta?.itemsPerPage;
-
-  console.log(budget);
 
   const formattedBudget = formatBudgetForApi(budget);
 
@@ -59,26 +91,21 @@ async function createBudget(
       ...formattedBudget,
     });
 
-    console.log(data);
-
     const newBudget: Budget = data.data.budget;
-
-    console.log(newBudget);
 
     dispatch({
       type: BudgetActionType.CREATE_BUDGET,
       payload: newBudget,
     });
 
-    if (currentPage === 1) {
-      syncBudgets(dispatch, {
+    if (currentPage !== 1) {
+      syncPaginatedBudgets(dispatch, {
         page: currentPage || 1,
         limit: currentLimit || 30,
         date: new Date(),
       });
     }
   } catch (error) {
-    console.log(error);
     dispatch({
       type: BudgetActionType.CREATE_BUDGET,
       payload: null,
@@ -92,6 +119,7 @@ async function createBudget(
 }
 
 export {
-  syncBudgets,
+  syncRecentBudgets,
+  syncPaginatedBudgets,
   createBudget,
 };
