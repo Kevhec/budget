@@ -39,7 +39,7 @@ export default function TooltipNavLink({ icon: IconComponent, label, ...props }:
     >
       <div className="flex gap-4 items-center md">
         <IconComponent />
-        <p className={srOnTablet}>
+        <p>
           {label}
         </p>
       </div>

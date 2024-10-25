@@ -17,7 +17,7 @@ interface Props {
 export default function GeneralResumeCard({
   variant, title, value, month, className,
 }: Props) {
-  const resumeCardClasses = cn('rounded-md p-4 col-span-4', {
+  const resumeCardClasses = cn('rounded-md p-4 col-span-4 border-none', {
     'bg-secondaryGreen text-white': variant === 'income',
     'bg-secondaryYellow': variant === 'expense',
   }, className);
@@ -35,7 +35,7 @@ export default function GeneralResumeCard({
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <Typography className="font-bold text-lg md:text-3xl">
+        <Typography className="font-bold text-lg md:text-xl">
           {formattedMoney}
         </Typography>
         <Typography className="text-sm">

@@ -27,7 +27,10 @@ Budget.hasMany(Transaction, { foreignKey: 'budgetId' });
 Transaction.belongsTo(Budget, { foreignKey: 'budgetId', as: 'budget' });
 
 CronTask.hasOne(Budget, { foreignKey: 'cronTaskId' });
+CronTask.hasOne(Transaction, { foreignKey: 'cronTaskId' });
+
 Budget.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
+Transaction.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
 
 CronTask.hasMany(CronJob, { foreignKey: 'cronTaskId', as: 'cronJobs' });
 CronJob.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });

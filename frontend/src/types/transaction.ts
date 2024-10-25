@@ -4,6 +4,7 @@ import { transactionSchema } from '@/schemas/creation';
 import { Category } from './category';
 import { PaginatedApiResponse } from './api';
 import { LoadingAction } from './common';
+import { BalanceData } from './balance';
 
 export enum TransactionType {
   Income = 'income',
@@ -27,7 +28,7 @@ export interface Transaction {
 export interface PaginatedParams {
   page: number
   limit: number
-  date: Date
+  date?: Date
 }
 
 export type CreateTransactionParams = z.infer<typeof transactionSchema>;
@@ -37,11 +38,17 @@ export enum TransactionActionType {
   SYNC_PAGINATED = 'SYNC_PAGINATED',
   CREATE_TRANSACTION = 'CREATE_TRANSACTION',
   SET_LOADING = 'SET_LOADING',
+  GET_BALANCE = 'GET_BALANCE',
 }
 
 export interface SyncRecentAction {
   type: TransactionActionType.SYNC_RECENT
   payload: Transaction[]
+}
+
+export interface GetBalanceAction {
+  type: TransactionActionType.GET_BALANCE
+  payload: BalanceData
 }
 
 export interface SyncPaginatedAction {
@@ -58,10 +65,12 @@ export type TransactionAction =
   | SyncRecentAction
   | SyncPaginatedAction
   | CreateTransactionAction
+  | GetBalanceAction
   | LoadingAction<TransactionActionType.SET_LOADING>;
 
 export interface TransactionState {
   recentTransactions: Transaction[],
+  balance: BalanceData
   paginatedTransactions: PaginatedApiResponse<Transaction[]>,
   loading: boolean
 }
@@ -71,4 +80,5 @@ export type TransactionReducer = Reducer<TransactionState, TransactionAction>;
 export interface TransactionsContextType {
   state: TransactionState,
   createTransaction: (data: CreateTransactionParams) => void;
+  getBalance: (from?: string, to?: string) => void;
 }

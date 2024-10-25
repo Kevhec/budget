@@ -1,5 +1,5 @@
 import { budgetReducer, initialBudgetState } from '@/reducers/budget/budgetReducer';
-import { BudgetReducer, CreateBudgetParams } from '@/types';
+import { BudgetReducer, CreateBudgetParams, PaginatedParams } from '@/types';
 import {
   createContext, useCallback, useEffect, useMemo, useReducer,
 } from 'react';
@@ -23,14 +23,25 @@ function BudgetProvider({ children }: React.PropsWithChildren) {
     createBudgetAction(dispatch, data, state);
   }, [state]);
 
+  const getBudgets = useCallback((options: PaginatedParams) => {
+    syncPaginatedBudgetsAction(dispatch, options, true);
+  }, []);
+
+  const updateRecentBudgets = useCallback(() => {
+    syncRecentBudgetsAction(dispatch);
+  }, []);
+
   const contextValue = useMemo<BudgetContextType>(() => ({
     state,
     createBudget,
-  }), [state, createBudget]);
+    getBudgets,
+    updateRecentBudgets,
+  }), [state, createBudget, getBudgets, updateRecentBudgets]);
 
   useEffect(() => {
     syncRecentBudgetsAction(dispatch);
     syncPaginatedBudgetsAction(dispatch, defaultPaginatedOptions);
+    syncPaginatedBudgetsAction(dispatch, undefined, true);
   }, []);
 
   return (

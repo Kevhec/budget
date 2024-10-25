@@ -4,11 +4,19 @@ import { PaginatedApiResponse, PaginatedParams, Transaction } from '@/types';
 
 async function getPaginatedTransactions({ page, limit, date }: PaginatedParams) {
   try {
-    const [year, month] = format(date, 'YYYY-MM').split('-');
+    let queryYear = '';
+    let queryMonth = '';
+
+    if (date) {
+      const [dateYear, dateMonth] = format(date, 'YYYY-MM').split('-');
+
+      queryYear = dateYear;
+      queryMonth = dateMonth;
+    }
     const offset = (page - 1) * limit;
 
     const { data } = await axiosClient
-      .get<PaginatedApiResponse<Transaction[]>>(`/transaction/?offset=${offset}&limit=${limit}&month=${year}-${month}`);
+      .get<PaginatedApiResponse<Transaction[]>>(`/transaction/?offset=${offset}&limit=${limit}&month=${date ? `${queryYear}-${queryMonth}` : ''}`);
 
     return data;
   } catch (error: any) {

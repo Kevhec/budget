@@ -89,7 +89,7 @@ export default function CreationDialog({ type, label }: Props) {
         <DialogTrigger>
           {label}
         </DialogTrigger>
-        <DialogContent className="p-0 max-w-md w-[calc(100%-2rem)] rounded-sm">
+        <DialogContent className="p-0 max-w-lg w-[calc(100%-2rem)] rounded-sm">
           <DialogDescription className="sr-only">
             Crea un nuevo recurso para
             {' '}

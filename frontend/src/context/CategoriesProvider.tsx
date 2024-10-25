@@ -1,5 +1,5 @@
 import {
-  createContext, PropsWithChildren, useEffect, useMemo, useReducer,
+  createContext, PropsWithChildren, useCallback, useEffect, useMemo, useReducer,
 } from 'react';
 import { CategoriesContextType, CategoryReducer } from '@/types';
 import { categoryReducer, initialCategoriesState } from '@/reducers/category/categoryReducer';
@@ -18,9 +18,14 @@ function CategoriesProvider({ children }: PropsWithChildren) {
     getBalanceAction(dispatch);
   }, []);
 
+  const updateBalance = useCallback(() => {
+    getBalanceAction(dispatch);
+  }, []);
+
   const contextValue = useMemo(() => ({
     state,
-  }), [state]);
+    updateBalance,
+  }), [state, updateBalance]);
 
   return (
     <CategoriesContext.Provider value={contextValue}>

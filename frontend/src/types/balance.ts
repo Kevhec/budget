@@ -7,3 +7,8 @@ export type MonthData = {
 export type YearData = Record<string, MonthData>;
 
 export type BalanceData = Record<string, YearData>;
+
+export interface PureBalance {
+  totalIncome: number
+  totalExpense: number
+}

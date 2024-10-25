@@ -9,11 +9,13 @@ import { ChartConfig } from '@/components/ui/chart';
 import ChartCard from '@/components/charts/ChartCard';
 import { formatMoney } from '@/lib/formatNumber';
 import Typography from '@/components/Typography';
+import useTransactions from '@/hooks/useTransactions';
 
 const tabsDefaultValue = 'income';
 
 export default function CategoryBalanceGraph() {
-  const { state: { monthBalance } } = useCategories();
+  const { state: { monthBalance }, updateBalance } = useCategories();
+  const { state: { recentTransactions } } = useTransactions();
   const [currentTab, setCurrentTab] = useState<string>(tabsDefaultValue);
   const [chartData, setChartData] = useState<any[]>([]);
   const [chartConfig, setChartConfig] = useState< Record<string, any>>({
@@ -67,20 +69,24 @@ export default function CategoryBalanceGraph() {
     setChartConfig(newChartConfig);
   }, [monthBalance, currentTab]);
 
+  useEffect(() => {
+    updateBalance();
+  }, [recentTransactions, updateBalance]);
+
   const onTabChange = (value: string) => {
     setCurrentTab(value);
   };
 
   return (
-    <section>
-      <Tabs defaultValue={tabsDefaultValue} onValueChange={onTabChange} value={currentTab} className="w-full bg-white rounded-lg">
+    <section className="md:col-span-10 xl:row-span-2 xl:col-start-11">
+      <Tabs defaultValue={tabsDefaultValue} onValueChange={onTabChange} value={currentTab} className="w-full bg-white rounded-lg md:h-full md:flex md:flex-col">
         <TabsList className="w-full justify-start gap-2">
           <TabsTrigger value="income">Ingresos</TabsTrigger>
           <TabsTrigger value="expense">Gastos</TabsTrigger>
         </TabsList>
         {
           ['income', 'expense'].map((type) => (
-            <TabsContent key={crypto.randomUUID()} value={type} className="mt-0 relative">
+            <TabsContent key={crypto.randomUUID()} value={type} className="mt-0 relative md:flex-1 data-[state=active]:flex data-[state=active]:flex-col">
               {
                 chartData.length === 0 && (
                   <Typography className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center whitespace-nowrap">
@@ -95,6 +101,8 @@ export default function CategoryBalanceGraph() {
                 title={`${type === 'income' ? 'Ingresos' : 'Gastos'} por categoría`}
                 hidden={chartData.length === 0}
                 month={monthBalance?.month ? getMonthFromDate(new Date(0, monthBalance.month - 1)) : ''}
+                containerClassName="md:h-full"
+                contentClassName="md:flex"
               >
                 <ChartPie
                   chartConfig={chartConfig}

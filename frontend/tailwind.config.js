@@ -12,7 +12,7 @@ module.exports = {
   prefix: '',
   theme: {
     container: {
-      center: true,
+      center: 'true',
       padding: '2rem',
       screens: {
         '2xl': '1400px',
@@ -30,6 +30,9 @@ module.exports = {
         blueishGray: 'hsl(var(--blueishGray))',
         secondaryGreen: 'hsl(var(--secondaryGreen))',
         secondaryYellow: 'hsl(var(--secondaryYellow))',
+        danger: 'hsl(var(--danger))',
+        caution: 'hsl(var(--caution))',
+        safe: 'hsl(var(--safe))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
@@ -58,6 +61,16 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -66,12 +79,20 @@ module.exports = {
       },
       keyframes: {
         'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
+          from: {
+            height: '0',
+          },
+          to: {
+            height: 'var(--radix-accordion-content-height)',
+          },
         },
         'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
+          from: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+          to: {
+            height: '0',
+          },
         },
       },
       animation: {
@@ -83,7 +104,6 @@ module.exports = {
         openSans: ['var(--font-open-sans)', ...fontFamily.sans],
       },
       gridTemplateColumns: {
-        // Simple 16 column grid
         20: 'repeat(20, minmax(0, 1fr))',
       },
     },

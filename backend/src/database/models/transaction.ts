@@ -6,6 +6,7 @@ import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';
 import Budget from './budget';
 import Category from './category';
+import CronTask from './cronTask';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -33,9 +34,7 @@ class Transaction
 
   declare type: TransactionType;
 
-  /*   declare frequency: FrequencyType;
-
-  declare endDate: Date; */
+  declare cronTaskId: ForeignKey<CronTask['id']> | null;
 
   declare userId: ForeignKey<User['id']>;
 
@@ -68,14 +67,6 @@ Transaction.init({
     allowNull: false,
     defaultValue: Date.now(),
   },
-/*   frequency: {
-    type: DataTypes.ENUM('daily', 'weekly', 'monthly', 'yearly'),
-    allowNull: true,
-  },
-  endDate: {
-    type: DataTypes.DATE,
-    allowNull: true,
-  }, */
 }, {
   sequelize,
   timestamps: true,

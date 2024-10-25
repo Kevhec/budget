@@ -9,5 +9,5 @@ export default function extractYearAndMonth(dateString?: string) {
     throw new Error('String must satisfy format YYYY-MM');
   }
 
-  return String(dateString).split('-').map((el) => Number(el));
+  return String(dateString).split('-').map(Number);
 }

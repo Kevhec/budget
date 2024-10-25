@@ -26,6 +26,7 @@ import { Period } from '../timePicker/time-picker-utils';
 import { TimePickerInput } from '../timePicker/time-picker-input';
 import { TimePeriodSelect } from '../timePicker/period-select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import ConcurrenceEndDate from '../ConcurrenceEndDate';
 
 const concurrenceTypes = [
   {
@@ -377,11 +378,13 @@ export default function ConcurrenceDialog<T extends FieldValues>({
                   </Select>
                   <FormMessage />
                 </FormItem>
-
               )}
             />
           )
         }
+        <ConcurrenceEndDate
+          form={form}
+        />
         <DialogFooter>
           <DialogClose asChild>
             <Button onClick={handleSave} type="button">Guardar</Button>

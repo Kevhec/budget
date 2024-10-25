@@ -1,14 +1,11 @@
 import {
-  ApiBudget,
-  ApiRecurrence, CreateBudgetParams, OccurrenceType, Ordinals, WeekDays,
+  ApiRecurrence, ConcurrenceFormData, DefaultConcurrency, OccurrenceType, Ordinals, WeekDays,
 } from '@/types';
 import { format } from '@formkit/tempo';
-import { DEFAULT_CONCURRENCES, ENGLISH_ORDINALS } from '../constants';
-import { getDayOrdinalNumber, getTimezone } from '../utils';
+import { ENGLISH_ORDINALS } from './constants';
+import { getDayOrdinalNumber, getTimezone } from './utils';
 
 // TODO: Extract concurrency related code to it's own module
-
-type DefaultConcurrency = typeof DEFAULT_CONCURRENCES[number];
 
 function getDefaultRecurrence(
   type: Exclude<DefaultConcurrency, 'none' | 'custom'>,
@@ -64,20 +61,10 @@ function getDefaultRecurrence(
   return defaultMapping[type];
 }
 
-interface ConcurrenceFormData {
-  concurrenceDefault: DefaultConcurrency
-  concurrenceType: OccurrenceType,
-  concurrenceSteps: number,
-  concurrenceWeekDay: WeekDays,
-  concurrenceTime: Date,
-  concurrenceMonthSelect: 'exact' | 'ordinal'
-}
-
 function formatConcurrence(
   concurrenceFormData: ConcurrenceFormData,
   startDate: Date,
-  endDate?: Date,
-) {
+): ApiRecurrence | null {
   const {
     concurrenceDefault,
     concurrenceType,
@@ -85,10 +72,11 @@ function formatConcurrence(
     concurrenceWeekDay,
     concurrenceTime,
     concurrenceMonthSelect,
+    concurrenceEndDate,
   } = concurrenceFormData;
 
   if (concurrenceDefault === 'none') {
-    return undefined;
+    return null;
   }
 
   const weekDayOrdinalIndex = getDayOrdinalNumber(startDate.getDate()) - 1;
@@ -134,39 +122,14 @@ function formatConcurrence(
       minute,
       timezone: getTimezone(),
     },
-    endDate,
+    endDate: concurrenceEndDate,
   };
 
   return recurrence;
-}
-
-function extractConcurrenceData(data: CreateBudgetParams) {
-  return Object.fromEntries(
-    Object.entries(data).filter(([key]) => key.startsWith('concurrence')),
-  ) as unknown as ConcurrenceFormData;
 }
 
 // TODO: CHANGE NAME TO RECURRENCE ON FORMS AND EVERYTHING PLEASE PLEASE VERY PLEASE
 
 // TODO: CHANGE NAME PROPERTY TO DESCRIPTION VERY PLEEEEASSEEEE
 
-function formatBudgetForApi(data: CreateBudgetParams): ApiBudget | null {
-  const concurrenceFormData = extractConcurrenceData(data);
-  const concurrenceData = formatConcurrence(
-    concurrenceFormData,
-    data.startDate,
-    data.endDate,
-  );
-
-  const formattedBudget: ApiBudget = {
-    name: data.name,
-    totalAmount: data.totalAmount,
-    startDate: data.startDate,
-    endDate: data.withEndDate ? data.endDate : undefined,
-    recurrence: concurrenceData,
-  };
-
-  return formattedBudget;
-}
-
-export default formatBudgetForApi;
+export default formatConcurrence;

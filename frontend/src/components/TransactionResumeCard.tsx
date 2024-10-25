@@ -27,7 +27,7 @@ export default function TransactionResumeCard({
 
   const containerClasses = cn({
     invisible: hidden,
-  }, 'py-2 border-none');
+  }, 'py-2 border-none shadow-none');
 
   return (
     <Card tabIndex={hidden ? 0 : 1} className={containerClasses}>

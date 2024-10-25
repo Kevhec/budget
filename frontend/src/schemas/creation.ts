@@ -16,9 +16,8 @@ const transactionSchema = z.object({
     .coerce
     .number()
     .positive(),
-  date: z
-    .date()
-    .optional(),
+  startDate: z
+    .date(),
   type: z
     .enum(TRANSACTION_TYPES),
   budgetId: z
@@ -29,7 +28,7 @@ const transactionSchema = z.object({
     .string()
     .uuid()
     .optional(),
-});
+}).merge(concurrenceSchema);
 
 const budgetSchema = z.object({
   name: z
@@ -48,8 +47,6 @@ const budgetSchema = z.object({
     .date({
       required_error: 'Este campo es obligatorio',
     }),
-  withEndDate: z
-    .enum(['true', 'false']),
   endDate: z
     .date()
     .optional(),

@@ -1,3 +1,8 @@
+import { DEFAULT_CONCURRENCES } from '@/lib/constants';
+import type { CreateBudgetParams } from './budget';
+import type { CreateTransactionParams } from './transaction';
+import { OccurrenceType } from './recurrence';
+
 export type Months =
 'enero' |
 'febrero' |
@@ -38,3 +43,19 @@ export type FormProps<T> = {
   onSubmit: (data: T) => void | Promise<void>;
   formId: string
 };
+
+export type CreationParamsUnion =
+  | CreateBudgetParams
+  | CreateTransactionParams;
+
+export type DefaultConcurrency = typeof DEFAULT_CONCURRENCES[number];
+
+export interface ConcurrenceFormData {
+  concurrenceDefault: DefaultConcurrency
+  concurrenceType: OccurrenceType,
+  concurrenceSteps: number,
+  concurrenceWeekDay: WeekDays,
+  concurrenceTime: Date,
+  concurrenceMonthSelect: 'exact' | 'ordinal'
+  concurrenceEndDate: Date
+}

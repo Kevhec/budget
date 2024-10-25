@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { fn, literal, Op } from 'sequelize';
+import { format } from '@formkit/tempo';
 import { Budget, Transaction } from '../database/models';
 import generateDateRange from '../lib/utils/generateDateRange';
 import generateCronExpression from '../lib/cron_manager/generateCronExpression';
@@ -11,6 +12,7 @@ import { CreateBudgetRequestBody, JobTypes, TypedRequest } from '../lib/types';
 import { generateLinksMetadata, sanitizeObject } from '../lib/utils';
 import generateNextExecutionDate from '../lib/cron_manager/generateNexExecutionDate';
 import getDateTimeDifference from '../lib/utils/time/getDateTimeDifference';
+import extractBudgetBalance from '../lib/jobs/extractBudgetBalance';
 
 // TODO: Sanitize returned objects to not return userId
 
@@ -58,8 +60,10 @@ async function createBudget(
         weekDay,
       });
 
+      // When recurring the end date for each budget is calculated automatically, not by the user
       const nextExecutionDate = generateNextExecutionDate(cronExpression, { tz: timezone });
 
+      // Budget ends when a new one of the same task is going to be created
       endDateObj = nextExecutionDate;
 
       const intervalMilliseconds = getDateTimeDifference(startDateObj, nextExecutionDate);
@@ -120,7 +124,10 @@ async function getAllBudgets(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
-  const { offset, limit, month } = req.query;
+  const {
+    offset, limit, month, balance,
+  } = req.query;
+  const userId = req.user?.id || '' as string;
 
   // Convert to string to ensure types
   let strOffset;
@@ -131,14 +138,14 @@ async function getAllBudgets(
 
   if (limit) strLimit = String(limit);
 
-  if (month) strMonth = String(month);
+  if (month) strMonth = String(month || format(new Date(), 'YYYY-MM'));
 
-  const intOffset = parseInt(strOffset || '', 10);
+  const intOffset = parseInt(strOffset || '0', 10);
   const intLimit = parseInt(strLimit || '', 10);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
-    userId: req.user?.id,
+    userId,
   };
 
   if (month) {
@@ -158,7 +165,7 @@ async function getAllBudgets(
     const { count, rows } = await Budget.findAndCountAll({
       where: whereClause,
       offset: intOffset,
-      limit: intLimit,
+      limit: intLimit || undefined,
       attributes: { exclude: ['cronTaskId'] },
       order: [['createdAt', 'DESC']],
     });
@@ -172,8 +179,23 @@ async function getAllBudgets(
       count, rows, offset: intOffset, limit: intLimit,
     });
 
+    let budgetsToReturn = rows.map((item) => item.get());
+
+    console.log(balance);
+
+    if (balance) {
+      const budgetsIds = rows.map((budget) => budget.id) as string[];
+
+      const budgetsBalance = await extractBudgetBalance({ userId, budgetId: budgetsIds });
+
+      budgetsToReturn = rows.map((budget) => ({
+        ...budget.get(),
+        balance: budgetsBalance ? budgetsBalance[budget.id] : { totalIncome: 0, totalExpense: 0 },
+      }));
+    }
+
     return res.status(200).json({
-      data: rows,
+      data: budgetsToReturn,
       meta,
       links,
     });
@@ -248,8 +270,15 @@ async function getBudgetBalance(
   res: Response,
 ): Promise<Response | undefined> {
   const userId = req.user?.id;
+  const { from, to } = req.query;
 
-  const [start, end] = generateDateRange({});
+  let strFrom;
+  let strTo;
+
+  if (from) strFrom = String(from);
+  if (to) strTo = String(to);
+
+  const [start, end] = generateDateRange({ fromDate: strFrom, toDate: strTo });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {

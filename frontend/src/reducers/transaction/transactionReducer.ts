@@ -8,6 +8,7 @@ const initialRecentTransactionsState: Transaction[] = [];
 
 const initialTransactionState: TransactionState = {
   recentTransactions: initialRecentTransactionsState,
+  balance: {},
   paginatedTransactions:
     initialPaginatedState as PaginatedApiResponse<Transaction[]>,
   loading: false,
@@ -61,6 +62,11 @@ function transactionReducer(
         paginatedTransactions: updatedPaginatedTransactions,
       });
     }
+    case TransactionActionType.GET_BALANCE:
+      return ({
+        ...state,
+        balance: action.payload,
+      });
     case TransactionActionType.SET_LOADING:
       return ({
         ...state,

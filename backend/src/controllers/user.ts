@@ -143,8 +143,9 @@ const logOut = async (req: Request, res: Response) => {
     if (user?.role === 'guest') {
       const t = await sequelize.transaction();
 
+      // TODO: Handle guest cron task and job deletion
       try {
-        await Transaction.destroy({
+        await Budget.destroy({
           where: {
             userId: user.id,
           },
@@ -158,17 +159,18 @@ const logOut = async (req: Request, res: Response) => {
           transaction: t,
         });
 
-        await Budget.destroy({
+        await Transaction.destroy({
           where: {
             userId: user.id,
           },
           transaction: t,
         });
 
-        await user.destroy();
+        await user.destroy({
+          transaction: t,
+        });
 
         await t.commit();
-
         res.clearCookie('jwt', { httpOnly: true });
         return res.status(200).json({ data: { message: 'Logged out successfully' } });
       } catch (error) {

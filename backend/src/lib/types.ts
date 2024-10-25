@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { TransactionType } from '../database/models/transaction';
 
 export interface BalanceResponse {
   year: string
@@ -82,6 +83,7 @@ export interface CreateBudgetParams {
 
 export enum JobTypes {
   CREATE_BUDGET = 'create-budget',
+  CREATE_TRANSACTION = 'create-transaction',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,4 +97,25 @@ export interface CreateBudgetRequestBody {
   startDate: string
   endDate: string
   recurrence: Recurrence
+}
+
+export interface CreateTransactionRequestBody {
+  description: string
+  amount: number
+  date: string
+  type: TransactionType
+  budgetId?: string
+  categoryId: string
+  recurrence: Recurrence
+}
+
+export interface CreateTransactionParams {
+  description: string
+  amount: number
+  date: Date
+  type: TransactionType
+  budgetId?: string
+  categoryId: string
+  cronTaskId: string | null
+  userId: string
 }

@@ -30,6 +30,8 @@ const DAY_NAMES_SPANISH = ['domingo', 'lunes', 'martes', 'miércoles',
 
 const ENGLISH_ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth'] as const;
 
+const SPANISH_MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
 export {
   dateStringRegex,
   initialPaginatedState,
@@ -39,4 +41,5 @@ export {
   WEEKDAYS,
   DAY_NAMES_SPANISH,
   ENGLISH_ORDINALS,
+  SPANISH_MONTHS,
 };

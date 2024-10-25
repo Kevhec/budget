@@ -1,5 +1,6 @@
 import { Ordinals, WeekDays } from './common';
 import { OccurrenceType } from './recurrence';
+import type { TransactionType } from './transaction';
 
 export interface ApiResponse<T> {
   status: string
@@ -57,5 +58,15 @@ export interface ApiBudget {
   totalAmount: number
   startDate: Date
   endDate?: Date
+  recurrence?: ApiRecurrence
+}
+
+export interface ApiTransaction {
+  description: string
+  amount: number
+  date: string
+  type: TransactionType
+  budgetId?: string
+  categoryId?: string
   recurrence?: ApiRecurrence
 }

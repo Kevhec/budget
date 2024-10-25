@@ -5,11 +5,19 @@ import {
 import { Category, Transaction } from '../database/models';
 import generateLinksMetadata from '../lib/utils/generateLinksMetadata';
 import generateDateRange from '../lib/utils/generateDateRange';
-import { BalanceData, BalanceResponse, MonthData } from '../lib/types';
+import {
+  BalanceData, BalanceResponse, CreateTransactionRequestBody, JobTypes, MonthData, TypedRequest,
+} from '../lib/types';
+import generateCronExpression from '../lib/cron_manager/generateCronExpression';
+import CronTask from '../database/models/cronTask';
+import CronJob from '../database/models/cronJobs';
+import { Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
+import { sanitizeObject } from '../lib/utils';
+import { createTransaction as createTransactionJob } from '../lib/jobs';
 
 // Create
 async function createTransaction(
-  req: Request,
+  req: TypedRequest<CreateTransactionRequestBody>,
   res: Response,
 ): Promise<Response | undefined> {
   const {
@@ -19,41 +27,89 @@ async function createTransaction(
     type,
     categoryId,
     budgetId,
-    /*     endDate,
-    frequency, */
+    recurrence,
   } = req.body;
 
   try {
-    const generalCategory = await Category.findOne({
-      where: {
-        name: 'General',
-        isDefault: true,
-      },
-    });
+    let taskId: null | string = null;
 
-    const newTransaction = await Transaction.create({
+    const dateObject = new Date(date);
+
+    if (recurrence) {
+      const {
+        concurrence, time, weekDay, endDate,
+      } = recurrence;
+      const { minute, hour, timezone } = time;
+      const { steps, type: concurrenceType } = concurrence;
+
+      const recurrenceEndDate = endDate ? new Date(endDate) : undefined;
+
+      const cronExpression = generateCronExpression({
+        concurrence: {
+          type: concurrenceType,
+          steps,
+        },
+        startDate: dateObject,
+        time: {
+          minute,
+          hour,
+          timezone,
+        },
+        weekDay,
+      });
+
+      const newTask = await CronTask.create({
+        cronExpression,
+        endDate: recurrenceEndDate || null,
+        timezone,
+      });
+
+      const job = await CronJob.create({
+        jobName: JobTypes.CREATE_TRANSACTION,
+        jobArgs: {
+          description,
+          amount,
+          date,
+          type,
+          categoryId,
+          budgetId: budgetId || '',
+          userId: req.user?.id || '',
+          cronTaskId: newTask.id,
+        },
+        cronTaskId: newTask.id,
+      });
+
+      const typedJob = job as unknown as Job;
+
+      taskId = newTask.id;
+
+      scheduleCronTask({
+        cronExpression,
+        endDate: recurrenceEndDate,
+        timezone,
+        taskId,
+        jobs: [typedJob],
+      });
+    }
+
+    const newTransaction = await createTransactionJob({
       description,
       amount,
-      date,
+      date: dateObject,
       type,
-      categoryId: categoryId || generalCategory?.id,
       budgetId,
-      /*       endDate,
-      frequency, */
+      categoryId,
+      cronTaskId: taskId,
       userId: req.user?.id || '',
     });
 
-    const transactionWithCategory = await Transaction.findOne({
-      where: { id: newTransaction.id },
-      attributes: { exclude: ['categoryId'] },
-      include: [{
-        model: Category,
-        attributes: ['id', 'name', 'color'],
-        as: 'category',
-      }],
-    });
+    if (!newTransaction) {
+      return res.status(500).json('There was an error creating the new transaction');
+    }
 
-    return res.status(201).json({ data: { transaction: transactionWithCategory } });
+    const sanitizedTransaction = sanitizeObject(newTransaction.toJSON(), ['cronTaskId']);
+
+    return res.status(201).json({ data: { transaction: sanitizedTransaction } });
   } catch (error: unknown) {
     if (error instanceof DatabaseError) {
       const sequelizeError = error as { parent?: { code?: string, detail?: string } };
@@ -127,6 +183,8 @@ async function getAllTransactions(
       }],
       order: [['createdAt', 'DESC']],
     });
+
+    console.log({ rows: rows.map((row) => row.get()) });
 
     if (!rows.length) {
       const noIdMessage = 'No expenses found';
@@ -210,8 +268,8 @@ async function getBalance(
     const balanceResponse = await Transaction.findAll({
       where: whereClause,
       attributes: [
-        [fn('EXTRACT', literal('YEAR from "createdAt"')), 'year'],
-        [fn('EXTRACT', literal('MONTH from "createdAt"')), 'month'],
+        [fn('EXTRACT', literal('YEAR from "date"')), 'year'],
+        [fn('EXTRACT', literal('MONTH from "date"')), 'month'],
         [fn('SUM', literal('CASE WHEN "type" = \'income\' THEN "amount" ELSE 0 END')), 'totalIncome'],
         [fn('SUM', literal('CASE WHEN "type" = \'expense\' THEN "amount" ELSE 0 END')), 'totalExpense'],
         [fn('SUM', literal(
@@ -222,12 +280,12 @@ async function getBalance(
         )), 'balance'],
       ],
       group: [
-        fn('EXTRACT', literal('YEAR from "createdAt"')),
-        fn('EXTRACT', literal('MONTH from "createdAt"')),
+        fn('EXTRACT', literal('YEAR from "date"')),
+        fn('EXTRACT', literal('MONTH from "date"')),
       ],
       order: [
-        [fn('EXTRACT', literal('YEAR from "createdAt"')), 'ASC'],
-        [fn('EXTRACT', literal('MONTH from "createdAt"')), 'ASC'],
+        [fn('EXTRACT', literal('YEAR from "date"')), 'ASC'],
+        [fn('EXTRACT', literal('MONTH from "date"')), 'ASC'],
       ],
     });
 

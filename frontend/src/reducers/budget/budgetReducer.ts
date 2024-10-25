@@ -9,6 +9,7 @@ const initialBudgetState = {
   recentBudgets: initialRecentBudgetsState,
   paginatedBudgets:
     initialPaginatedState as PaginatedApiResponse<Budget[]>,
+  budgets: [] as Budget[],
   loading: false,
 };
 
@@ -20,6 +21,12 @@ function budgetReducer(state: BudgetState, action: BudgetAction) {
         recentBudgets: action.payload,
       });
     case BudgetActionType.SYNC_PAGINATED:
+      return ({
+        ...state,
+        paginatedBudgets: action.payload,
+        loading: false,
+      });
+    case BudgetActionType.SET_BUDGETS:
       return ({
         ...state,
         budgets: action.payload,

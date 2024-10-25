@@ -8,6 +8,8 @@ export interface User {
   role: string | null
   confirmed: boolean
   email?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface AuthLoginGuest {

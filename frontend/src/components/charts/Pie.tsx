@@ -18,7 +18,7 @@ export default function ChartPie({
   return (
     <ChartContainer
       config={chartConfig}
-      className="mx-auto aspect-square max-h-[250px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
+      className="mx-auto aspect-square max-h-[250px] md:max-g-[300px] xl:max-h-[350px] pb-0 [&_.recharts-pie-label-text]:fill-foreground"
     >
       <PieChart accessibilityLayer>
         <ChartTooltip

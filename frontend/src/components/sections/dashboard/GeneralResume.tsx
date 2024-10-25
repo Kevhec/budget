@@ -29,7 +29,7 @@ export default function GeneralResume() {
   }, [recentTransactions]);
 
   return (
-    <section className="mb-2">
+    <section className="mb-2 md:mb-0 md:col-span-full xl:col-span-10 md:flex-1">
       <Tabs defaultValue="balance" className="w-full md:hidden">
         <TabsList className="w-full flex gap-1">
           <TabsTrigger className="flex-1" value="balance">Saldo Total</TabsTrigger>
@@ -46,8 +46,8 @@ export default function GeneralResume() {
           <GeneralResumeCard variant="expense" title="Gastos" value={balance?.totalExpense || 0} className="col-span-1" />
         </TabsContent>
       </Tabs>
-      <div className="hidden md:grid md:grid-cols-2 md:gap-2">
-        <GeneralResumeCard variant="default" title="Saldo total" value={balance?.balance || 0} className="col-span-2" />
+      <div className="hidden md:grid md:grid-cols-3 xl:grid xl:grid-cols-3 gap-4">
+        <GeneralResumeCard variant="default" title="Saldo total" value={balance?.balance || 0} className="col-span-1" />
         <GeneralResumeCard variant="income" title="Ingresos" value={balance?.totalIncome || 0} className="col-span-1" />
         <GeneralResumeCard variant="expense" title="Gastos" value={balance?.totalExpense || 0} className="col-span-1" />
       </div>

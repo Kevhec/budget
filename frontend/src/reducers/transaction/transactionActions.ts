@@ -1,11 +1,16 @@
 import { Dispatch } from 'react';
 import { getPaginatedTransactions } from '@/lib/transaction';
 import {
+  ApiTransaction,
   CreateTransactionParams,
   PaginatedParams, Transaction, TransactionAction, TransactionActionType,
   TransactionState,
+  TransactionType,
 } from '@/types';
 import axiosClient from '@/config/axios';
+import getBalance from '@/lib/balance/getBalance';
+import formatConcurrence from '@/lib/formatConcurrence';
+import { extractConcurrenceData } from '@/lib/utils';
 import { initialRecentTransactionsState, initialTransactionState } from './transactionReducer';
 
 async function syncRecentTransactions(dispatch: Dispatch<TransactionAction>) {
@@ -18,7 +23,6 @@ async function syncRecentTransactions(dispatch: Dispatch<TransactionAction>) {
     const response = await getPaginatedTransactions({
       page: 1,
       limit: 4,
-      date: new Date(),
     });
 
     const recentTransactions = response.data;
@@ -84,9 +88,22 @@ async function createTransaction(
   const currentPage = currentPaginated.meta?.currentPage;
   const currentLimit = currentPaginated.meta?.itemsPerPage;
 
+  const concurrencyFormData = extractConcurrenceData(transaction);
+  const parsedConcurrency = formatConcurrence(concurrencyFormData, transaction.startDate);
+
+  const formattedTransaction: ApiTransaction = {
+    description: transaction.description,
+    amount: transaction.amount,
+    date: transaction.startDate.toString(),
+    type: transaction.type as TransactionType,
+    budgetId: transaction.budgetId,
+    categoryId: transaction.categoryId,
+    recurrence: parsedConcurrency || undefined,
+  };
+
   try {
     const { data } = await axiosClient.post('/transaction', {
-      ...transaction,
+      ...formattedTransaction,
     });
 
     const newTransaction: Transaction = data.data.transaction;
@@ -116,8 +133,39 @@ async function createTransaction(
   }
 }
 
+async function getHistoricalBalance(
+  dispatch: Dispatch<TransactionAction>,
+  from?: string,
+  to?: string,
+) {
+  dispatch({
+    type: TransactionActionType.SET_LOADING,
+    payload: true,
+  });
+
+  try {
+    const balance = await getBalance(from, to);
+
+    dispatch({
+      type: TransactionActionType.GET_BALANCE,
+      payload: balance || {},
+    });
+  } catch (error) {
+    dispatch({
+      type: TransactionActionType.GET_BALANCE,
+      payload: {},
+    });
+  } finally {
+    dispatch({
+      type: TransactionActionType.SET_LOADING,
+      payload: false,
+    });
+  }
+}
+
 export {
   syncRecentTransactions,
   syncPaginatedTransactions,
   createTransaction,
+  getHistoricalBalance,
 };

@@ -13,6 +13,12 @@ const concurrenceSchema = z.object({
     .int()
     .positive()
     .optional(),
+  concurrenceEndDate: z
+    .date()
+    .optional(),
+  concurrenceWithEndDate: z
+    .enum(['true', 'false'])
+    .optional(),
   concurrenceWeekDay: z
     .enum(WEEKDAYS)
     .optional(),

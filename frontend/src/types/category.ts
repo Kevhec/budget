@@ -52,4 +52,5 @@ export type CategoryReducer = Reducer<CategoryState, CategoryAction>;
 
 export interface CategoriesContextType {
   state: CategoryState
+  updateBalance: () => void
 }

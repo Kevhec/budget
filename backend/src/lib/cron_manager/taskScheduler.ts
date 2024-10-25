@@ -1,7 +1,12 @@
 import cron, { ScheduledTask } from 'node-cron';
 import CronTask from '@/src/database/models/cronTask';
-import { JobParams, JobTypes } from '../types';
-import { createBudget as createBudgetJob } from '../jobs';
+import {
+  CreateBudgetParams, CreateTransactionParams, JobParams, JobTypes,
+} from '../types';
+import {
+  createBudget as createBudgetJob,
+  createTransaction as createTransactionJob,
+} from '../jobs';
 
 export interface Job {
   jobName: JobTypes
@@ -20,7 +25,8 @@ const activeTasks = new Map<string, ScheduledTask>();
 
 const jobsMapping = {
   'create-budget': createBudgetJob,
-};
+  'create-transaction': createTransactionJob,
+} as const;
 
 async function scheduleCronTask({
   cronExpression,
@@ -53,15 +59,22 @@ async function scheduleCronTask({
           await Promise.all(
             jobs.map(async (job) => {
               const { jobArgs, jobName } = job;
-              const jobFunction = jobsMapping[jobName];
 
-              if (jobFunction) {
-                await jobFunction({
-                  ...jobArgs,
-                  startDate: now,
-                });
-              } else {
-                console.error(`No job function found for name: ${jobName}`);
+              switch (jobName) {
+                case JobTypes.CREATE_BUDGET:
+                  await createBudgetJob({
+                    ...jobArgs,
+                    startDate: now,
+                  } as CreateBudgetParams);
+                  break;
+                case JobTypes.CREATE_TRANSACTION:
+                  await createTransactionJob({
+                    ...jobArgs,
+                    date: now,
+                  } as CreateTransactionParams);
+                  break;
+                default:
+                  console.error(`No job function found for name: ${jobName}`);
               }
             }),
           );

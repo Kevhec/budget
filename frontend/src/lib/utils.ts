@@ -1,7 +1,8 @@
 /* eslint-disable import/prefer-default-export */
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { DAY_NAMES_SPANISH } from './constants';
+import { ConcurrenceFormData, CreationParamsUnion } from '@/types';
+import { DAY_NAMES_SPANISH, SPANISH_MONTHS } from './constants';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -29,14 +30,38 @@ export function getDayOrdinalNumber(dayNumber: number) {
 export function nthDay(date: Date = new Date(), withMonth?: boolean) {
   const nth = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto'];
 
-  const monthNames = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-
   const dayNumber = date.getDate();
 
   return `${nth[Math.ceil(dayNumber / 7) - 1]} ${
-    DAY_NAMES_SPANISH[date.getDay()]} ${withMonth ? `de ${monthNames[date.getMonth()]}` : ''}`.trim();
+    DAY_NAMES_SPANISH[date.getDay()]} ${withMonth ? `de ${SPANISH_MONTHS[date.getMonth()]}` : ''}`.trim();
 }
 
 export function getTimezone() {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+export function getFirstDate(dates: Date[]) {
+  let firstDate: Date = dates[0] || new Date();
+
+  dates.forEach((date) => {
+    if (date <= firstDate || !firstDate) {
+      firstDate = date;
+    }
+  });
+
+  return firstDate;
+}
+
+export function hasOneYearPassed(fromDate: Date) {
+  const now = new Date();
+  const nextYear = new Date(fromDate);
+  nextYear.setFullYear(fromDate.getFullYear() + 1);
+
+  return now >= nextYear;
+}
+
+export function extractConcurrenceData(data: CreationParamsUnion) {
+  return Object.fromEntries(
+    Object.entries(data).filter(([key]) => key.startsWith('concurrence')),
+  ) as unknown as ConcurrenceFormData;
 }

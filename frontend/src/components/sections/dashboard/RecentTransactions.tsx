@@ -32,7 +32,7 @@ export default function RecentTransactions() {
   }, [recentTransactions]);
 
   return (
-    <section className="rounded-md bg-white p-4">
+    <section className="rounded-md mb-2 md:mb-0 bg-white p-4 md:flex-1 md:col-span-10 md:row-start-2">
       <div className="flex justify-between items-center pb-4">
         <Typography variant="h2">
           Últimas transacciones

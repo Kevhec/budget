@@ -20,6 +20,7 @@ import {
   Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger,
 } from './ui/sheet';
 import Navigation from './Navigation';
+/* import { SidebarTrigger } from './ui/sidebar'; */
 
 export default function Header() {
   const { state, logout } = useAuth();
@@ -67,8 +68,9 @@ export default function Header() {
   return (
     <header className="px-4 py-4 gap-x-2 bg-white flex justify-between items-center">
       <Sheet open={open} onOpenChange={setOpen}>
+        {/* <SidebarTrigger /> */}
         <SheetTrigger asChild>
-          <Button variant="outline" className="md:hidden">
+          <Button variant="outline" className="lg:hidden">
             <Menu className="h-5 w-5" />
             <span className="sr-only">Abrir menú</span>
           </Button>

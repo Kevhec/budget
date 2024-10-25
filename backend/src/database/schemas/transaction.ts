@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { TransactionType } from '../models/transaction';
+import { recurrenceSchema } from './general';
 
 const dateRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
 
@@ -8,8 +9,9 @@ const createTransactionSchema = Joi.object({
   amount: Joi.number().precision(2).positive().required(),
   date: Joi.date(),
   type: Joi.string().valid(...Object.values(TransactionType)).required(),
-  budgetId: Joi.string().guid(),
+  budgetId: Joi.string().guid().optional(),
   categoryId: Joi.string().guid(),
+  recurrence: recurrenceSchema.optional(),
 });
 
 const updateTransactionSchema = Joi.object({
@@ -20,6 +22,7 @@ const updateTransactionSchema = Joi.object({
   date: Joi.date(),
   budgetId: Joi.string().guid(),
   categoryId: Joi.string().guid(),
+  recurrence: recurrenceSchema.optional(),
 }).min(2);
 
 const getBalanceSchema = Joi.object({
