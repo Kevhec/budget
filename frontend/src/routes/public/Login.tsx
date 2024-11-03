@@ -107,7 +107,7 @@ export default function Login() {
         <div className="mt-4 text-center text-sm">
           ¿No tienes una cuenta?
           {' '}
-          <NavLink to="#" className="underline">
+          <NavLink to="/register" className="underline">
             Registrarse
           </NavLink>
         </div>

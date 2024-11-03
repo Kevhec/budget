@@ -8,8 +8,13 @@ const initialAuthState: AuthState = {
     username: null,
     role: null,
     confirmed: false,
+    createdAt: '',
+    updatedAt: '',
   },
   loading: false,
+  finishedAsyncAction: false,
+  message: '',
+  error: '',
 };
 
 function authReducer(
@@ -31,6 +36,21 @@ function authReducer(
       });
     case AuthActionType.LOGOUT:
       return (initialAuthState);
+    case AuthActionType.SET_FINISHED_ASYNC_ACTION:
+      return ({
+        ...state,
+        finishedAsyncAction: action.payload,
+      });
+    case AuthActionType.SET_ERROR:
+      return ({
+        ...state,
+        error: action.payload,
+      });
+    case AuthActionType.SET_MESSAGE:
+      return ({
+        ...state,
+        message: action.payload,
+      });
     case AuthActionType.SET_LOADING:
       return ({
         ...state,

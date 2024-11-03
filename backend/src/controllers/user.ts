@@ -13,6 +13,7 @@ import setCookie from '../lib/utils/setCookie';
 import SequelizeConnection from '../database/config/SequelizeConnection';
 
 const sequelize = SequelizeConnection.getInstance();
+const isProduction = process.env.NODE_ENV === 'production';
 
 const signUp = async (req: Request, res: Response) => {
   const { error, value } = userSchema.validate(req.body);
@@ -20,6 +21,8 @@ const signUp = async (req: Request, res: Response) => {
   if (error) {
     return res.status(400).json(error.details[0].message);
   }
+
+  // TODO: Delete accounts that are not verified on a week, provide a warning message;
 
   try {
     // Generate salt to properly hash the password
@@ -41,7 +44,7 @@ const signUp = async (req: Request, res: Response) => {
     }
 
     // Testing email delivered@resend.dev
-    await verificationEmail('delivered@resend.dev', newUser.token || '');
+    await verificationEmail(isProduction ? newUser.email : 'delivered@resend.dev', newUser.token || '');
 
     const plainUserObj = newUser.toJSON();
 
@@ -54,11 +57,11 @@ const signUp = async (req: Request, res: Response) => {
     if (e instanceof Error) {
       console.error(e.message);
     }
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({ data: 'Internal server error' });
   }
 };
 
-const confirm = async (req: Request, res: Response) => {
+const verifyToken = async (req: Request, res: Response) => {
   const { token } = req.params;
 
   try {
@@ -75,7 +78,7 @@ const confirm = async (req: Request, res: Response) => {
       confirmed: true,
     });
 
-    return res.status(200).json({ data: 'User confirmed successfully.' });
+    return res.status(200).json({ message: 'User confirmed successfully.' });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error(error.message);
@@ -251,7 +254,7 @@ const getInfo = async (req: Request, res: Response) => {
 
 export {
   signUp,
-  confirm,
+  verifyToken,
   logIn,
   logOut,
   loginAsGuest,

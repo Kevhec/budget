@@ -1,6 +1,7 @@
 import { Dispatch } from 'react';
 import {
   AuthAction, AuthActionType, AuthLoginGuest, AuthLoginUser, AuthResponse,
+  MessageResponse,
 } from '@/types';
 import axiosClient from '@/config/axios';
 
@@ -66,9 +67,40 @@ async function checkAuth(dispatch: Dispatch<AuthAction>) {
       payload: data.data,
     });
   } catch (error: any) {
+    // TODO: Handle errors as an array with identifiers
     throw new Error(error.response.data.message);
   } finally {
     dispatch({ type: AuthActionType.SET_LOADING, payload: false });
+  }
+}
+
+async function verifyToken(dispatch: Dispatch<AuthAction>, token: string) {
+  dispatch({ type: AuthActionType.SET_LOADING, payload: true });
+  dispatch({ type: AuthActionType.SET_FINISHED_ASYNC_ACTION, payload: false });
+  dispatch({
+    type: AuthActionType.SET_MESSAGE,
+    payload: '',
+  });
+  dispatch({
+    type: AuthActionType.SET_ERROR,
+    payload: '',
+  });
+
+  try {
+    const { data } = await axiosClient.post<MessageResponse>(`/user/verify/${token || ''}`);
+
+    dispatch({
+      type: AuthActionType.SET_MESSAGE,
+      payload: data.data.message,
+    });
+  } catch (error: any) {
+    dispatch({
+      type: AuthActionType.SET_ERROR,
+      payload: error.response.data.error,
+    });
+  } finally {
+    dispatch({ type: AuthActionType.SET_LOADING, payload: false });
+    dispatch({ type: AuthActionType.SET_FINISHED_ASYNC_ACTION, payload: true });
   }
 }
 
@@ -77,4 +109,5 @@ export {
   loginGuest,
   logout,
   checkAuth,
+  verifyToken,
 };

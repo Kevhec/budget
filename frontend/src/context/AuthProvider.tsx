@@ -1,5 +1,5 @@
 import {
-  createContext, useEffect, useMemo, useReducer,
+  createContext, useCallback, useEffect, useMemo, useReducer,
 } from 'react';
 import {
   AuthContextType,
@@ -13,6 +13,7 @@ import {
   logout as logoutAction,
   checkAuth as checkAuthAction,
   loginGuest as loginGuestAction,
+  verifyToken as verifyTokenAction,
 } from '@/reducers/auth/authActions';
 
 interface Props {
@@ -40,12 +41,22 @@ export function AuthProvider({ children }: Props) {
     loginGuestAction(dispatch, credentials);
   };
 
+  const verifyToken = useCallback((token: string) => {
+    verifyTokenAction(dispatch, token);
+  }, []);
+
+  const signUp = useCallback(() => {
+
+  }, []);
+
   const contextValue = useMemo<AuthContextType>(() => ({
     state,
     loginGuest,
     login,
+    signUp,
     logout,
-  }), [state]);
+    verifyToken,
+  }), [state, verifyToken, signUp]);
 
   return (
     <AuthContext.Provider value={contextValue}>

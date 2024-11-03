@@ -30,6 +30,7 @@ module.exports = {
         blueishGray: 'hsl(var(--blueishGray))',
         secondaryGreen: 'hsl(var(--secondaryGreen))',
         secondaryYellow: 'hsl(var(--secondaryYellow))',
+        softBlack: '#1B1B1B',
         danger: 'hsl(var(--danger))',
         caution: 'hsl(var(--caution))',
         safe: 'hsl(var(--safe))',

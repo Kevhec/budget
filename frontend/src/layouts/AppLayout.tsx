@@ -38,7 +38,7 @@ export default function AppLayout() {
               </Popover>
             </div>
             <aside className="hidden lg:block px-6 pt-5 pb-4 bg-[#343A40] text-white min-w-60 font-openSans">
-              <p className="text-3xl font-semibold mb-32 font-openSans">Budget</p>
+              <p className="text-3xl font-semibold mb-32 font-openSans">Budmin</p>
               <Navigation />
             </aside>
             <div className="flex flex-col w-full">
@@ -47,6 +47,11 @@ export default function AppLayout() {
                 <main className="px-4 py-2 md:py-4 flex flex-col bg-softGray md:h-full">
                   <Outlet />
                 </main>
+                <footer className="py-6 bg-[#343A40] text-white text-center">
+                  Ahorrify por
+                  {' '}
+                  <a href="https://www.linkedin.com/in/kevhec/" target="_blank" rel="noreferrer" className="underline underline-offset-4">KevHec</a>
+                </footer>
               </ScrollArea>
             </div>
           </div>

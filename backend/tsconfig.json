@@ -8,6 +8,7 @@
       "@lib/*": ["src/lib/*"],
       "@database/*": ["src/database/*"]
     },
+    "jsx": "react",
     "allowJs": true,
     "noEmit": false,
     "outDir": "./dist",
@@ -20,7 +21,7 @@
     "src/**/*.tsx",
     "src/**/*.js",
     "src/database/config/config.js"
-  ],
+, "src/mails/VerifyAccount.jsx"  ],
   "ts-node": {
     "require": ["tsconfig-paths/register"]
   }

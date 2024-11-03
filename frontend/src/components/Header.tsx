@@ -77,8 +77,8 @@ export default function Header() {
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs font-openSans bg-[#343A40] text-white border-none">
           <SheetTitle className="sr-only">Menú de la aplicación</SheetTitle>
-          <SheetDescription className="sr-only">Navega a través de budget</SheetDescription>
-          <p className="text-3xl font-semibold mb-32 font-openSans">Budget</p>
+          <SheetDescription className="sr-only">Navega a través de Ahorrify</SheetDescription>
+          <p className="text-3xl font-semibold mb-32 font-openSans">Ahorrify</p>
           <Navigation />
         </SheetContent>
       </Sheet>

@@ -57,7 +57,7 @@ export default function RecentBudgets() {
           Ver más
         </NavLink>
       </div>
-      <div className="relative flex flex-col gap-2 md:grow">
+      <div className="relative flex flex-col gap-2 md:grow pb-2">
         {budgetsWithPlaceholder.map((budget, i) => {
           const {
             name, startDate, endDate, totalAmount, hidden, balance,

@@ -39,6 +39,11 @@ module.exports = {
       },
     },
   },
+  ignorePatterns: [
+    'dist',
+    '.eslintrc.cjs',
+    '**/transactional/**'
+  ],
   overrides: [
     {
       files: ['./backend/**/*'],

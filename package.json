@@ -5,10 +5,14 @@
   "main": "index.js",
   "scripts": {
     "dev": "pnpm --filter ** dev",
-    "dev:backend": "pnpm --filter \"backend\" dev",
+    "dev:backend": "dotenvx run -f ./transactional/.env ./backend/.env.development -- pnpm --filter \"backend\" dev",
     "dev:frontend": "pnpm --filter \"frontend\" dev",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+  },
+  "dependencies": {
+    "@budmin/transactional": "workspace:*",
+    "@dotenvx/dotenvx": "^1.14.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.8.0",

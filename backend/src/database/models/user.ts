@@ -16,6 +16,8 @@ export default class User
 
   declare password: string;
 
+  declare birthDate: Date;
+
   declare role: string;
 
   declare confirmed: boolean;
@@ -34,6 +36,10 @@ User.init({
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: 'Invitado',
+  },
+  birthDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
   },
   email: {
     type: DataTypes.STRING,

@@ -10,9 +10,10 @@ interface Props {
   titleLeft?: boolean
   titleClassName?: string
   containerClassName?: string
+  headerRightElement?: React.ReactNode
   headerClassName?: string
   contentClassName?: string
-  month?: string
+  subtitle?: string | number | React.ReactNode
   hidden?: boolean
 }
 
@@ -22,9 +23,10 @@ export default function ChartCard({
   titleLeft,
   titleClassName,
   headerClassName,
+  headerRightElement,
   containerClassName,
   contentClassName,
-  month,
+  subtitle,
   hidden,
   children,
 }: Props) {
@@ -37,22 +39,29 @@ export default function ChartCard({
     'w-full': titleLeft,
   }, 'font-openSans text-xl', titleClassName);
 
-  const headerClasses = cn('items-center p-4', headerClassName);
+  const headerClasses = cn('flex-row items-center p-4 justify-between', headerClassName);
 
   const contentClasses = cn('flex-1 pb-0', contentClassName);
 
   return (
     <Card className={containerClasses}>
       <CardHeader className={headerClasses}>
-        <CardTitle className={titleClasses}>
-          {titleIcon}
-          {title}
-        </CardTitle>
-        {
-          month && (
-            <CardDescription className="font-inter capitalize">{month}</CardDescription>
-          )
-        }
+        <div className="grow">
+          <CardTitle className={titleClasses}>
+            {titleIcon}
+            {title}
+          </CardTitle>
+          {
+            subtitle && (
+              (typeof subtitle === 'string' || typeof subtitle === 'number') ? (
+                <CardDescription className="font-inter capitalize text-left w-full !mt-0">{subtitle}</CardDescription>
+              ) : (
+                subtitle
+              )
+            )
+          }
+        </div>
+        {headerRightElement}
       </CardHeader>
       <CardContent className={contentClasses}>
         {children}

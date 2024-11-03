@@ -10,7 +10,7 @@ export default function ProtectedRoute({ children }: Props) {
   const { state } = useAuth();
   const location = useLocation();
 
-  if (state.user && !state.user?.id) {
+  if (state.user && (!state.user?.id || !state.user.confirmed)) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 

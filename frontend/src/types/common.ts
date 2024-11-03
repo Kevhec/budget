@@ -35,7 +35,12 @@ export enum Ordinals {
 }
 
 export interface LoadingAction<T> {
-  type: T,
+  type: T
+  payload: boolean
+}
+
+export interface FinishedAsyncAction<T> {
+  type: T
   payload: boolean
 }
 

@@ -17,6 +17,18 @@ import { format } from '@formkit/tempo';
 import useTransactions from '@/hooks/useTransactions';
 import { SPANISH_MONTHS } from '@/lib/constants';
 import { formatMoney, suffixNumberFormatter } from '@/lib/formatNumber';
+import Typography from '@/components/Typography';
+import { cn, generateYearsList } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
+import { z } from 'zod';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  Form, FormControl, FormDescription, FormField, FormItem, FormLabel,
+} from '@/components/ui/form';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 
 export const description = 'A linear line chart';
 
@@ -35,6 +47,43 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+const filterTypes = [
+  {
+    id: 'totalBalance',
+    label: 'Balance total',
+    color: 'softBlack',
+  },
+  {
+    id: 'income',
+    label: 'Ingresos',
+    color: 'safe',
+  },
+  {
+    id: 'expense',
+    label: 'Gastos',
+    color: 'danger',
+  },
+] as const;
+
+const chartLines = [
+  {
+    dataKey: 'totalBalance',
+    stroke: '#1B1B1B',
+  },
+  {
+    dataKey: 'income',
+    stroke: 'hsl(var(--safe))',
+  },
+  {
+    dataKey: 'expense',
+    stroke: 'hsl(var(--danger))',
+  },
+];
+
+const FilterSchema = z.object({
+  filterTypes: z.array(z.string()),
+});
+
 export default function MonthlyBalanceGraph() {
   const {
     state: {
@@ -42,19 +91,24 @@ export default function MonthlyBalanceGraph() {
     },
   } = useAuth();
   const { getBalance, state: { balance, recentTransactions } } = useTransactions();
+  const [filterYearsList, setFilterYearsList] = useState<number[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const filterForm = useForm<z.infer<typeof FilterSchema>>({
+    resolver: zodResolver(FilterSchema),
+    defaultValues: {
+      filterTypes: ['totalBalance', 'income', 'expense'],
+    },
+  });
+
+  const filterTypesValues = useWatch({
+    control: filterForm.control,
+    name: 'filterTypes',
+  });
 
   useEffect(() => {
     const getData = async () => {
-      const todayDate = new Date();
-      /* const userCreationDate = new Date(createdAt); */
-      const januaryDate = new Date(todayDate.getFullYear(), 0, 1);
-
-      /* const wasUserCreatedThisYear = userCreationDate >= januaryDate;
-
-      const balanceFromDate = wasUserCreatedThisYear
-        ? userCreationDate
-        : januaryDate; */
+      const januaryDate = new Date(parseInt(selectedYear, 10), 0, 1);
 
       getBalance(
         format(januaryDate, 'YYYY-MM'),
@@ -62,7 +116,15 @@ export default function MonthlyBalanceGraph() {
     };
 
     getData();
-  }, [createdAt, getBalance, recentTransactions]);
+  }, [getBalance, recentTransactions, selectedYear]);
+
+  useEffect(() => {
+    const userCreationDate = new Date(createdAt);
+
+    const yearsSinceCreation = generateYearsList(userCreationDate.getFullYear());
+
+    setFilterYearsList(yearsSinceCreation);
+  }, [createdAt]);
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
@@ -103,10 +165,85 @@ export default function MonthlyBalanceGraph() {
         title="Así va tu dinero"
         titleIcon={<TrendingUp />}
         titleLeft
+        subtitle={(
+          <div className="flex gap-2 items-center">
+            <Typography className="text-foreground">
+              Año
+            </Typography>
+            <Select defaultValue={selectedYear} onValueChange={setSelectedYear}>
+              <SelectTrigger className="w-fit px-2 py-1 h-fit">
+                <SelectValue placeholder={new Date().getFullYear().toString()} />
+              </SelectTrigger>
+              <SelectContent className="max-h-56">
+                {filterYearsList.map((year) => (
+                  <SelectItem key={`filter-years-${year}`} value={year.toString()}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         titleClassName="font-inter text-lg font-medium"
         headerClassName="px-4 py-4 border-b border-b-slate-200"
         contentClassName="px-4 pt-4"
         containerClassName="h-full"
+        headerRightElement={(
+          <Form {...filterForm}>
+            <form onSubmit={(evt) => evt.preventDefault()}>
+              <FormField
+                control={filterForm.control}
+                name="filterTypes"
+                render={() => (
+                  <FormItem>
+                    <FormLabel className="sr-only">Tipo</FormLabel>
+                    <FormDescription className="sr-only">
+                      Selecciona qué datos deseas conocer anualmente, balance total,
+                      gastos o ingresos.
+                    </FormDescription>
+                    <div className="flex flex-col gap-2 xl:flex-row xl:gap-4">
+                      {
+                        filterTypes.map((item) => (
+                          <FormField
+                            key={`filter-type-checkbox-${item.id}`}
+                            control={filterForm.control}
+                            name="filterTypes"
+                            render={({ field }) => (
+                              <FormItem
+                                key={item.id}
+                                className="flex flex-row items-center space-x-1 space-y-0"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(item.id)}
+                                    onCheckedChange={(checked) => (checked
+                                      ? field.onChange([...field.value, item.id])
+                                      : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.id,
+                                        ),
+                                      ))}
+                                    className={cn({
+                                      'data-[state=checked]:bg-softBlack border-softBlack': item.color === 'softBlack',
+                                      'data-[state=checked]:bg-safe border-safe': item.color === 'safe',
+                                      'data-[state=checked]:bg-danger border-danger': item.color === 'danger',
+                                    })}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {item.label}
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        ))
+                      }
+
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </form>
+          </Form>
+        )}
       >
         <ChartContainer config={chartConfig} className="h-full w-full">
           <LineChart
@@ -117,7 +254,7 @@ export default function MonthlyBalanceGraph() {
               right: 12,
             }}
           >
-            <CartesianGrid vertical={false} />
+            <CartesianGrid />
             <XAxis
               dataKey="month"
               tickLine={false}
@@ -137,27 +274,19 @@ export default function MonthlyBalanceGraph() {
               cursor={false}
               content={<ChartTooltipContent customValueFormatter={formatMoney} hideLabel />}
             />
-            <Line
-              dataKey="totalBalance"
-              type="linear"
-              stroke="#1B1B1B"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              dataKey="income"
-              type="linear"
-              stroke="hsl(var(--safe))"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              dataKey="expense"
-              type="linear"
-              stroke="hsl(var(--danger))"
-              strokeWidth={2}
-              dot={false}
-            />
+            {
+              chartLines.map((line) => (
+                <Line
+                  key={`chart-line-${line.dataKey}`}
+                  dataKey={line.dataKey}
+                  type="linear"
+                  stroke={line.stroke}
+                  strokeWidth={2}
+                  dot={false}
+                  hide={!filterTypesValues.find((item) => item === line.dataKey)}
+                />
+              ))
+            }
           </LineChart>
         </ChartContainer>
       </ChartCard>

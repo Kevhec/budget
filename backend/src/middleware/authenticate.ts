@@ -10,7 +10,7 @@ const authenticate: RequestHandler = async (req, res, next) => {
   const sessionCookie = req.cookies.jwt;
 
   if (!sessionCookie) {
-    return res.status(401).json({ message: 'No token provided' });
+    return res.status(401).json('No token provided');
   }
 
   try {

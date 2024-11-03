@@ -65,3 +65,16 @@ export function extractConcurrenceData(data: CreationParamsUnion) {
     Object.entries(data).filter(([key]) => key.startsWith('concurrence')),
   ) as unknown as ConcurrenceFormData;
 }
+
+export function generateYearsList(from: number, to?: number) {
+  const endYear = to || new Date().getFullYear();
+  const yearsList = [];
+  let currentYear = from;
+
+  while (currentYear <= endYear) {
+    yearsList.push(currentYear);
+    currentYear += 1;
+  }
+
+  return yearsList;
+}

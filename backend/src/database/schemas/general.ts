@@ -7,6 +7,10 @@ const getObjectByUUID = Joi.object({
   id: Joi.string().guid().required(),
 });
 
+const getTokenUUID = Joi.object({
+  token: Joi.string().guid().required(),
+});
+
 const recurrenceSchema = Joi.object({
   concurrence: Joi.object({
     type: Joi.string().valid(...Object.values(OccurrenceType)),
@@ -26,6 +30,7 @@ const recurrenceSchema = Joi.object({
 
 export {
   positiveInteger,
+  getTokenUUID,
   getObjectByUUID,
   recurrenceSchema,
 };

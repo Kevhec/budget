@@ -76,7 +76,7 @@ export default function BudgetForm({
     name: ['concurrenceDefault', 'startDate'],
   });
 
-  const containerClasses = cn('flex relative flex-col gap-4', className);
+  const containerClasses = cn('flex relative flex-col gap-6', className);
 
   const handleConcurrenceSelectOpen = useCallback((open: boolean) => {
     if (!isConcurrenceOptionHovered) {
