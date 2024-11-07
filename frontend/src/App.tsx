@@ -13,6 +13,7 @@ import History from './routes/private/History';
 import Budgets from './routes/private/Budgets';
 import VerifyAccount from './routes/public/VerifyAccount';
 import SignUp from './routes/public/SignUp';
+import SuccessSignUp from './routes/public/SuccessSignUp';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/" element={<AuthLayout />}>
               <Route index element={<Login />} />
               <Route path="/register" element={<SignUp />} />
+              <Route path="/register/success" element={<SuccessSignUp />} />
               <Route path="/login/guest" element={<Guest />} />
               <Route path="/verify/:token" element={<VerifyAccount />} />
             </Route>

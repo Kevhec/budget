@@ -7,7 +7,7 @@ const typographyVariants = cva(
     variants: {
       variant: {
         p: 'font-inter text-base',
-        h1: 'font-openSans',
+        h1: 'font-openSans text-2xl md:text-4xl font-bold',
         h2: 'font-openSans text-lg font-semibold',
         h3: 'font-openSans',
         h4: 'font-openSans',

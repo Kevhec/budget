@@ -26,9 +26,10 @@ export interface Transaction {
 }
 
 export interface PaginatedParams {
-  page: number
-  limit: number
+  page?: number
+  limit?: number
   date?: Date
+  presetUrl?: string
 }
 
 export type CreateTransactionParams = z.infer<typeof transactionSchema>;

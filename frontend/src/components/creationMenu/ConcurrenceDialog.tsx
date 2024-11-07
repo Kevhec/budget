@@ -4,6 +4,7 @@ import {
   useWatch,
 } from 'react-hook-form';
 import { cn, nthDay } from '@/lib/utils';
+import { format } from '@formkit/tempo';
 import {
   Dialog,
   DialogClose,
@@ -129,7 +130,11 @@ export default function ConcurrenceDialog<T extends FieldValues>({
   form,
   containerToggler,
 }: Props<T>) {
-  const [period, setPeriod] = useState<Period>('PM');
+  const [period, setPeriod] = useState<Period>(() => {
+    // Remove regular and non-breaking spaces from period string
+    const defaultPeriod = format(new Date(), 'A').replace(/[\s\u00A0.]/g, '');
+    return defaultPeriod as Period;
+  });
   const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
   const [currentSteps, currentType] = useWatch({
     control: form.control,

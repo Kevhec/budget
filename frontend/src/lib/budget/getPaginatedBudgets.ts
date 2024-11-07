@@ -9,7 +9,7 @@ async function getPaginatedBudgets(options: PaginatedParams | undefined) {
     let validLimit: number | string = '';
 
     if (options) {
-      const { date, limit, page } = options;
+      const { date, limit = 1, page = 1 } = options;
 
       validOffset = (page - 1) * limit;
       validDate = date || new Date();

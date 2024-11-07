@@ -1,10 +1,13 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import {
+  Navigate, Outlet, useMatch,
+} from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
 
 export default function AuthLayout() {
   const { state } = useAuth();
+  const isVerifyRoute = useMatch('/verify/:token');
 
-  if (state.user && state.user?.id) {
+  if (state.user && state.user?.id && !isVerifyRoute) {
     return <Navigate to="/app/dashboard" replace />;
   }
 

@@ -25,6 +25,10 @@ export interface PaginatedApiResponse<T> {
   },
 }
 
+export type LinksData = PaginatedApiResponse<any>['links'];
+
+export type MetaData = PaginatedApiResponse<any>['meta'];
+
 export interface ApiError {
   status: string
   error: string

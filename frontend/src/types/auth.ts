@@ -21,6 +21,14 @@ export interface AuthLoginUser {
   password: string
 }
 
+export interface AuthSignUpUser {
+  username: string
+  email: string
+  birthday: Date
+  password: string
+  repeatPassword: string
+}
+
 export type AuthResponse = ApiResponse<User>;
 
 export enum AuthActionType {
@@ -88,7 +96,7 @@ export interface AuthState {
 export interface AuthContextType {
   state: AuthState
   logout: () => void
-  signUp: () => void
+  signUp: (credentials: AuthSignUpUser) => void
   loginGuest: (credentials: AuthLoginGuest) => void
   login: (credentials: AuthLoginUser) => void
   verifyToken: (token: string) => void

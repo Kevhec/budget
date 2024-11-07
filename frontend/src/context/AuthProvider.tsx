@@ -5,6 +5,7 @@ import {
   AuthContextType,
   AuthLoginGuest,
   AuthReducer,
+  AuthSignUpUser,
   type AuthLoginUser,
 } from '@/types';
 import { authReducer, initialAuthState } from '@/reducers/auth/authReducer';
@@ -14,6 +15,7 @@ import {
   checkAuth as checkAuthAction,
   loginGuest as loginGuestAction,
   verifyToken as verifyTokenAction,
+  signUp as signUpAction,
 } from '@/reducers/auth/authActions';
 
 interface Props {
@@ -45,8 +47,8 @@ export function AuthProvider({ children }: Props) {
     verifyTokenAction(dispatch, token);
   }, []);
 
-  const signUp = useCallback(() => {
-
+  const signUp = useCallback((credentials: AuthSignUpUser) => {
+    signUpAction(dispatch, credentials);
   }, []);
 
   const contextValue = useMemo<AuthContextType>(() => ({

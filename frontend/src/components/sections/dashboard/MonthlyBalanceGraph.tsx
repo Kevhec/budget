@@ -172,7 +172,7 @@ export default function MonthlyBalanceGraph() {
             </Typography>
             <Select defaultValue={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className="w-fit px-2 py-1 h-fit">
-                <SelectValue placeholder={new Date().getFullYear().toString()} />
+                <SelectValue placeholder={selectedYear} />
               </SelectTrigger>
               <SelectContent className="max-h-56">
                 {filterYearsList.map((year) => (

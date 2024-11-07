@@ -2,7 +2,9 @@ import { format } from '@formkit/tempo';
 import axiosClient from '@/config/axios';
 import { PaginatedApiResponse, PaginatedParams, Transaction } from '@/types';
 
-async function getPaginatedTransactions({ page, limit, date }: PaginatedParams) {
+async function getPaginatedTransactions({
+  page, limit, date, presetUrl,
+}: PaginatedParams) {
   try {
     let queryYear = '';
     let queryMonth = '';
@@ -13,10 +15,12 @@ async function getPaginatedTransactions({ page, limit, date }: PaginatedParams) 
       queryYear = dateYear;
       queryMonth = dateMonth;
     }
-    const offset = (page - 1) * limit;
+    const offset = (page || 1 - 1) * (limit || 1);
+
+    const requestUrl = presetUrl || `/transaction/?offset=${offset}&limit=${limit}&month=${date ? `${queryYear}-${queryMonth}` : ''}`;
 
     const { data } = await axiosClient
-      .get<PaginatedApiResponse<Transaction[]>>(`/transaction/?offset=${offset}&limit=${limit}&month=${date ? `${queryYear}-${queryMonth}` : ''}`);
+      .get<PaginatedApiResponse<Transaction[]>>(requestUrl);
 
     return data;
   } catch (error: any) {

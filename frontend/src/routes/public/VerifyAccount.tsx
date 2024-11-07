@@ -20,7 +20,7 @@ export default function VerifyAccount() {
     }
 
     return (
-      <Typography variant="span" className="w-32 aspect-square border-2 border-slate-600 rounded-full grid place-content-center text-3xl font-bold mx-auto mt-4 text-slate-600">
+      <Typography variant="span" className="w-32 aspect-square border-2 border-slate-600 rounded-full grid place-content-center text-3xl font-bold mx-auto mt-4 text-slate-600 text-center tabular-nums">
         {seconds}
         {' '}
         <Typography variant="span" className="text-xl font-medium text-center">
@@ -36,7 +36,7 @@ export default function VerifyAccount() {
   }, [token, verifyToken]);
 
   return (
-    <div className="text-center">
+    <main className="text-center">
       {
         loading ? (
           <p>loading...</p>
@@ -76,6 +76,6 @@ export default function VerifyAccount() {
             </>
           ))
       }
-    </div>
+    </main>
   );
 }

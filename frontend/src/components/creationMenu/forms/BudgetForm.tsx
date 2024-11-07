@@ -97,6 +97,7 @@ export default function BudgetForm({
       const newEndDate = new Date(currentStartDate);
       newEndDate.setMonth(newEndDate.getMonth() + 1);
 
+      form.setValue('endDate', newEndDate);
       form.setValue('concurrenceEndDate', newEndDate);
     } else {
       form.setValue('concurrenceDefault', 'none');
@@ -247,55 +248,57 @@ export default function BudgetForm({
           )}
         />
         {
-          !['none', 'custom'].includes(currentDefaultConcurrence) ? (
-            <ConcurrenceEndDate
-              form={form}
-            />
-          ) : (
-            <FormField
-              control={form.control}
-              name="endDate"
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Fecha límite</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            'w-full pl-3 text-left font-normal row-start-2',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          {field.value ? (
-                            <Typography variant="span">
-                              {format((field.value || new Date()), 'long')}
-                            </Typography>
-                          ) : (
-                            <Typography variant="span">Selecciona una fecha</Typography>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="center">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                        disabled={{ before: currentStartDate || null }}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription className="text-xs">
-                    ¿Cuándo termina?
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          currentDefaultConcurrence !== 'custom' && (
+            currentDefaultConcurrence !== 'none' ? (
+              <ConcurrenceEndDate
+                form={form}
+              />
+            ) : (
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Fecha límite</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              'w-full pl-3 text-left font-normal row-start-2',
+                              !field.value && 'text-muted-foreground',
+                            )}
+                          >
+                            {field.value ? (
+                              <Typography variant="span">
+                                {format((field.value || new Date()), 'long')}
+                              </Typography>
+                            ) : (
+                              <Typography variant="span">Selecciona una fecha</Typography>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="center">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                          disabled={{ before: currentStartDate || null }}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription className="text-xs">
+                      ¿Cuándo termina?
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )
           )
         }
       </form>

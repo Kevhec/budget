@@ -1,6 +1,7 @@
 import { Dispatch } from 'react';
 import {
   AuthAction, AuthActionType, AuthLoginGuest, AuthLoginUser, AuthResponse,
+  AuthSignUpUser,
   MessageResponse,
 } from '@/types';
 import axiosClient from '@/config/axios';
@@ -39,6 +40,59 @@ async function loginGuest(dispatch: Dispatch<AuthAction>, credentials: AuthLogin
     throw new Error(error.response.data.message);
   } finally {
     dispatch({ type: AuthActionType.SET_LOADING, payload: false });
+  }
+}
+
+async function signUp(
+  dispatch: Dispatch<AuthAction>,
+  credentials: AuthSignUpUser,
+) {
+  dispatch({ type: AuthActionType.SET_LOADING, payload: true });
+  dispatch({
+    type: AuthActionType.SET_MESSAGE,
+    payload: '',
+  });
+  dispatch({
+    type: AuthActionType.SET_ERROR,
+    payload: '',
+  });
+  dispatch({
+    type: AuthActionType.SET_FINISHED_ASYNC_ACTION,
+    payload: false,
+  });
+
+  const {
+    username,
+    email,
+    birthday,
+    password,
+    repeatPassword,
+  } = credentials;
+
+  try {
+    const { data } = await axiosClient.post<MessageResponse>('/user/signup', {
+      username,
+      email,
+      birthday,
+      password,
+      repeatPassword,
+    });
+
+    dispatch({
+      type: AuthActionType.SET_MESSAGE,
+      payload: data.data.message,
+    });
+  } catch (error: any) {
+    dispatch({
+      type: AuthActionType.SET_ERROR,
+      payload: error.response.data.error,
+    });
+  } finally {
+    dispatch({ type: AuthActionType.SET_LOADING, payload: false });
+    dispatch({
+      type: AuthActionType.SET_FINISHED_ASYNC_ACTION,
+      payload: true,
+    });
   }
 }
 
@@ -107,6 +161,7 @@ async function verifyToken(dispatch: Dispatch<AuthAction>, token: string) {
 export {
   login,
   loginGuest,
+  signUp,
   logout,
   checkAuth,
   verifyToken,

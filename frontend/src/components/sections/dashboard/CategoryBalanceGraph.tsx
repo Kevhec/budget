@@ -13,6 +13,8 @@ import useTransactions from '@/hooks/useTransactions';
 
 const tabsDefaultValue = 'income';
 
+// TODO: Category balance should be of current month, currently showing whole history
+
 export default function CategoryBalanceGraph() {
   const { state: { monthBalance }, updateBalance } = useCategories();
   const { state: { recentTransactions } } = useTransactions();
@@ -100,7 +102,7 @@ export default function CategoryBalanceGraph() {
               <ChartCard
                 title={`${type === 'income' ? 'Ingresos' : 'Gastos'} por categoría`}
                 hidden={chartData.length === 0}
-                month={monthBalance?.month ? getMonthFromDate(new Date(0, monthBalance.month - 1)) : ''}
+                subtitle={monthBalance?.month ? getMonthFromDate(new Date(0, monthBalance.month - 1)) : ''}
                 containerClassName="md:h-full"
                 contentClassName="md:flex"
               >
