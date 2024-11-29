@@ -12,11 +12,15 @@ User.hasMany(Page, { foreignKey: 'userId' });
 User.hasMany(Budget, { foreignKey: 'userId' });
 User.hasMany(Transaction, { foreignKey: 'userId' });
 User.hasMany(Category, { foreignKey: 'userId' });
+User.hasMany(CronTask, { foreignKey: 'userId' });
+User.hasMany(CronJob, { foreignKey: 'userId' });
 
 Page.belongsTo(User, { foreignKey: 'userId' });
 Budget.belongsTo(User, { foreignKey: 'userId' });
 Transaction.belongsTo(User, { foreignKey: 'userId' });
 Category.belongsTo(User, { foreignKey: 'userId' });
+CronTask.belongsTo(User, { foreignKey: 'userId' });
+CronJob.belongsTo(User, { foreignKey: 'userId' });
 
 // Each page can have only one budget
 /* Page.hasOne(Budget, { foreignKey: 'pageId' });

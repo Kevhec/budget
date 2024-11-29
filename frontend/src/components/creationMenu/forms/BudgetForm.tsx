@@ -25,13 +25,16 @@ import { z } from 'zod';
 import { WEEKDAYS } from '@/lib/constants';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
 import Typography from '@/components/Typography';
+import { type Budget } from '@/types';
 import ConcurrenceDialog from '../ConcurrenceDialog';
 
-type Props = {
+export type BudgetFormProps = {
   onSubmit: (value: z.infer<typeof budgetSchema>) => void
   formId: string
   className?: string
   dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
+  editMode?: boolean
+  item?: Budget
 };
 
 const defaultStartDate = new Date();
@@ -40,8 +43,8 @@ const defaultEndDate = new Date(defaultStartDate);
 defaultEndDate.setMonth(defaultEndDate.getMonth() + 1);
 
 export default function BudgetForm({
-  onSubmit, formId, className, dirtyChecker,
-}: Props) {
+  onSubmit, formId, className, dirtyChecker, item,
+}: BudgetFormProps) {
   const [isConcurrenceSelectOpen, setConcurrenceSelectOpen] = useState(false);
   const [isConcurrenceOptionHovered, setIsConcurrenceOptionHovered] = useState(false);
 
@@ -65,18 +68,10 @@ export default function BudgetForm({
 
   const { formState: { isDirty } } = form;
 
-  useEffect(() => {
-    if (dirtyChecker) {
-      dirtyChecker(isDirty);
-    }
-  }, [isDirty, dirtyChecker]);
-
   const [currentDefaultConcurrence, currentStartDate] = useWatch({
     control: form.control,
     name: ['concurrenceDefault', 'startDate'],
   });
-
-  const containerClasses = cn('flex relative flex-col gap-6', className);
 
   const handleConcurrenceSelectOpen = useCallback((open: boolean) => {
     if (!isConcurrenceOptionHovered) {
@@ -93,6 +88,16 @@ export default function BudgetForm({
   };
 
   useEffect(() => {
+    if (dirtyChecker) {
+      dirtyChecker(isDirty);
+    }
+  }, [isDirty, dirtyChecker]);
+
+  useEffect(() => {
+    console.log(item);
+  }, [item]);
+
+  useEffect(() => {
     if (currentStartDate) {
       const newEndDate = new Date(currentStartDate);
       newEndDate.setMonth(newEndDate.getMonth() + 1);
@@ -103,6 +108,8 @@ export default function BudgetForm({
       form.setValue('concurrenceDefault', 'none');
     }
   }, [currentStartDate, form]);
+
+  const containerClasses = cn('flex relative flex-col gap-6', className);
 
   return (
     <Form {...form}>

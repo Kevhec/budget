@@ -7,22 +7,41 @@ export interface ApiResponse<T> {
   data: T
 }
 
+export interface PaginationMeta {
+  totalItems: number,
+  itemCount: number,
+  itemsPerPage: number,
+  totalPages: number,
+  currentPage: number,
+}
+
+export interface PaginationLinks {
+  first?: string,
+  previous?: string,
+  next?: string,
+  last?: string,
+}
+
 export interface PaginatedApiResponse<T> {
   status?: number,
   data?: T,
-  meta?: {
-    totalItems: number,
-    itemCount: number,
-    itemsPerPage: number,
-    totalPages: number,
-    currentPage: number,
-  },
-  links?: {
-    first?: string,
-    previous?: string,
-    next?: string,
-    last?: string,
-  },
+  meta?: PaginationMeta,
+  links?: PaginationLinks,
+}
+
+export enum PaginationAction {
+  NEXT = 'next',
+  PREV = 'prev',
+  FIRST = 'first',
+  LAST = 'last',
+  PAGE = 'page',
+}
+
+export interface GetPaginatedParams {
+  links: LinksData
+  meta: MetaData
+  action: PaginationAction
+  page?: number
 }
 
 export type LinksData = PaginatedApiResponse<any>['links'];

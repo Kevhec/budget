@@ -1,7 +1,10 @@
-import cron, { ScheduledTask } from 'node-cron';
+import cron, { type ScheduledTask } from 'node-cron';
 import CronTask from '@/src/database/models/cronTask';
 import {
-  CreateBudgetParams, CreateTransactionParams, JobParams, JobTypes,
+  JobTypes,
+  type CreateBudgetParams,
+  type CreateTransactionParams,
+  type JobParams,
 } from '../types';
 import {
   createBudget as createBudgetJob,

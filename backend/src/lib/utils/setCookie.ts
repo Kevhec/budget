@@ -1,4 +1,4 @@
-import { CookieOptions, type Response } from 'express';
+import { type CookieOptions, type Response } from 'express';
 
 const setCookie = (res: Response, name: string, val: string, options: CookieOptions = {}) => {
   const isProduction = process.env.NODE_ENV === 'production';

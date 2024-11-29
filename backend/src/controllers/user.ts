@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import {
   Budget, Category, Transaction, User,
 } from '../database/models';
-import { guestSchema, userSchema } from '../database/schemas/user';
+import { guestSchema } from '../database/schemas/user';
 import generateJWT from '../lib/utils/generateJWT';
 import convert from '../lib/utils/convert';
 import { REMEMBER_ME_EXPIRATION_TIME_DAYS, SESSION_EXPIRATION_TIME_DAYS } from '../lib/constants';
@@ -11,16 +11,21 @@ import verificationEmail from '../lib/utils/verificationEmail';
 import sanitizeObject from '../lib/utils/sanitizeObject';
 import setCookie from '../lib/utils/setCookie';
 import SequelizeConnection from '../database/config/SequelizeConnection';
+import type { CreateUserRequestBody, TypedRequest } from '../lib/types';
 
 const sequelize = SequelizeConnection.getInstance();
 const isProduction = process.env.NODE_ENV === 'production';
 
-const signUp = async (req: Request, res: Response) => {
-  const { error, value } = userSchema.validate(req.body);
-
-  if (error) {
-    return res.status(400).json(error.details[0].message);
-  }
+const signUp = async (
+  req: TypedRequest<CreateUserRequestBody>,
+  res: Response,
+) => {
+  const {
+    email,
+    username,
+    birthday,
+    password,
+  } = req.body;
 
   // TODO: Delete accounts that are not verified on a week, provide a warning message;
 
@@ -30,8 +35,10 @@ const signUp = async (req: Request, res: Response) => {
 
     // Apply a hashing process to the password
     const data = {
-      ...value,
-      password: await bcrypt.hash(value.password, salt),
+      email,
+      username,
+      birthday: new Date(birthday),
+      password: await bcrypt.hash(password, salt),
     };
 
     // Create a new user,
@@ -40,7 +47,7 @@ const signUp = async (req: Request, res: Response) => {
     // If user is successfully created, generate a jwt using env secret key
     // and send it through a cookie to the client
     if (!newUser) {
-      return res.status(409).json('Details are not correct');
+      return res.status(409).json('Datos incorrectos');
     }
 
     // Testing email delivered@resend.dev
@@ -51,13 +58,19 @@ const signUp = async (req: Request, res: Response) => {
     // Sanitize user object in order to avoid sending sensitive data to frontend
     const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
 
+    console.log(sanitizedUser);
+
     // Send user
-    return res.status(201).json({ data: sanitizedUser });
+    return res.status(201).json({
+      data: {
+        message: 'Usuario registrado correctamente',
+      },
+    });
   } catch (e: unknown) {
     if (e instanceof Error) {
       console.error(e.message);
     }
-    return res.status(500).json({ data: 'Internal server error' });
+    return res.status(500).json('Internal server error');
   }
 };
 

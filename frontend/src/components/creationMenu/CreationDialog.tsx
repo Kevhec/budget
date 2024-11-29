@@ -1,24 +1,35 @@
 import { z } from 'zod';
 import { budgetSchema, transactionSchema } from '@/schemas/creation';
 import useTransactions from '@/hooks/useTransactions';
-import { CreateBudgetParams, CreateTransactionParams } from '@/types';
+import {
+  Budget, CreateBudgetParams, CreateTransactionParams, Transaction,
+} from '@/types';
 import useBudgets from '@/hooks/useBudgets';
-import { useCallback, useEffect, useState } from 'react';
-import TransactionForm from './forms/TransactionForm';
+import {
+  ComponentType,
+  ElementRef, forwardRef, useCallback, useEffect, useState,
+} from 'react';
+import TransactionForm, { TransactionFormProps } from './forms/TransactionForm';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from '../ui/dialog';
 import { Button } from '../ui/button';
-import BudgetForm from './forms/BudgetForm';
+import BudgetForm, { BudgetFormProps } from './forms/BudgetForm';
 import { ScrollArea } from '../ui/scroll-area';
 import ConfirmDialog from '../ConfirmDialog';
 
 interface Props {
   type: 'transaction' | 'budget'
-  label: string
+  triggerLabel: string
+  modalTitle?: string
+  item?: Budget | Transaction
+  editMode?: boolean
 }
 
-const formMapping = {
+const formMapping: {
+  transaction: ComponentType<TransactionFormProps>;
+  budget: ComponentType<BudgetFormProps>;
+} = {
   transaction: TransactionForm,
   budget: BudgetForm,
 };
@@ -28,7 +39,9 @@ const schemaMapping = {
   budget: budgetSchema,
 };
 
-export default function CreationDialog({ type, label }: Props) {
+const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
+  type, triggerLabel, item, editMode, modalTitle,
+}, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -85,28 +98,41 @@ export default function CreationDialog({ type, label }: Props) {
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={handleOpen}>
-        <DialogTrigger>
-          {label}
+      <Dialog open={isOpen} onOpenChange={handleOpen} modal>
+        <DialogTrigger ref={ref}>
+          {triggerLabel}
         </DialogTrigger>
         <DialogContent className="p-0 max-w-lg w-[calc(100%-2rem)] rounded-sm">
           <DialogDescription className="sr-only">
             Crea un nuevo recurso para
             {' '}
-            {label}
+            {modalTitle || triggerLabel}
           </DialogDescription>
           <DialogHeader className="p-6 pb-0">
             <DialogTitle>
-              Crear
-              {' '}
-              {label}
+              {modalTitle || triggerLabel}
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[26rem]">
-            <FormComponent className="p-6 pt-0" onSubmit={handleSubmit} formId={formId} dirtyChecker={setIsFormDirty} />
+            <FormComponent
+              className="p-6 pt-0"
+              onSubmit={handleSubmit}
+              formId={formId}
+              dirtyChecker={setIsFormDirty}
+              item={item as CreateTransactionParams & Budget}
+              editMode={editMode}
+            />
           </ScrollArea>
           <DialogFooter className="p-6 pt-0">
-            <Button form={formId} type="submit">Crear</Button>
+            <Button form={formId} type="submit">
+              {
+                editMode ? (
+                  'Guardar'
+                ) : (
+                  'Crear'
+                )
+              }
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -120,4 +146,6 @@ export default function CreationDialog({ type, label }: Props) {
       />
     </>
   );
-}
+});
+
+export default CreationDialog;

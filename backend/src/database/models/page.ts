@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { DataTypes, ForeignKey, Model } from 'sequelize';
+import { Model, DataTypes, type ForeignKey } from 'sequelize';
 import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';
 

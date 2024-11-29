@@ -1,11 +1,14 @@
 import {
-  CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model,
+  Model,
+  DataTypes,
+  type CreationOptional,
+  type InferAttributes,
+  type InferCreationAttributes,
 } from 'sequelize';
 import SequelizeConnection from '../config/SequelizeConnection';
 
 const sequelize = SequelizeConnection.getInstance();
 
-// TODO: Pedir fecha de cumpleaños para hacer °°diseño°°° emocional °°°°°°
 export default class User
   extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<string>;
@@ -16,13 +19,17 @@ export default class User
 
   declare password: string;
 
-  declare birthDate: Date;
+  declare birthday: Date;
 
-  declare role: string;
+  declare role: CreationOptional<string>;
 
-  declare confirmed: boolean;
+  declare confirmed: CreationOptional<boolean>;
 
-  declare token: string | null;
+  declare token: CreationOptional<string | null>;
+
+  declare createdAt?: CreationOptional<Date>;
+
+  declare updatedAt?: CreationOptional<Date>;
 }
 
 User.init({
@@ -37,7 +44,7 @@ User.init({
     allowNull: true,
     defaultValue: 'Invitado',
   },
-  birthDate: {
+  birthday: {
     type: DataTypes.DATE,
     allowNull: false,
   },

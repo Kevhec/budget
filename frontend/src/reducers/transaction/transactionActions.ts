@@ -23,6 +23,7 @@ async function syncRecentTransactions(dispatch: Dispatch<TransactionAction>) {
     const response = await getPaginatedTransactions({
       page: 1,
       limit: 4,
+      include: 'budget,category',
     });
 
     const recentTransactions = response.data;
@@ -89,12 +90,12 @@ async function createTransaction(
   const currentLimit = currentPaginated.meta?.itemsPerPage;
 
   const concurrencyFormData = extractConcurrenceData(transaction);
-  const parsedConcurrency = formatConcurrence(concurrencyFormData, transaction.startDate);
+  const parsedConcurrency = formatConcurrence(concurrencyFormData, transaction.date);
 
   const formattedTransaction: ApiTransaction = {
     description: transaction.description,
     amount: transaction.amount,
-    date: transaction.startDate.toString(),
+    date: transaction.date.toString(),
     type: transaction.type as TransactionType,
     budgetId: transaction.budgetId,
     categoryId: transaction.categoryId,
@@ -118,6 +119,7 @@ async function createTransaction(
         page: currentPage || 1,
         limit: currentLimit || 30,
         date: new Date(),
+        include: 'budget,category',
       });
     }
   } catch (error) {

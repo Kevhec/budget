@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { ModelStatic } from 'sequelize';
-import { Element } from '../../types/express';
+import type { Request, Response, NextFunction } from 'express';
+import type { ModelStatic } from 'sequelize';
+import type { Element } from '../../types/express';
 
 function authorizeAccess(
   model: ModelStatic<Element>,

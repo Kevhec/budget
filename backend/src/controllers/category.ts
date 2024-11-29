@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { fn, literal, Op } from 'sequelize';
 import { Category, Transaction } from '../database/models';
 import generateDateRange from '../lib/utils/generateDateRange';
@@ -99,7 +99,7 @@ async function getCategoriesMonthlyBalance(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const whereClause: any = {
     userId,
-    createdAt: {
+    date: {
       [Op.between]: [start, end],
     },
   };

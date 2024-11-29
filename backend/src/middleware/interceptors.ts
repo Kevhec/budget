@@ -1,5 +1,5 @@
 /* eslint-disable func-names */
-import { RequestHandler } from 'express';
+import { type RequestHandler } from 'express';
 
 interface FormattedBody<T> {
   status: number,

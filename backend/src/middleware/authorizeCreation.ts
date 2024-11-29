@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { Model, ModelStatic } from 'sequelize';
+import type { Request, Response, NextFunction } from 'express';
+import { Model, type ModelStatic } from 'sequelize';
 
 interface ProtectedModel extends Model {
   userId?: string

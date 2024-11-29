@@ -1,4 +1,4 @@
-import { OccurrenceType, Ordinals, Recurrence } from '../types';
+import { OccurrenceType, Ordinals, type Recurrence } from '../types';
 import getWeekDay from '../utils/time/getWeekDay';
 /*
 Cron expression anatomy

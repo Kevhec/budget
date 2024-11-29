@@ -1,3 +1,6 @@
+import { type ConcurrenceFormData, type WeekDays } from '@/types';
+import { format } from '@formkit/tempo';
+
 const dateStringRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 const initialPaginatedState = {
@@ -15,8 +18,9 @@ const initialPaginatedState = {
 
 const defaultPaginatedOptions = {
   page: 1,
-  limit: 30,
+  limit: 5,
   date: new Date(),
+  include: 'budget,category',
 };
 
 const CONCURRENCE_TYPE = ['daily', 'weekly', 'monthly', 'semestrial', 'yearly'] as const;
@@ -32,12 +36,24 @@ const ENGLISH_ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth'] as cons
 
 const SPANISH_MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
+const concurrenceFormDefaults: ConcurrenceFormData = {
+  concurrenceDefault: 'none',
+  concurrenceTime: new Date(),
+  concurrenceSteps: 1,
+  concurrenceWithEndDate: 'true',
+  concurrenceType: 'daily',
+  concurrenceWeekDay: format(new Date(), 'dddd', 'en').toLowerCase() as WeekDays,
+  concurrenceMonthSelect: 'exact',
+  concurrenceEndDate: undefined,
+};
+
 export {
   dateStringRegex,
   initialPaginatedState,
   defaultPaginatedOptions,
   CONCURRENCE_TYPE,
   DEFAULT_CONCURRENCES,
+  concurrenceFormDefaults,
   WEEKDAYS,
   DAY_NAMES_SPANISH,
   ENGLISH_ORDINALS,

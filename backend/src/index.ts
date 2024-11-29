@@ -1,14 +1,15 @@
 import express from 'express';
-import cors, { CorsOptions } from 'cors';
+import cors, { type CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
 import { SequelizeStorage, Umzug } from 'umzug';
-import responseInterceptor from './middleware/interceptors';
+import responseInterceptor from './middleware/interceptors.js';
 import {
   budgetRoutes, transactionRoutes, pageRouter, userRoutes,
   categoryRouter,
-} from './router';
-import SequelizeConnection from './database/config/SequelizeConnection';
-import startCronManager from './lib/cron_manager';
+} from './router/index.js';
+import SequelizeConnection from './database/config/SequelizeConnection.js';
+import startCronManager from './lib/cron_manager/index.js';
+import cliTheme from './lib/utils/chalk.js';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -42,7 +43,7 @@ app.use('/api/page', pageRouter);
 app.use('/api/category', categoryRouter);
 
 sequelize.sync().then(async () => {
-  console.log('Database synchronized');
+  console.log(`${cliTheme.db('[SEQUELIZE]')}: Database synchronized`);
 });
 
 // UMZUG (migrations tool)
@@ -58,22 +59,15 @@ const runMigrations = async () => {
 };
 
 runMigrations().catch((error) => {
-  console.error('Migration failed:', error);
+  console.log(`${cliTheme.serverWarn('[ERROR]')}: Migration failed: `, error);
   process.exit(1);
 });
 
 startCronManager();
 
-/* const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  console.log('Middleware executed');
-  next(err);
-};
-
-app.use(errorHandler) */
-
 app.listen(PORT, () => {
   console.log(
-    `Server listening to port ${PORT} \n
-    at http://localhost:3000/`,
+    `\n${cliTheme.server('[Server]')}: listening to port ${PORT}
+          at ${cliTheme.underline('http://localhost:3000/')}\n`,
   );
 });

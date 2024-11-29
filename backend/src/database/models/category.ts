@@ -1,6 +1,10 @@
 import {
-  CreationOptional,
-  DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model,
+  Model,
+  DataTypes,
+  type CreationOptional,
+  type ForeignKey,
+  type InferAttributes,
+  type InferCreationAttributes,
 } from 'sequelize';
 import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';

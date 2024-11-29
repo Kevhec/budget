@@ -1,5 +1,5 @@
-import { Request } from 'express';
-import { TransactionType } from '../database/models/transaction';
+import { type Request } from 'express';
+import { type TransactionType } from '../database/models/transaction';
 
 export interface BalanceResponse {
   year: string
@@ -107,6 +107,14 @@ export interface CreateTransactionRequestBody {
   budgetId?: string
   categoryId: string
   recurrence: Recurrence
+}
+
+export interface CreateUserRequestBody {
+  email: string
+  username: string
+  birthday: string
+  password: string
+  repeatPassword: string
 }
 
 export interface CreateTransactionParams {

@@ -16,7 +16,7 @@ const transactionSchema = z.object({
     .coerce
     .number()
     .positive(),
-  startDate: z
+  date: z
     .date(),
   type: z
     .enum(TRANSACTION_TYPES),

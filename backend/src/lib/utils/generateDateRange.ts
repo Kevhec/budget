@@ -1,4 +1,5 @@
 import { dateStringRegex } from '../constants';
+import cliTheme from './chalk';
 import { extractYearAndMonth } from './time';
 
 interface Params {
@@ -13,7 +14,7 @@ export default function generateDateRange({ fromDate, toDate, untilToday }: Para
     if (param === undefined) return;
 
     if (!dateStringRegex.test(param)) {
-      throw new Error(`Badly formatted param: ${i === 0 ? 'fromDate' : 'toDate'}, should satisfy format YYYY-MM`);
+      throw new Error(`${cliTheme.serverWarn('[ERROR]:')} Badly formatted param: ${i === 0 ? 'fromDate' : 'toDate'}, should satisfy format YYYY-MM, received ${fromDate} ${toDate}`);
     }
   });
 

@@ -1,4 +1,5 @@
-import { Dialect, Sequelize } from 'sequelize';
+import { cliTheme } from '@lib/utils';
+import { type Dialect, Sequelize } from 'sequelize';
 
 class SequelizeConnection {
   private static instance: Sequelize;
@@ -13,6 +14,7 @@ class SequelizeConnection {
     SequelizeConnection.instance = new Sequelize(dbName, dbUser, dbPassword, {
       host: dbHost,
       dialect: dbDriver,
+      logging: (...msg) => console.log(`${cliTheme.db('[SEQUELIZE]')}: ${msg}`),
     });
 
     SequelizeConnection.instance.authenticate().then(() => {

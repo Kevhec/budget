@@ -5,6 +5,7 @@ import { Category } from './category';
 import { PaginatedApiResponse } from './api';
 import { LoadingAction } from './common';
 import { BalanceData } from './balance';
+import { type Budget } from './budget';
 
 export enum TransactionType {
   Income = 'income',
@@ -21,7 +22,9 @@ export interface Transaction {
   updatedAt: Date;
   userId: string;
   budgetId: number;
-  category: Category | null;
+  categoryId?: string
+  budget?: Budget | null;
+  category?: Category | null;
   hidden?: boolean
 }
 
@@ -30,6 +33,7 @@ export interface PaginatedParams {
   limit?: number
   date?: Date
   presetUrl?: string
+  include?: string
 }
 
 export type CreateTransactionParams = z.infer<typeof transactionSchema>;
@@ -82,4 +86,5 @@ export interface TransactionsContextType {
   state: TransactionState,
   createTransaction: (data: CreateTransactionParams) => void;
   getBalance: (from?: string, to?: string) => void;
+  changePage: (params: PaginatedParams) => void;
 }

@@ -14,5 +14,7 @@ export default function ProtectedRoute({ children }: Props) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  return children;
+  return (
+    children
+  );
 }

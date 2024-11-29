@@ -10,6 +10,7 @@ import CreationDialog from '@/components/creationMenu/CreationDialog';
 import TransactionsProvider from '@/context/TransactionProvider';
 import CategoriesProvider from '@/context/CategoriesProvider';
 import BudgetProvider from '@/context/BudgetProvider';
+import Footer from '@/components/Footer';
 /* import { SidebarProvider } from '@/components/ui/sidebar'; */
 
 export default function AppLayout() {
@@ -32,8 +33,8 @@ export default function AppLayout() {
                   <span className="sr-only">Crear elemento</span>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="flex flex-col gap-2">
-                  <CreationDialog type="transaction" label="Transacción" />
-                  <CreationDialog type="budget" label="Presupuesto" />
+                  <CreationDialog type="transaction" triggerLabel="Transacción" modalTitle="Crear Transacción" />
+                  <CreationDialog type="budget" triggerLabel="Presupuesto" modalTitle="Crear Presupuesto" />
                 </PopoverContent>
               </Popover>
             </div>
@@ -43,15 +44,11 @@ export default function AppLayout() {
             </aside>
             <div className="flex flex-col w-full">
               <Header />
-              <ScrollArea className="w-full h-full grow">
-                <main className="px-4 py-2 md:py-4 flex flex-col bg-softGray md:h-full">
+              <ScrollArea className="w-full h-full">
+                <main className="px-4 py-2 md:py-4 flex flex-col bg-softGray md:h-full grow max-w-[100vw]">
                   <Outlet />
                 </main>
-                <footer className="py-6 bg-[#343A40] text-white text-center">
-                  Ahorrify por
-                  {' '}
-                  <a href="https://www.linkedin.com/in/kevhec/" target="_blank" rel="noreferrer" className="underline underline-offset-4">KevHec</a>
-                </footer>
+                <Footer />
               </ScrollArea>
             </div>
           </div>

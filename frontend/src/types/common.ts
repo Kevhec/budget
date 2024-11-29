@@ -1,7 +1,6 @@
-import { DEFAULT_CONCURRENCES } from '@/lib/constants';
+import { CONCURRENCE_TYPE, DEFAULT_CONCURRENCES } from '@/lib/constants';
 import type { CreateBudgetParams } from './budget';
 import type { CreateTransactionParams } from './transaction';
-import { OccurrenceType } from './recurrence';
 
 export type Months =
 'enero' |
@@ -57,10 +56,16 @@ export type DefaultConcurrency = typeof DEFAULT_CONCURRENCES[number];
 
 export interface ConcurrenceFormData {
   concurrenceDefault: DefaultConcurrency
-  concurrenceType: OccurrenceType,
+  concurrenceType: typeof CONCURRENCE_TYPE[number],
   concurrenceSteps: number,
   concurrenceWeekDay: WeekDays,
   concurrenceTime: Date,
   concurrenceMonthSelect: 'exact' | 'ordinal'
-  concurrenceEndDate: Date
+  concurrenceEndDate?: Date
+  concurrenceWithEndDate: 'true' | 'false'
+}
+
+export interface TablePagination {
+  pageIndex: number
+  pageSize: number
 }

@@ -6,4 +6,6 @@ export { default as sanitizeObject } from './sanitizeObject';
 export { default as setCookie } from './setCookie';
 export { default as verificationEmail } from './verificationEmail';
 export { default as strReplaceAt } from './strReplaceAt';
+export { default as cliTheme } from './chalk';
+export { default as parseIncludes } from './parseIncludes';
 export * from './time';

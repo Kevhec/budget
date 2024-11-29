@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { Budget, Page /* , User */ } from '../database/models';
 import SequelizeConnection from '../database/config/SequelizeConnection';
 

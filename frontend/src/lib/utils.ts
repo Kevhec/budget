@@ -2,7 +2,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { ConcurrenceFormData, CreationParamsUnion } from '@/types';
-import { DAY_NAMES_SPANISH, SPANISH_MONTHS } from './constants';
+import { concurrenceFormDefaults, DAY_NAMES_SPANISH, SPANISH_MONTHS } from './constants';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -64,6 +64,14 @@ export function extractConcurrenceData(data: CreationParamsUnion) {
   return Object.fromEntries(
     Object.entries(data).filter(([key]) => key.startsWith('concurrence')),
   ) as unknown as ConcurrenceFormData;
+}
+
+export function resetConcurrence(formSetter: (name: string, value: unknown) => void) {
+  const entries = Object.entries(concurrenceFormDefaults);
+
+  entries.forEach(([name, value]) => {
+    formSetter(name, value);
+  });
 }
 
 export function generateYearsList(from: number, to?: number) {

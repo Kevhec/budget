@@ -1,9 +1,15 @@
 import {
-  CreationOptional,
-  DataTypes, HasManyGetAssociationsMixin, InferAttributes, InferCreationAttributes, Model,
+  Model,
+  DataTypes,
+  type CreationOptional,
+  type ForeignKey,
+  type HasManyGetAssociationsMixin,
+  type InferAttributes,
+  type InferCreationAttributes,
 } from 'sequelize';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type CronJob from './cronJobs';
+import User from './user';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -21,6 +27,8 @@ class CronTask extends Model<InferAttributes<CronTask>, InferCreationAttributes<
   declare getCronJobs: HasManyGetAssociationsMixin<CronJob>;
 
   declare cronJobs?: CronJob[];
+
+  declare userId: ForeignKey<User['id']>;
 }
 
 CronTask.init({

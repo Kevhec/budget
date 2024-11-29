@@ -1,18 +1,23 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import {
   DatabaseError, fn, literal, Op,
 } from 'sequelize';
-import { Category, Transaction } from '../database/models';
+import { Budget, Category, Transaction } from '../database/models';
 import generateLinksMetadata from '../lib/utils/generateLinksMetadata';
 import generateDateRange from '../lib/utils/generateDateRange';
 import {
-  BalanceData, BalanceResponse, CreateTransactionRequestBody, JobTypes, MonthData, TypedRequest,
+  JobTypes,
+  type BalanceData,
+  type BalanceResponse,
+  type CreateTransactionRequestBody,
+  type MonthData,
+  type TypedRequest,
 } from '../lib/types';
 import generateCronExpression from '../lib/cron_manager/generateCronExpression';
 import CronTask from '../database/models/cronTask';
 import CronJob from '../database/models/cronJobs';
-import { Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
-import { sanitizeObject } from '../lib/utils';
+import { type Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
+import { cliTheme, parseIncludes, sanitizeObject } from '../lib/utils';
 import { createTransaction as createTransactionJob } from '../lib/jobs';
 
 // Create
@@ -34,6 +39,8 @@ async function createTransaction(
     let taskId: null | string = null;
 
     const dateObject = new Date(date);
+
+    console.log(cliTheme.server('HERE I AM CREATING A TRANSACTION'));
 
     if (recurrence) {
       const {
@@ -103,6 +110,8 @@ async function createTransaction(
       userId: req.user?.id || '',
     });
 
+    console.log({ newTransaction });
+
     if (!newTransaction) {
       return res.status(500).json('There was an error creating the new transaction');
     }
@@ -123,7 +132,8 @@ async function createTransaction(
 
     console.log(error);
 
-    return res.status(500).json({ message: 'Internal server error' });
+    // TODO: Define res body on error with the key "error" followed by the message
+    return res.status(500).json('Internal server error');
   }
 }
 
@@ -133,7 +143,26 @@ async function getAllTransactions(
   res: Response,
 ): Promise<Response | undefined> {
   const transactionId = req.params.id;
-  const { offset, limit, month } = req.query;
+  const {
+    offset, limit, month, include,
+  } = req.query;
+
+  const includes = parseIncludes(String(include), {
+    models: [
+      {
+        identifier: 'budget',
+        model: Budget,
+        attributes: ['id', 'name', 'totalAmount', 'startDate', 'endDate'],
+        as: 'budget',
+      },
+      {
+        identifier: 'category',
+        model: Category,
+        attributes: ['id', 'name', 'color'],
+        as: 'category',
+      },
+    ],
+  });
 
   // Convert to string to ensure types
   let strOffset;
@@ -175,16 +204,9 @@ async function getAllTransactions(
       where: whereClause,
       offset: intOffset,
       limit: intLimit,
-      attributes: { exclude: ['categoryId'] },
-      include: [{
-        model: Category,
-        attributes: ['id', 'name', 'color'],
-        as: 'category',
-      }],
+      include: includes,
       order: [['createdAt', 'DESC']],
     });
-
-    console.log({ rows: rows.map((row) => row.get()) });
 
     if (!rows.length) {
       const noIdMessage = 'No expenses found';

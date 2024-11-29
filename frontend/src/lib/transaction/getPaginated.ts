@@ -3,7 +3,11 @@ import axiosClient from '@/config/axios';
 import { PaginatedApiResponse, PaginatedParams, Transaction } from '@/types';
 
 async function getPaginatedTransactions({
-  page, limit, date, presetUrl,
+  page = 1,
+  limit = 4,
+  date,
+  presetUrl,
+  include,
 }: PaginatedParams) {
   try {
     let queryYear = '';
@@ -15,12 +19,21 @@ async function getPaginatedTransactions({
       queryYear = dateYear;
       queryMonth = dateMonth;
     }
-    const offset = (page || 1 - 1) * (limit || 1);
+    const offset = (page - 1) * (limit);
 
-    const requestUrl = presetUrl || `/transaction/?offset=${offset}&limit=${limit}&month=${date ? `${queryYear}-${queryMonth}` : ''}`;
+    const requestUrl = presetUrl || '/transaction/';
+
+    const queryParams = presetUrl ? null : new URLSearchParams([
+      ['offset', String(offset)],
+      ['limit', String(limit)],
+      ['month', date ? `${queryYear}-${queryMonth}` : ''],
+      include ? ['include', include] : [],
+    ]);
 
     const { data } = await axiosClient
-      .get<PaginatedApiResponse<Transaction[]>>(requestUrl);
+      .get<PaginatedApiResponse<Transaction[]>>(requestUrl, {
+      params: queryParams,
+    });
 
     return data;
   } catch (error: any) {

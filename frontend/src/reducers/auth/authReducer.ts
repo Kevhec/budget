@@ -11,7 +11,7 @@ const initialAuthState: AuthState = {
     createdAt: '',
     updatedAt: '',
   },
-  loading: false,
+  loading: true,
   finishedAsyncAction: false,
   message: '',
   error: '',

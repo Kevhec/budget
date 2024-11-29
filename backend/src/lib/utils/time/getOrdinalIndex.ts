@@ -1,4 +1,4 @@
-import { Ordinals } from '../../types';
+import { Ordinals } from '@lib/types';
 
 function getOrdinalNumber(ordinal: Ordinals) {
   const ordinalsMap: Record<Ordinals, number> = {

@@ -1,5 +1,5 @@
 import { Budget } from '@/src/database/models';
-import { CreateBudgetParams } from '../types';
+import type { CreateBudgetParams } from '../types';
 
 async function createBudget({
   name,

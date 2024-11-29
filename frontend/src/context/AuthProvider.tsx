@@ -60,6 +60,10 @@ export function AuthProvider({ children }: Props) {
     verifyToken,
   }), [state, verifyToken, signUp]);
 
+  if (state.loading && !state.user.id) {
+    return <p>LOADING</p>;
+  }
+
   return (
     <AuthContext.Provider value={contextValue}>
       {children}

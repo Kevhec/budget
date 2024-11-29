@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { fn, literal, Op } from 'sequelize';
 import { format } from '@formkit/tempo';
 import { Budget, Transaction } from '../database/models';
@@ -7,8 +7,8 @@ import generateCronExpression from '../lib/cron_manager/generateCronExpression';
 import CronTask from '../database/models/cronTask';
 import CronJob from '../database/models/cronJobs';
 import { createBudget as createBudgetJob } from '../lib/jobs';
-import { Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
-import { CreateBudgetRequestBody, JobTypes, TypedRequest } from '../lib/types';
+import { type Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
+import { type CreateBudgetRequestBody, JobTypes, type TypedRequest } from '../lib/types';
 import { generateLinksMetadata, sanitizeObject } from '../lib/utils';
 import generateNextExecutionDate from '../lib/cron_manager/generateNexExecutionDate';
 import getDateTimeDifference from '../lib/utils/time/getDateTimeDifference';
@@ -28,6 +28,10 @@ async function createBudget(
     endDate,
     recurrence,
   } = req.body;
+
+  const {
+    user,
+  } = req;
 
   try {
     let taskId: null | string = null;
@@ -72,6 +76,7 @@ async function createBudget(
         cronExpression,
         endDate: recurrenceEndDate || null,
         timezone,
+        userId: user?.id,
       });
 
       const job = await CronJob.create({
@@ -80,10 +85,11 @@ async function createBudget(
           name,
           totalAmount,
           intervalMilliseconds,
-          userId: req.user?.id || '',
+          userId: user?.id || '',
           cronTaskId: newTask.id,
         },
         cronTaskId: newTask.id,
+        userId: user?.id,
       });
 
       const typedJob = job as unknown as Job;
@@ -104,11 +110,11 @@ async function createBudget(
       totalAmount,
       startDate: startDateObj,
       endDate: endDateObj,
-      userId: req.user?.id || '',
+      userId: user?.id || '',
       cronTaskId: taskId,
     });
 
-    const sanitizedBudget = sanitizeObject(newBudget.toJSON(), ['cronTaskId']);
+    const sanitizedBudget = sanitizeObject(newBudget.toJSON(), ['cronTaskId', 'userId']);
 
     return res.status(201).json({ data: { budget: sanitizedBudget } });
   } catch (error: unknown) {
@@ -166,7 +172,7 @@ async function getAllBudgets(
       where: whereClause,
       offset: intOffset,
       limit: intLimit || undefined,
-      attributes: { exclude: ['cronTaskId'] },
+      attributes: { exclude: ['cronTaskId', 'userId'] },
       order: [['createdAt', 'DESC']],
     });
 
@@ -220,7 +226,7 @@ async function getBudget(
         userId: req.user?.id,
       },
       attributes: {
-        exclude: ['cronTaskId'],
+        exclude: ['cronTaskId', 'userId'],
       },
     });
 

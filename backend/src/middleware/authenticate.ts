@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { type RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../database/models';
 

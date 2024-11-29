@@ -14,6 +14,7 @@ import Budgets from './routes/private/Budgets';
 import VerifyAccount from './routes/public/VerifyAccount';
 import SignUp from './routes/public/SignUp';
 import SuccessSignUp from './routes/public/SuccessSignUp';
+import NoAuthOnly from './routes/public/NoAuthOnly';
 
 function App() {
   return (
@@ -22,11 +23,44 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<AuthLayout />}>
-              <Route index element={<Login />} />
-              <Route path="/register" element={<SignUp />} />
-              <Route path="/register/success" element={<SuccessSignUp />} />
-              <Route path="/login/guest" element={<Guest />} />
-              <Route path="/verify/:token" element={<VerifyAccount />} />
+              <Route
+                index
+                element={(
+                  <NoAuthOnly>
+                    <Login />
+                  </NoAuthOnly>
+                )}
+              />
+              <Route
+                path="/register"
+                element={(
+                  <NoAuthOnly>
+                    <SignUp />
+                  </NoAuthOnly>
+                )}
+              />
+              <Route
+                path="/register/success"
+                element={(
+                  <NoAuthOnly>
+                    <SuccessSignUp />
+                  </NoAuthOnly>
+                )}
+              />
+              <Route
+                path="/login/guest"
+                element={(
+                  <NoAuthOnly>
+                    <Guest />
+                  </NoAuthOnly>
+                )}
+              />
+              <Route
+                path="/verify/:token"
+                element={(
+                  <VerifyAccount />
+                )}
+              />
             </Route>
             <Route path="/app" element={<AppLayout />}>
               <Route

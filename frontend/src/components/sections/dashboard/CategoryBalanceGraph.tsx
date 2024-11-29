@@ -102,7 +102,7 @@ export default function CategoryBalanceGraph() {
               <ChartCard
                 title={`${type === 'income' ? 'Ingresos' : 'Gastos'} por categoría`}
                 hidden={chartData.length === 0}
-                subtitle={monthBalance?.month ? getMonthFromDate(new Date(0, monthBalance.month - 1)) : ''}
+                subtitle={monthBalance?.month ? getMonthFromDate(new Date(0, monthBalance.month)) : ''}
                 containerClassName="md:h-full"
                 contentClassName="md:flex"
               >

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 
 function validateSchema(schema: Joi.ObjectSchema<unknown>) {

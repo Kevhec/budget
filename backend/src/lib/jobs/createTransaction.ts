@@ -1,5 +1,5 @@
 import { Category, Transaction } from '@/src/database/models';
-import { CreateTransactionParams } from '../types';
+import type { CreateTransactionParams } from '../types';
 
 async function createTransaction({
   description,

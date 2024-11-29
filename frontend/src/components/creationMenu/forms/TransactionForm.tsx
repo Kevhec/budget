@@ -28,51 +28,73 @@ import useBudgets from '@/hooks/useBudgets';
 import { format } from '@formkit/tempo';
 import { Calendar } from '@/components/ui/calendar';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
-import { WEEKDAYS } from '@/lib/constants';
+import { concurrenceFormDefaults } from '@/lib/constants';
+import { CreateTransactionParams } from '@/types';
+import useTransactions from '@/hooks/useTransactions';
 import ConcurrenceDialog from '../ConcurrenceDialog';
 
-type Props = {
+type TransactionFormType = z.infer<typeof transactionSchema>;
+
+export type TransactionFormProps = {
   onSubmit: (value: z.infer<typeof transactionSchema>) => void
   formId: string
   className?: string
   dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
+  editMode?: boolean
+  item?: CreateTransactionParams
 };
 
 export default function TransactionForm({
-  onSubmit, formId, className, dirtyChecker,
-}: Props) {
+  formId, className, dirtyChecker, editMode, item,
+}: TransactionFormProps) {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [budgetsOpen, setBudgetsOpen] = useState(false);
   const [isConcurrenceSelectOpen, setConcurrenceSelectOpen] = useState(false);
   const [isConcurrenceOptionHovered, setIsConcurrenceOptionHovered] = useState(false);
+  const { createTransaction } = useTransactions();
   const { state: { categories } } = useCategories();
   const { state: { budgets } } = useBudgets();
-  const form = useForm<z.infer<typeof transactionSchema>>({
+  const isEditWithItem = editMode && item;
+
+  const form = useForm<TransactionFormType>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      description: '',
-      type: 'expense',
-      amount: 0,
-      categoryId: categories.find((category) => category.name === 'General')?.id,
-      budgetId: undefined,
-      startDate: new Date(),
-      concurrenceDefault: 'none',
-      concurrenceTime: new Date(),
-      concurrenceSteps: 1,
-      concurrenceWithEndDate: 'true',
-      concurrenceType: 'daily',
-      concurrenceWeekDay: format(new Date(), 'dddd', 'en').toLowerCase() as typeof WEEKDAYS[number],
-      concurrenceMonthSelect: 'exact',
-      concurrenceEndDate: undefined,
+      description: isEditWithItem ? item.description : '',
+      type: isEditWithItem ? item.type : 'expense',
+      amount: isEditWithItem ? item.amount : 0,
+      categoryId: isEditWithItem ? item.categoryId : categories.find((category) => category.name === 'General')?.id,
+      budgetId: isEditWithItem ? item.budgetId : undefined,
+      date: isEditWithItem ? new Date(item.date) : new Date(),
+      ...concurrenceFormDefaults,
     },
   });
 
-  const [currentDefaultConcurrence, currentStartDate] = useWatch({
+  const [currentDefaultConcurrence, currentDate] = useWatch({
     control: form.control,
-    name: ['concurrenceDefault', 'startDate'],
+    name: ['concurrenceDefault', 'date'],
   });
 
   const { formState: { isDirty } } = form;
+
+  const onSubmit = (value: z.infer<typeof transactionSchema>) => {
+    if (!editMode) {
+      createTransaction(value);
+    }
+  };
+
+  const handleConcurrenceSelectOpen = useCallback((open: boolean) => {
+    if (!isConcurrenceOptionHovered) {
+      setConcurrenceSelectOpen(open);
+    }
+  }, [isConcurrenceOptionHovered]);
+
+  const handleConcurrenceMouseOver = (evt: React.MouseEvent<HTMLDivElement>) => {
+    evt.stopPropagation();
+    if (evt.relatedTarget && !evt.currentTarget.contains(evt.relatedTarget as Node)) {
+      const didMouseEnter = evt.type === 'mouseenter';
+      setIsConcurrenceOptionHovered(didMouseEnter);
+    }
+  };
 
   useEffect(() => {
     if (dirtyChecker) {
@@ -92,20 +114,6 @@ export default function TransactionForm({
     value: budget.id,
     label: budget.name,
   }));
-
-  const handleConcurrenceSelectOpen = useCallback((open: boolean) => {
-    if (!isConcurrenceOptionHovered) {
-      setConcurrenceSelectOpen(open);
-    }
-  }, [isConcurrenceOptionHovered]);
-
-  const handleConcurrenceMouseOver = (evt: React.MouseEvent<HTMLDivElement>) => {
-    evt.stopPropagation();
-    if (evt.relatedTarget && !evt.currentTarget.contains(evt.relatedTarget as Node)) {
-      const didMouseEnter = evt.type === 'mouseenter';
-      setIsConcurrenceOptionHovered(didMouseEnter);
-    }
-  };
 
   return (
     <Form {...form}>
@@ -171,7 +179,7 @@ export default function TransactionForm({
         />
         <FormField
           control={form.control}
-          name="startDate"
+          name="date"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Fecha</FormLabel>
@@ -375,7 +383,7 @@ export default function TransactionForm({
                 value={field.value}
                 open={isConcurrenceSelectOpen}
                 onOpenChange={handleConcurrenceSelectOpen}
-                disabled={currentStartDate === undefined}
+                disabled={currentDate === undefined}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -392,19 +400,19 @@ export default function TransactionForm({
                   <SelectItem value="weekly">
                     Cada semana, el
                     {' '}
-                    {format((currentStartDate || new Date()), 'dddd')}
+                    {format((currentDate || new Date()), 'dddd')}
                   </SelectItem>
                   <SelectItem value="monthly">
                     Todos los meses, el
                     {' '}
-                    {nthDay(currentStartDate)}
+                    {nthDay(currentDate)}
                   </SelectItem>
                   <SelectItem value="yearly" className="peer">
                     Anualmente, el
                     {' '}
-                    {(currentStartDate || new Date()).getDate()}
+                    {(currentDate || new Date()).getDate()}
                     {' de '}
-                    {format((currentStartDate || new Date()), 'MMMM')}
+                    {format((currentDate || new Date()), 'MMMM')}
                   </SelectItem>
                   <ConcurrenceDialog
                     form={form}

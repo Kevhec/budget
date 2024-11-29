@@ -1,10 +1,15 @@
 import {
-  CreationOptional,
-  DataTypes, ForeignKey, InferAttributes, InferCreationAttributes, Model,
+  Model,
+  DataTypes,
+  type CreationOptional,
+  type ForeignKey,
+  type InferAttributes,
+  type InferCreationAttributes,
 } from 'sequelize';
 import { JobTypes } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import CronTask from './cronTask';
+import User from './user';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -24,6 +29,8 @@ class CronJob extends Model<InferAttributes<CronJob>, InferCreationAttributes<Cr
   declare jobArgs: JSONValue;
 
   declare cronTaskId: ForeignKey<CronTask['id']>;
+
+  declare userId: ForeignKey<User['id']>;
 }
 
 CronJob.init({

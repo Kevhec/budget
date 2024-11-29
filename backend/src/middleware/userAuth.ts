@@ -1,5 +1,5 @@
 // importing modules
-import { RequestHandler } from 'express';
+import { type RequestHandler } from 'express';
 import { User } from '../database/models';
 // Assigning db.users to User variable
 

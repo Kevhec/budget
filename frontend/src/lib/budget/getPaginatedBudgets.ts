@@ -24,6 +24,7 @@ async function getPaginatedBudgets(options: PaginatedParams | undefined) {
 
     return data;
   } catch (error: any) {
+    // TODO: Handle errors to avoid error logs for non critical errors
     throw new Error(error);
   }
 }
