@@ -125,6 +125,20 @@ const categories = [
     createdAt: new Date(),
     updatedAt: new Date(),
   },
+  {
+    id: crypto.randomUUID(),
+    name: 'Deudas',
+    color: '#B22222',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    id: crypto.randomUUID(),
+    name: 'Sueldo',
+    color: '#32CD32',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
 ];
 
 /** @type {import('sequelize-cli').Migration} */

@@ -49,7 +49,7 @@ sequelize.sync().then(async () => {
 // UMZUG (migrations tool)
 const runMigrations = async () => {
   const umzug = new Umzug({
-    migrations: { glob: 'src/database/migrations/*.js' },
+    migrations: { glob: 'src/database/migrations/*.cjs' },
     context: sequelize.getQueryInterface(),
     storage: new SequelizeStorage({ sequelize }),
     logger: console,

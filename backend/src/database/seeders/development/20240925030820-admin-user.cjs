@@ -7,7 +7,6 @@ module.exports = {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash('admin', salt);
     const userId = crypto.randomUUID();
-    const budgetId = crypto.randomUUID();
 
     await queryInterface.bulkInsert('users', [
       {
@@ -18,20 +17,7 @@ module.exports = {
         role: 'user',
         token: null,
         confirmed: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ]);
-
-    await queryInterface.bulkInsert('budgets', [
-      {
-        id: budgetId,
-        name: 'General',
-        totalAmount: 0.00,
-        userId,
-        startDate: new Date(),
-        endDate: null,
-        isGeneral: true,
+        birthday: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
       },

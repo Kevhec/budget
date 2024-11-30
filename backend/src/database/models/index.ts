@@ -5,6 +5,7 @@ import User from './user';
 import Category from './category';
 import CronTask from './cronTask';
 import CronJob from './cronJobs';
+import Concurrence from './concurrence';
 
 // Associate user with all of the other models
 // so they can be protected by auth
@@ -14,6 +15,7 @@ User.hasMany(Transaction, { foreignKey: 'userId' });
 User.hasMany(Category, { foreignKey: 'userId' });
 User.hasMany(CronTask, { foreignKey: 'userId' });
 User.hasMany(CronJob, { foreignKey: 'userId' });
+User.hasMany(Concurrence, { foreignKey: 'userId' });
 
 Page.belongsTo(User, { foreignKey: 'userId' });
 Budget.belongsTo(User, { foreignKey: 'userId' });
@@ -21,6 +23,7 @@ Transaction.belongsTo(User, { foreignKey: 'userId' });
 Category.belongsTo(User, { foreignKey: 'userId' });
 CronTask.belongsTo(User, { foreignKey: 'userId' });
 CronJob.belongsTo(User, { foreignKey: 'userId' });
+Concurrence.belongsTo(User, { foreignKey: 'userId' });
 
 // Each page can have only one budget
 /* Page.hasOne(Budget, { foreignKey: 'pageId' });
@@ -35,6 +38,12 @@ CronTask.hasOne(Transaction, { foreignKey: 'cronTaskId' });
 
 Budget.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
 Transaction.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
+
+Concurrence.hasOne(Transaction, { foreignKey: 'concurrenceId' });
+Concurrence.hasOne(Budget, { foreignKey: 'concurrenceId' });
+
+Transaction.belongsTo(Concurrence, { foreignKey: 'concurrenceId' });
+Budget.belongsTo(Concurrence, { foreignKey: 'concurrenceId' });
 
 CronTask.hasMany(CronJob, { foreignKey: 'cronTaskId', as: 'cronJobs' });
 CronJob.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });

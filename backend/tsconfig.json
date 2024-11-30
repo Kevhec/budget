@@ -38,8 +38,9 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.js",
-    "src/database/config/config.js",
+    "src/**/*.cjs",
+    "src/database/config/config.cjs",
     "src/mails/VerifyAccount.jsx",
     "src/index.mts"
-  ]
+, "src/database/migrations/20240925025414-create-user.cjs"  ]
 }

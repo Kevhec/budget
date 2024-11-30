@@ -14,6 +14,7 @@ class SequelizeConnection {
     SequelizeConnection.instance = new Sequelize(dbName, dbUser, dbPassword, {
       host: dbHost,
       dialect: dbDriver,
+      port: 5433,
       logging: (...msg) => console.log(`${cliTheme.db('[SEQUELIZE]')}: ${msg}`),
     });
 

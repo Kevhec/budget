@@ -11,6 +11,7 @@ import User from './user';
 import Budget from './budget';
 import Category from './category';
 import CronTask from './cronTask';
+import Concurrence from './concurrence';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -45,6 +46,8 @@ class Transaction
   declare categoryId: ForeignKey<Category['id']> | null;
 
   declare budgetId: ForeignKey<Budget['id']>;
+
+  declare concurrenceId: ForeignKey<Concurrence['id']> | null;
 }
 
 Transaction.init({
