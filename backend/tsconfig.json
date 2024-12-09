@@ -24,6 +24,7 @@
       "@/*": ["./*"],
       "@lib/*": ["src/lib/*"],
       "@database/*": ["src/database/*"],
+      "@schemas/*": ["src/database/schemas/*"],
       "@controllers/*": ["src/controllers/*"],
       "@middlewares/*": ["src/middleware/*"],
       "@router/*": ["src/router/*"]

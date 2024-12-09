@@ -1,12 +1,13 @@
 import type { Request, Response, NextFunction } from 'express';
-import Joi from 'joi';
+import { z } from 'zod';
 
-function validateSchema(schema: Joi.ObjectSchema<unknown>) {
+function validateSchema(schema: z.Schema) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const { error } = schema.validate({ ...req.body, ...req.params, ...req.query });
+    const { success, error } = schema.safeParse({ ...req.body, ...req.params, ...req.query });
 
-    if (error) {
-      return res.status(400).json(error.details[0].message);
+    if (!success && error) {
+      const errorMessages = error.errors.map((err) => err.message);
+      return res.status(400).json(errorMessages);
     }
 
     return next();

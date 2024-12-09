@@ -1,15 +1,17 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
-const createCategorySchema = Joi.object({
-  name: Joi.string().required(),
-  color: Joi.string(),
+const createCategorySchema = z.object({
+  name: z.string(),
+  color: z.string(),
 });
 
-const updateCategorySchema = Joi.object({
-  id: Joi.string().guid().required(),
-  name: Joi.string(),
-  color: Joi.string(),
-}).min(2);
+const updateCategorySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  color: z.string(),
+}).refine((data) => Object.entries(data).length > 1, {
+  message: 'Se requiere mínimo un campo además',
+});
 
 export {
   createCategorySchema,

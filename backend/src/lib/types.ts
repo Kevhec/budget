@@ -1,5 +1,7 @@
+import { z } from 'zod';
 import { type Request } from 'express';
 import { type TransactionType } from '../database/models/transaction';
+import { concurrenceSchema } from '../database/schemas/general';
 
 export interface BalanceResponse {
   year: string
@@ -60,15 +62,7 @@ export type YearData = Record<string, MonthData>;
 
 export type BalanceData = Record<string, YearData>;
 
-export interface Recurrence {
-  endDate?: string
-  concurrence: Concurrence
-  weekDay: {
-    value: WeekDays
-    ordinal: Ordinals
-  }
-  time: TimeRecurrence
-}
+export type Recurrence = z.infer<typeof concurrenceSchema>;
 
 export interface CreateBudgetParams {
   name: string,
@@ -126,4 +120,31 @@ export interface CreateTransactionParams {
   categoryId: string
   cronTaskId: string | null
   userId: string
+}
+
+export enum DefaultConcurrences {
+  NONE = 'none',
+  CUSTOM = 'custom',
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  YEARLY = 'yearly',
+}
+
+export enum ConcurrenceType {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  SEMESTRIAL = 'semestrial',
+  YEARLY = 'yearly',
+}
+
+export enum WithEndDate {
+  TRUE = 'true',
+  FALSE = 'false',
+}
+
+export enum MonthSelect {
+  EXACT = 'exact',
+  ORDINAL = 'ordinal',
 }

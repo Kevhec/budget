@@ -1,14 +1,14 @@
-import Joi from 'joi';
+import { z } from 'zod';
 import { positiveInteger } from './general';
 
-const createPageSchema = Joi.object({
-  name: Joi.string().min(3).max(30),
+const createPageSchema = z.object({
+  name: z.string().min(3).max(30),
 });
 
-const updatePageSchema = Joi.object({
-  id: positiveInteger.required(),
-  name: Joi.string().min(3).max(30),
-}).min(2);
+const updatePageSchema = z.object({
+  id: positiveInteger,
+  name: z.string().min(3).max(30),
+});
 
 export {
   createPageSchema,

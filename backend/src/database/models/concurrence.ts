@@ -6,7 +6,9 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
-import { WeekDays } from '@/src/lib/types';
+import {
+  ConcurrenceType, DefaultConcurrences, MonthSelect, WeekDays, WithEndDate,
+} from '@/src/lib/types';
 import { format } from '@formkit/tempo';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
@@ -14,33 +16,6 @@ import type User from './user';
 const sequelize = SequelizeConnection.getInstance();
 
 // TODO: Define relationship foreign key with transaction or budget
-
-enum DefaultConcurrences {
-  NONE = 'none',
-  CUSTOM = 'custom',
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  YEARLY = 'yearly',
-}
-
-enum ConcurrenceType {
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  SEMESTRIAL = 'semestrial',
-  YEARLY = 'yearly',
-}
-
-enum WithEndDate {
-  TRUE = 'true',
-  FALSE = 'false',
-}
-
-enum MonthSelect {
-  EXACT = 'exact',
-  ORDINAL = 'ordinal',
-}
 
 class Concurrence extends Model<
 InferAttributes<Concurrence>,
