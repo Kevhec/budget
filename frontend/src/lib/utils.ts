@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { ConcurrenceFormData, CreationParamsUnion } from '@/types';
+import { CreationParamsUnion, SimplifiedConcurrence } from '@/types';
 import { concurrenceFormDefaults, DAY_NAMES_SPANISH, SPANISH_MONTHS } from './constants';
 
 export function cn(...inputs: ClassValue[]) {
@@ -61,9 +61,18 @@ export function hasOneYearPassed(fromDate: Date) {
 }
 
 export function extractConcurrenceData(data: CreationParamsUnion) {
+  const concurrenceOnlyEntries = Object.entries(data).filter(([key]) => key.startsWith('concurrence'));
+
+  const simplifiedEntries = concurrenceOnlyEntries.map(([key, value]) => {
+    const replacedKey = key.replace('concurrence', '');
+    const firstLowerCaseKey = replacedKey[0].toLowerCase() + replacedKey.substring(1);
+
+    return [firstLowerCaseKey, value];
+  });
+
   return Object.fromEntries(
-    Object.entries(data).filter(([key]) => key.startsWith('concurrence')),
-  ) as unknown as ConcurrenceFormData;
+    simplifiedEntries,
+  ) as unknown as SimplifiedConcurrence;
 }
 
 export function resetConcurrence(formSetter: (name: string, value: unknown) => void) {

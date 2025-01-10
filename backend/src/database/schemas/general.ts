@@ -12,7 +12,7 @@ const getTokenUUID = z.object({
 });
 
 const concurrenceSchema = z.object({
-  default: z
+  defaults: z
     .enum(DEFAULT_CONCURRENCES),
   type: z
     .enum(CONCURRENCE_TYPE),
@@ -24,12 +24,14 @@ const concurrenceSchema = z.object({
   withEndDate: z
     .enum(['true', 'false']),
   endDate: z
-    .date()
+    .string()
+    .datetime()
     .optional(),
   weekDay: z
     .enum(WEEKDAYS),
   time: z
-    .date(),
+    .string()
+    .datetime(),
   monthSelect: z
     .enum(['exact', 'ordinal']),
 });

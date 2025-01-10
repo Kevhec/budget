@@ -1,4 +1,4 @@
-import { OccurrenceType, Ordinals, type Recurrence } from '../types';
+import { RecurrenceType, Ordinals, type ParsedConcurrence } from '../types';
 import getWeekDay from '../utils/time/getWeekDay';
 /*
 Cron expression anatomy
@@ -13,7 +13,7 @@ Cron expression anatomy
 * * * * *
 */
 
-interface Params extends Recurrence {
+interface Params extends ParsedConcurrence {
   startDate: Date,
 }
 
@@ -36,42 +36,49 @@ function getOrdinalIndex(ordinal: Ordinals): number | undefined {
   }
 }
 
-function generateCronExpression(recurrence: Params) {
+function generateCronExpression(concurrence: Params) {
   const {
-    concurrence,
+    recurrence,
     weekDay,
     time,
     startDate,
-  } = recurrence;
+  } = concurrence;
   const { hour, minute } = time;
-  const { type, steps } = concurrence;
-  const { value: weekdayName, ordinal } = weekDay;
+  const { type, steps } = recurrence;
 
-  const weekDayNumber = getWeekDay(weekdayName);
+  let weekDayNumber;
+  let ordinalWeekdayNumber;
+
+  if (weekDay?.value) {
+    weekDayNumber = getWeekDay(weekDay.value);
+  }
+
+  if (weekDay?.ordinal) {
+    ordinalWeekdayNumber = getOrdinalIndex(weekDay.ordinal);
+  }
+
   const startDay = startDate.getDate();
   const startMonth = startDate.getMonth() + 1;
-
-  const ordinalNumber = getOrdinalIndex(ordinal);
 
   // Initialize cron exp with time data
   let cronExpression = `${minute} ${hour} `;
 
   switch (type) {
-    case OccurrenceType.DAILY:
+    case RecurrenceType.DAILY:
       cronExpression += `*/${steps} * *`;
       break;
-    case OccurrenceType.WEEKLY:
+    case RecurrenceType.WEEKLY:
       cronExpression += `* * ${weekDayNumber}/${steps}`;
       break;
-    case OccurrenceType.MONTHLY:
-      cronExpression += `${startDay} */${steps} ${weekDayNumber || '*'}${ordinal ? `#${ordinalNumber}` : ''}`;
+    case RecurrenceType.MONTHLY:
+      cronExpression += `${startDay} */${steps} ${weekDayNumber || '*'}${`#${ordinalWeekdayNumber}` || ''}`;
       break;
-    case OccurrenceType.SEMESTRIAL: {
+    case RecurrenceType.SEMESTRIAL: {
       const nextMonth = (startMonth + 6) > 12 ? (startMonth + 6) - 12 : (startMonth + 6);
       cronExpression += `${startDay} ${startMonth},${nextMonth} *`;
       break;
     }
-    case OccurrenceType.YEARLY:
+    case RecurrenceType.YEARLY:
       cronExpression += `${startDay} ${startMonth} *`;
       break;
     default:

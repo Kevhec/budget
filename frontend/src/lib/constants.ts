@@ -29,15 +29,14 @@ const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'satur
 
 const DEFAULT_CONCURRENCES = ['none', 'custom', 'daily', 'weekly', 'monthly', 'yearly'] as const;
 
-const DAY_NAMES_SPANISH = ['domingo', 'lunes', 'martes', 'miércoles',
-  'jueves', 'viernes', 'sábado'] as const;
+const DAY_NAMES_SPANISH = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'] as const;
 
 const ENGLISH_ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth'] as const;
 
 const SPANISH_MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
 const concurrenceFormDefaults: ConcurrenceFormData = {
-  concurrenceDefault: 'none',
+  concurrenceDefaults: 'none',
   concurrenceTime: new Date(),
   concurrenceSteps: 1,
   concurrenceWithEndDate: 'true',

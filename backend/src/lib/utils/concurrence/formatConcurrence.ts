@@ -1,43 +1,49 @@
-function formatConcurrence(
-  concurrenceFormData: ConcurrenceFormData,
-  startDate: Date,
-): ApiRecurrence | null {
-  const {
-    concurrenceDefault,
-    concurrenceType,
-    concurrenceSteps,
-    concurrenceWeekDay,
-    concurrenceTime,
-    concurrenceMonthSelect,
-    concurrenceEndDate,
-  } = concurrenceFormData;
+import { format } from '@formkit/tempo';
+import {
+  ParsedConcurrence, RecurrenceType, Ordinals, Concurrence, WeekDays,
+} from '../../types';
+import { ENGLISH_ORDINALS } from '../../constants';
+import getDayOrdinalNumber from '../time/getDayOrinalNumber';
+import getDefaultRecurrence from '../time/getDefaultConcurrence';
 
-  if (concurrenceDefault === 'none') {
-    return null;
-  }
+function parseConcurrence(
+  concurrence: Concurrence,
+  startDate: Date,
+  timezone: string,
+): ParsedConcurrence {
+  const {
+    defaults,
+    type,
+    steps,
+    weekDay,
+    time,
+    monthSelect,
+    endDate,
+  } = concurrence;
 
   const weekDayOrdinalIndex = getDayOrdinalNumber(startDate.getDate()) - 1;
 
   if (
-    concurrenceDefault !== 'custom'
+    defaults !== 'custom'
   ) {
-    const defaultRecurrence = getDefaultRecurrence(
-      concurrenceDefault,
+    const defaultRecurrence = getDefaultRecurrence({
+      type: defaults,
       startDate,
-      weekDayOrdinalIndex,
-    );
+      timezone,
+      ordinalIndex: weekDayOrdinalIndex,
+    });
 
     return defaultRecurrence;
   }
 
-  const [hour, minute] = format(concurrenceTime || new Date(), 'H-m')
+  const [hour, minute] = format(time || new Date(), 'H-m')
     .split('-')
     .map(Number);
 
-  const monthOrdinalCheck = concurrenceType === 'monthly' && concurrenceMonthSelect === 'ordinal';
+  const monthOrdinalCheck = type === 'monthly' && monthSelect === 'ordinal';
 
   const hasWeekDay = (
-    concurrenceType === 'weekly'
+    type === 'weekly'
     || monthOrdinalCheck
   );
 
@@ -45,24 +51,24 @@ function formatConcurrence(
     ? ENGLISH_ORDINALS[weekDayOrdinalIndex] as Ordinals
     : undefined;
 
-  const recurrence: ApiRecurrence = {
-    concurrence: {
-      type: concurrenceType as OccurrenceType,
-      steps: concurrenceSteps || 1,
+  const recurrence: ParsedConcurrence = {
+    recurrence: {
+      type: type as RecurrenceType,
+      steps: steps || 1,
     },
     weekDay: {
-      value: hasWeekDay ? concurrenceWeekDay as WeekDays : undefined,
+      value: hasWeekDay ? weekDay as WeekDays : undefined,
       ordinal,
     },
     time: {
       hour,
       minute,
-      timezone: getTimezone(),
+      timezone,
     },
-    endDate: concurrenceEndDate,
+    endDate: endDate ? new Date(endDate) : undefined,
   };
 
   return recurrence;
 }
 
-export default formatConcurrence;
+export default parseConcurrence;

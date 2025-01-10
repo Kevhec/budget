@@ -55,7 +55,7 @@ export default function BudgetForm({
       totalAmount: 0,
       startDate: undefined,
       endDate: undefined,
-      concurrenceDefault: 'none',
+      concurrenceDefaults: 'none',
       concurrenceTime: new Date(),
       concurrenceSteps: 1,
       concurrenceWithEndDate: 'true',
@@ -70,7 +70,7 @@ export default function BudgetForm({
 
   const [currentDefaultConcurrence, currentStartDate] = useWatch({
     control: form.control,
-    name: ['concurrenceDefault', 'startDate'],
+    name: ['concurrenceDefaults', 'startDate'],
   });
 
   const handleConcurrenceSelectOpen = useCallback((open: boolean) => {
@@ -105,7 +105,7 @@ export default function BudgetForm({
       form.setValue('endDate', newEndDate);
       form.setValue('concurrenceEndDate', newEndDate);
     } else {
-      form.setValue('concurrenceDefault', 'none');
+      form.setValue('concurrenceDefaults', 'none');
     }
   }, [currentStartDate, form]);
 
@@ -189,7 +189,7 @@ export default function BudgetForm({
         />
         <FormField
           control={form.control}
-          name="concurrenceDefault"
+          name="concurrenceDefaults"
           render={({ field }) => (
             <FormItem>
               <FormLabel>

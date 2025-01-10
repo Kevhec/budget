@@ -2,7 +2,7 @@ import { DEFAULT_CONCURRENCES, CONCURRENCE_TYPE, WEEKDAYS } from '@/lib/constant
 import { z } from 'zod';
 
 const concurrenceSchema = z.object({
-  concurrenceDefault: z
+  concurrenceDefaults: z
     .enum(DEFAULT_CONCURRENCES),
   concurrenceType: z
     .enum(CONCURRENCE_TYPE)

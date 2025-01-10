@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { type Request } from 'express';
 import { type TransactionType } from '../database/models/transaction';
 import { concurrenceSchema } from '../database/schemas/general';
+import { CONCURRENCE_TYPE, DEFAULT_CONCURRENCES } from './constants';
 
 export interface BalanceResponse {
   year: string
@@ -21,17 +22,12 @@ export type MonthData = {
   balance: number;
 };
 
-export enum OccurrenceType {
+export enum RecurrenceType {
   DAILY = 'daily',
   WEEKLY = 'weekly',
   MONTHLY = 'monthly',
   SEMESTRIAL = 'semestrial',
   YEARLY = 'yearly',
-}
-
-export interface Concurrence {
-  type: OccurrenceType,
-  steps: number,
 }
 
 export enum WeekDays {
@@ -62,7 +58,7 @@ export type YearData = Record<string, MonthData>;
 
 export type BalanceData = Record<string, YearData>;
 
-export type Recurrence = z.infer<typeof concurrenceSchema>;
+export type Concurrence = z.infer<typeof concurrenceSchema>;
 
 export interface CreateBudgetParams {
   name: string,
@@ -73,6 +69,7 @@ export interface CreateBudgetParams {
   datesOffset?: string | number
   userId: string,
   cronTaskId: string | null,
+  concurrenceId: string | null,
 }
 
 export enum JobTypes {
@@ -90,7 +87,7 @@ export interface CreateBudgetRequestBody {
   totalAmount: number
   startDate: string
   endDate: string
-  recurrence: Recurrence
+  concurrence: Concurrence
 }
 
 export interface CreateTransactionRequestBody {
@@ -100,7 +97,7 @@ export interface CreateTransactionRequestBody {
   type: TransactionType
   budgetId?: string
   categoryId: string
-  recurrence: Recurrence
+  concurrence: Concurrence
 }
 
 export interface CreateUserRequestBody {
@@ -120,6 +117,36 @@ export interface CreateTransactionParams {
   categoryId: string
   cronTaskId: string | null
   userId: string
+}
+
+export type DefaultConcurrency = typeof DEFAULT_CONCURRENCES[number];
+
+export interface ConcurrenceFormData {
+  concurrenceDefault: DefaultConcurrency
+  concurrenceType: typeof CONCURRENCE_TYPE[number],
+  concurrenceSteps: number,
+  concurrenceWeekDay: WeekDays,
+  concurrenceTime: Date,
+  concurrenceMonthSelect: 'exact' | 'ordinal'
+  concurrenceEndDate?: Date
+  concurrenceWithEndDate: 'true' | 'false'
+}
+
+export interface ParsedConcurrence {
+  recurrence: {
+    type: typeof CONCURRENCE_TYPE[number]
+    steps: number
+  }
+  weekDay?: {
+    value?: WeekDays
+    ordinal?: Ordinals
+  }
+  time: {
+    hour: number
+    minute: number
+    timezone: string
+  }
+  endDate?: Date
 }
 
 export enum DefaultConcurrences {

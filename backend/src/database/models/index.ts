@@ -42,8 +42,8 @@ Transaction.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
 Concurrence.hasOne(Transaction, { foreignKey: 'concurrenceId' });
 Concurrence.hasOne(Budget, { foreignKey: 'concurrenceId' });
 
-Transaction.belongsTo(Concurrence, { foreignKey: 'concurrenceId' });
-Budget.belongsTo(Concurrence, { foreignKey: 'concurrenceId' });
+Transaction.belongsTo(Concurrence, { foreignKey: 'concurrenceId', as: 'concurrence' });
+Budget.belongsTo(Concurrence, { foreignKey: 'concurrenceId', as: 'concurrence' });
 
 CronTask.hasMany(CronJob, { foreignKey: 'cronTaskId', as: 'cronJobs' });
 CronJob.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });

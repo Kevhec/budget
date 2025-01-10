@@ -3,16 +3,15 @@ import { fn, literal, Op } from 'sequelize';
 import { format } from '@formkit/tempo';
 import { Budget, Transaction } from '../database/models';
 import generateDateRange from '../lib/utils/generateDateRange';
-import generateCronExpression from '../lib/cron_manager/generateCronExpression';
-import CronTask from '../database/models/cronTask';
-import CronJob from '../database/models/cronJobs';
-import { createBudget as createBudgetJob } from '../lib/jobs';
-import { type Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
-import { type CreateBudgetRequestBody, JobTypes, type TypedRequest } from '../lib/types';
+import {
+  createBudget as createBudgetJob,
+  createConcurrence as createConcurrenceJob,
+} from '../lib/jobs';
+import { type CreateBudgetRequestBody, type TypedRequest } from '../lib/types';
 import { generateLinksMetadata, sanitizeObject } from '../lib/utils';
-import generateNextExecutionDate from '../lib/cron_manager/generateNexExecutionDate';
-import getDateTimeDifference from '../lib/utils/time/getDateTimeDifference';
 import extractBudgetBalance from '../lib/jobs/extractBudgetBalance';
+import setupJob from '../lib/cron_manager/setupJob';
+import Concurrence from '../database/models/concurrence';
 
 // TODO: Sanitize returned objects to not return userId
 
@@ -26,7 +25,7 @@ async function createBudget(
     totalAmount,
     startDate,
     endDate,
-    recurrence,
+    concurrence,
   } = req.body;
 
   const {
@@ -35,74 +34,36 @@ async function createBudget(
 
   try {
     let taskId: null | string = null;
+    let concurrenceId: null | string = null;
 
     const startDateObj = new Date(startDate);
 
-    // When recurrence is provided, end date refers to the moment to stop repeating
+    // If recurrence is provided, overwrite endDateObj to
+    // nextExecutionDate instead of normal non concurrent budgets end date.
     let endDateObj = new Date(endDate);
 
-    if (recurrence) {
+    if (concurrence && user) {
+      const newConcurrence = await createConcurrenceJob({ concurrence, user });
+
+      concurrenceId = newConcurrence.id;
+
       const {
-        concurrence, time, weekDay, endDate: recEndDateStr,
-      } = recurrence;
-      const { minute, hour, timezone } = time;
-      const { steps, type } = concurrence;
-
-      const recurrenceEndDate = recEndDateStr ? new Date(recEndDateStr) : null;
-
-      const cronExpression = generateCronExpression({
-        concurrence: {
-          type,
-          steps,
-        },
+        nextExecutionDate,
+        taskId: newTaskId,
+      } = await setupJob({
+        user,
+        concurrence,
         startDate: startDateObj,
-        time: {
-          minute,
-          hour,
-          timezone,
+        particularJobArgs: {
+          name,
+          totalAmount,
         },
-        weekDay,
       });
-
-      // When recurring the end date for each budget is calculated automatically, not by the user
-      const nextExecutionDate = generateNextExecutionDate(cronExpression, { tz: timezone });
 
       // Budget ends when a new one of the same task is going to be created
       endDateObj = nextExecutionDate;
 
-      const intervalMilliseconds = getDateTimeDifference(startDateObj, nextExecutionDate);
-
-      const newTask = await CronTask.create({
-        cronExpression,
-        endDate: recurrenceEndDate || null,
-        timezone,
-        userId: user?.id,
-      });
-
-      const job = await CronJob.create({
-        jobName: JobTypes.CREATE_BUDGET,
-        jobArgs: {
-          name,
-          totalAmount,
-          intervalMilliseconds,
-          userId: user?.id || '',
-          cronTaskId: newTask.id,
-        },
-        cronTaskId: newTask.id,
-        userId: user?.id,
-      });
-
-      const typedJob = job as unknown as Job;
-
-      taskId = newTask.id;
-
-      scheduleCronTask({
-        cronExpression,
-        endDate: endDateObj,
-        timezone,
-        taskId,
-        jobs: [typedJob],
-      });
+      taskId = newTaskId;
     }
 
     const newBudget = await createBudgetJob({
@@ -112,6 +73,7 @@ async function createBudget(
       endDate: endDateObj,
       userId: user?.id || '',
       cronTaskId: taskId,
+      concurrenceId,
     });
 
     const sanitizedBudget = sanitizeObject(newBudget.toJSON(), ['cronTaskId', 'userId']);
@@ -172,7 +134,16 @@ async function getAllBudgets(
       where: whereClause,
       offset: intOffset,
       limit: intLimit || undefined,
-      attributes: { exclude: ['cronTaskId', 'userId'] },
+      include: [
+        {
+          model: Concurrence,
+          as: 'concurrence',
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'userId', 'id'],
+          },
+        },
+      ],
+      attributes: { exclude: ['cronTaskId', 'userId', 'concurrenceId'] },
       order: [['createdAt', 'DESC']],
     });
 
@@ -186,8 +157,6 @@ async function getAllBudgets(
     });
 
     let budgetsToReturn = rows.map((item) => item.get());
-
-    console.log(balance);
 
     if (balance) {
       const budgetsIds = rows.map((budget) => budget.id) as string[];

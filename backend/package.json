@@ -6,6 +6,7 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "createMigration": "node ./src/lib/scripts/generateMigration.js",
     "dev": "tsx watch ./src/index.ts"
   },
   "keywords": [],

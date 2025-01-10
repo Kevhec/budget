@@ -11,7 +11,7 @@ const createTransactionSchema = z.object({
   type: z.nativeEnum(TransactionType),
   budgetId: z.string().uuid().optional(),
   categoryId: z.string().uuid(),
-  recurrence: concurrenceSchema.optional(),
+  concurrence: concurrenceSchema.optional(),
 });
 
 // TODO: Id must be provided via params, not req body
@@ -23,7 +23,7 @@ const updateTransactionSchema = z.object({
   date: z.date().optional(),
   budgetId: z.string().uuid().optional(),
   categoryId: z.string().uuid().optional(),
-  recurrence: concurrenceSchema.optional(),
+  concurrence: concurrenceSchema.optional(),
 }).refine((data) => Object.entries(data).length > 1, {
   message: 'Se requiere mínimo un campo además',
 });

@@ -1,9 +1,8 @@
 import type { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import {
-  Budget, Category, Transaction, User,
+  Budget, Transaction, User,
 } from '../database/models';
-import { guestSchema } from '../database/schemas/user';
 import generateJWT from '../lib/utils/generateJWT';
 import convert from '../lib/utils/convert';
 import { REMEMBER_ME_EXPIRATION_TIME_DAYS, SESSION_EXPIRATION_TIME_DAYS } from '../lib/constants';
@@ -168,13 +167,6 @@ const logOut = async (req: Request, res: Response) => {
           transaction: t,
         });
 
-        await Category.destroy({
-          where: {
-            userId: user.id,
-          },
-          transaction: t,
-        });
-
         await Transaction.destroy({
           where: {
             userId: user.id,
@@ -207,16 +199,10 @@ const logOut = async (req: Request, res: Response) => {
 };
 
 const loginAsGuest = async (req: Request, res: Response) => {
-  const { error, value } = guestSchema.validate(req.body);
-
-  if (error) {
-    return res.status(400).json(error.details[0].message);
-  }
-
   // Create a new user with guest role and provided username
   try {
     const newGuest = await User.create({
-      ...value,
+      ...req.body,
       role: 'guest',
     });
 

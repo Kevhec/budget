@@ -71,7 +71,7 @@ export default function TransactionForm({
 
   const [currentDefaultConcurrence, currentDate] = useWatch({
     control: form.control,
-    name: ['concurrenceDefault', 'date'],
+    name: ['concurrenceDefaults', 'date'],
   });
 
   const { formState: { isDirty } } = form;
@@ -371,7 +371,7 @@ export default function TransactionForm({
         </div>
         <FormField
           control={form.control}
-          name="concurrenceDefault"
+          name="concurrenceDefaults"
           render={({ field }) => (
             <FormItem>
               <FormLabel>

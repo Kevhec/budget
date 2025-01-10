@@ -48,6 +48,7 @@ sequelize.sync().then(async () => {
 
 // UMZUG (migrations tool)
 const runMigrations = async () => {
+  console.log(`${cliTheme.server('[SERVER]')}: Initializing umzug`);
   const umzug = new Umzug({
     migrations: { glob: 'src/database/migrations/*.cjs' },
     context: sequelize.getQueryInterface(),

@@ -10,6 +10,7 @@ import {
   ConcurrenceType, DefaultConcurrences, MonthSelect, WeekDays, WithEndDate,
 } from '@/src/lib/types';
 import { format } from '@formkit/tempo';
+import { CONCURRENCE_TYPE } from '@/src/lib/constants';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
 
@@ -23,15 +24,15 @@ InferCreationAttributes<Concurrence>
 > {
   declare id: CreationOptional<string>;
 
-  declare default: CreationOptional<DefaultConcurrences>;
+  declare defaults: CreationOptional<DefaultConcurrences>;
 
-  declare type: CreationOptional<ConcurrenceType>;
+  declare type: CreationOptional<typeof CONCURRENCE_TYPE[number]>;
 
   declare steps: CreationOptional<number>;
 
   declare endDate: CreationOptional<Date>;
 
-  declare withEndDate: CreationOptional<WithEndDate>;
+  declare withEndDate: CreationOptional<boolean>;
 
   declare weekDay: CreationOptional<WeekDays>;
 
@@ -49,7 +50,7 @@ Concurrence.init({
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
   },
-  default: {
+  defaults: {
     type: DataTypes.ENUM(...Object.values(DefaultConcurrences)),
     defaultValue: DefaultConcurrences.NONE,
     allowNull: false,
@@ -70,7 +71,7 @@ Concurrence.init({
     allowNull: true,
   },
   withEndDate: {
-    type: DataTypes.ENUM(...Object.values(WithEndDate)),
+    type: DataTypes.BOOLEAN,
     defaultValue: WithEndDate.FALSE,
     allowNull: false,
   },

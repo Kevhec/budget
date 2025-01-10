@@ -43,5 +43,5 @@
     "src/database/config/config.cjs",
     "src/mails/VerifyAccount.jsx",
     "src/index.mts"
-, "src/database/migrations/20240925025414-create-user.cjs"  ]
+, "src/database/migrations/20240925025414-create-user.cjs", "src/lib/scripts/generateMigration.Cjs"  ]
 }
