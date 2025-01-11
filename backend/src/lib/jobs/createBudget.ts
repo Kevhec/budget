@@ -16,7 +16,7 @@ async function createBudget({
 
     // TODO: Check this end date, should it be nextExecutionDate?
     if (!endDate && intervalMilliseconds) {
-      const dateFromInterval = new Date(intervalMilliseconds);
+      const dateFromInterval = new Date(startDate.getTime() + intervalMilliseconds);
       calculatedEndDate = dateFromInterval;
     }
 

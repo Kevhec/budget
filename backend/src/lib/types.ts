@@ -106,6 +106,7 @@ export interface CreateUserRequestBody {
   birthday: string
   password: string
   repeatPassword: string
+  timezone: string
 }
 
 export interface CreateTransactionParams {
@@ -117,6 +118,7 @@ export interface CreateTransactionParams {
   categoryId: string
   cronTaskId: string | null
   userId: string
+  concurrenceId: string | null
 }
 
 export type DefaultConcurrency = typeof DEFAULT_CONCURRENCES[number];

@@ -13,12 +13,14 @@ interface Params<T> {
   concurrence: Concurrence
   startDate: Date
   particularJobArgs: T
+  startDateOnly?: boolean
 }
 
 async function setupJob<T>({
   user,
   concurrence,
   startDate,
+  startDateOnly,
   particularJobArgs,
 }: Params<T>) {
   const userTimezone = user?.dataValues.timezone || 'UTC';
@@ -65,7 +67,7 @@ async function setupJob<T>({
     jobName: JobTypes.CREATE_BUDGET,
     jobArgs: {
       ...particularJobArgs,
-      intervalMilliseconds,
+      intervalMilliseconds: startDateOnly ? null : intervalMilliseconds,
       userId: user?.id || '',
       cronTaskId: newTask.id,
     },

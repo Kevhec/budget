@@ -7,7 +7,7 @@ const dateRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
 const createTransactionSchema = z.object({
   description: z.string().min(3).max(30),
   amount: z.number().positive(),
-  date: z.date(),
+  date: z.string().datetime(),
   type: z.nativeEnum(TransactionType),
   budgetId: z.string().uuid().optional(),
   categoryId: z.string().uuid(),
@@ -20,7 +20,7 @@ const updateTransactionSchema = z.object({
   description: z.string().min(3).max(30).optional(),
   amount: z.number().positive().optional(),
   type: z.nativeEnum(TransactionType).optional(),
-  date: z.date().optional(),
+  date: z.string().datetime().optional(),
   budgetId: z.string().uuid().optional(),
   categoryId: z.string().uuid().optional(),
   concurrence: concurrenceSchema.optional(),

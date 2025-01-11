@@ -54,17 +54,17 @@ export default function TransactionForm({
   const { createTransaction } = useTransactions();
   const { state: { categories } } = useCategories();
   const { state: { budgets } } = useBudgets();
-  const isEditWithItem = editMode && item;
+  const hasItemInEdit = editMode && item;
 
   const form = useForm<TransactionFormType>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      description: isEditWithItem ? item.description : '',
-      type: isEditWithItem ? item.type : 'expense',
-      amount: isEditWithItem ? item.amount : 0,
-      categoryId: isEditWithItem ? item.categoryId : categories.find((category) => category.name === 'General')?.id,
-      budgetId: isEditWithItem ? item.budgetId : undefined,
-      date: isEditWithItem ? new Date(item.date) : new Date(),
+      description: hasItemInEdit ? item.description : '',
+      type: hasItemInEdit ? item.type : 'expense',
+      amount: hasItemInEdit ? item.amount : 0,
+      categoryId: hasItemInEdit ? item.categoryId : categories.find((category) => category.name === 'General')?.id,
+      budgetId: hasItemInEdit ? item.budgetId : undefined,
+      date: hasItemInEdit ? new Date(item.date) : new Date(),
       ...concurrenceFormDefaults,
     },
   });

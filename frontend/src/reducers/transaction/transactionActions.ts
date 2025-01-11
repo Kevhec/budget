@@ -9,7 +9,6 @@ import {
 } from '@/types';
 import axiosClient from '@/config/axios';
 import getBalance from '@/lib/balance/getBalance';
-import formatConcurrence from '@/lib/formatConcurrence';
 import { extractConcurrenceData } from '@/lib/utils';
 import { initialRecentTransactionsState, initialTransactionState } from './transactionReducer';
 
@@ -90,16 +89,15 @@ async function createTransaction(
   const currentLimit = currentPaginated.meta?.itemsPerPage;
 
   const concurrencyFormData = extractConcurrenceData(transaction);
-  const parsedConcurrency = formatConcurrence(concurrencyFormData, transaction.date);
 
   const formattedTransaction: ApiTransaction = {
     description: transaction.description,
     amount: transaction.amount,
-    date: transaction.date.toString(),
+    date: transaction.date,
     type: transaction.type as TransactionType,
     budgetId: transaction.budgetId,
     categoryId: transaction.categoryId,
-    recurrence: parsedConcurrency || undefined,
+    concurrence: concurrencyFormData || undefined,
   };
 
   try {
@@ -123,6 +121,7 @@ async function createTransaction(
       });
     }
   } catch (error) {
+    // TODO!: ERROR HANDLING
     dispatch({
       type: TransactionActionType.CREATE_TRANSACTION,
       payload: null,

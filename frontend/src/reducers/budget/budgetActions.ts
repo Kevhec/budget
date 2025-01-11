@@ -97,8 +97,6 @@ async function createBudget(
 
   const concurrencyFormData = extractConcurrenceData(budget);
 
-  console.log({ concurrencyFormData });
-
   const formattedBudget: ApiBudget = {
     name: budget.name,
     totalAmount: budget.totalAmount,

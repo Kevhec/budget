@@ -24,6 +24,7 @@ const signUp = async (
     username,
     birthday,
     password,
+    timezone,
   } = req.body;
 
   // TODO: Delete accounts that are not verified on a week, provide a warning message;
@@ -36,6 +37,7 @@ const signUp = async (
     const data = {
       email,
       username,
+      timezone,
       birthday: new Date(birthday),
       password: await bcrypt.hash(password, salt),
     };

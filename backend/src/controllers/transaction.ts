@@ -6,19 +6,18 @@ import { Budget, Category, Transaction } from '../database/models';
 import generateLinksMetadata from '../lib/utils/generateLinksMetadata';
 import generateDateRange from '../lib/utils/generateDateRange';
 import {
-  JobTypes,
   type BalanceData,
   type BalanceResponse,
   type CreateTransactionRequestBody,
   type MonthData,
   type TypedRequest,
 } from '../lib/types';
-import generateCronExpression from '../lib/cron_manager/generateCronExpression';
-import CronTask from '../database/models/cronTask';
-import CronJob from '../database/models/cronJobs';
-import { type Job, scheduleCronTask } from '../lib/cron_manager/taskScheduler';
 import { cliTheme, parseIncludes, sanitizeObject } from '../lib/utils';
-import { createTransaction as createTransactionJob } from '../lib/jobs';
+import {
+  createTransaction as createTransactionJob,
+  createConcurrence as createConcurrenceJob,
+} from '../lib/jobs';
+import setupJob from '../lib/cron_manager/setupJob';
 
 // Create
 async function createTransaction(
@@ -32,71 +31,46 @@ async function createTransaction(
     type,
     categoryId,
     budgetId,
-    recurrence,
+    concurrence,
   } = req.body;
+
+  console.log({ body: req.body });
+
+  const {
+    user,
+  } = req;
 
   try {
     let taskId: null | string = null;
+    let concurrenceId: null | string = null;
 
     const dateObject = new Date(date);
 
     console.log(cliTheme.server('HERE I AM CREATING A TRANSACTION'));
 
-    if (recurrence) {
+    if (concurrence && user) {
+      const newConcurrence = await createConcurrenceJob({ concurrence, user });
+
+      concurrenceId = newConcurrence.id;
+
       const {
-        concurrence, time, weekDay, endDate,
-      } = recurrence;
-      const { minute, hour, timezone } = time;
-      const { steps, type: concurrenceType } = concurrence;
-
-      const recurrenceEndDate = endDate ? new Date(endDate) : undefined;
-
-      const cronExpression = generateCronExpression({
-        concurrence: {
-          type: concurrenceType,
-          steps,
-        },
+        taskId: newTaskId,
+      } = await setupJob({
+        user,
+        concurrence,
         startDate: dateObject,
-        time: {
-          minute,
-          hour,
-          timezone,
-        },
-        weekDay,
-      });
-
-      const newTask = await CronTask.create({
-        cronExpression,
-        endDate: recurrenceEndDate || null,
-        timezone,
-      });
-
-      const job = await CronJob.create({
-        jobName: JobTypes.CREATE_TRANSACTION,
-        jobArgs: {
+        startDateOnly: true,
+        particularJobArgs: {
           description,
           amount,
           date,
           type,
           categoryId,
           budgetId: budgetId || '',
-          userId: req.user?.id || '',
-          cronTaskId: newTask.id,
         },
-        cronTaskId: newTask.id,
       });
 
-      const typedJob = job as unknown as Job;
-
-      taskId = newTask.id;
-
-      scheduleCronTask({
-        cronExpression,
-        endDate: recurrenceEndDate,
-        timezone,
-        taskId,
-        jobs: [typedJob],
-      });
+      taskId = newTaskId;
     }
 
     const newTransaction = await createTransactionJob({
@@ -108,6 +82,7 @@ async function createTransaction(
       categoryId,
       cronTaskId: taskId,
       userId: req.user?.id || '',
+      concurrenceId,
     });
 
     console.log({ newTransaction });

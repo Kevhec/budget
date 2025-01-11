@@ -87,9 +87,9 @@ export interface ApiBudget {
 export interface ApiTransaction {
   description: string
   amount: number
-  date: string
+  date: Date
   type: TransactionType
   budgetId?: string
   categoryId?: string
-  recurrence?: ApiRecurrence
+  concurrence?: SimplifiedConcurrence
 }
