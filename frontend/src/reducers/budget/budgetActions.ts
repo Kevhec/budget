@@ -5,7 +5,6 @@ import {
 } from '@/types';
 import { Dispatch } from 'react';
 import axiosClient from '@/config/axios';
-import formatConcurrence from '@/lib/formatConcurrence';
 import { extractConcurrenceData } from '@/lib/utils';
 import { initialBudgetState, initialRecentBudgetsState } from './budgetReducer';
 
@@ -97,14 +96,13 @@ async function createBudget(
   const currentLimit = currentPaginated.meta?.itemsPerPage;
 
   const concurrencyFormData = extractConcurrenceData(budget);
-  const parsedConcurrency = formatConcurrence(concurrencyFormData, budget.startDate);
 
   const formattedBudget: ApiBudget = {
     name: budget.name,
     totalAmount: budget.totalAmount,
     startDate: budget.startDate,
     endDate: budget.endDate || undefined,
-    recurrence: parsedConcurrency || undefined,
+    concurrence: concurrencyFormData.defaults === 'none' ? undefined : concurrencyFormData,
   };
 
   try {

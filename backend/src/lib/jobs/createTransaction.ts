@@ -10,6 +10,7 @@ async function createTransaction({
   categoryId,
   cronTaskId,
   userId,
+  concurrenceId,
 }: CreateTransactionParams) {
   try {
     const generalCategory = await Category.findOne({
@@ -28,6 +29,7 @@ async function createTransaction({
       categoryId: categoryId || generalCategory?.id,
       cronTaskId,
       userId,
+      concurrenceId,
     });
 
     const transactionWithCategory = await Transaction.findOne({

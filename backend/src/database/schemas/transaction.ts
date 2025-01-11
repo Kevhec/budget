@@ -1,33 +1,36 @@
-import Joi from 'joi';
+import { z } from 'zod';
 import { TransactionType } from '../models/transaction';
-import { recurrenceSchema } from './general';
+import { concurrenceSchema } from './general';
 
 const dateRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
 
-const createTransactionSchema = Joi.object({
-  description: Joi.string().min(3).max(30).required(),
-  amount: Joi.number().precision(2).positive().required(),
-  date: Joi.date(),
-  type: Joi.string().valid(...Object.values(TransactionType)).required(),
-  budgetId: Joi.string().guid().optional(),
-  categoryId: Joi.string().guid(),
-  recurrence: recurrenceSchema.optional(),
+const createTransactionSchema = z.object({
+  description: z.string().min(3).max(30),
+  amount: z.number().positive(),
+  date: z.string().datetime(),
+  type: z.nativeEnum(TransactionType),
+  budgetId: z.string().uuid().optional(),
+  categoryId: z.string().uuid(),
+  concurrence: concurrenceSchema.optional(),
 });
 
-const updateTransactionSchema = Joi.object({
-  id: Joi.string().guid().required(),
-  description: Joi.string().min(3).max(30),
-  amount: Joi.number().precision(2).positive(),
-  type: Joi.string().valid(...Object.values(TransactionType)),
-  date: Joi.date(),
-  budgetId: Joi.string().guid(),
-  categoryId: Joi.string().guid(),
-  recurrence: recurrenceSchema.optional(),
-}).min(2);
+// TODO: Id must be provided via params, not req body
+const updateTransactionSchema = z.object({
+  id: z.string().uuid(),
+  description: z.string().min(3).max(30).optional(),
+  amount: z.number().positive().optional(),
+  type: z.nativeEnum(TransactionType).optional(),
+  date: z.string().datetime().optional(),
+  budgetId: z.string().uuid().optional(),
+  categoryId: z.string().uuid().optional(),
+  concurrence: concurrenceSchema.optional(),
+}).refine((data) => Object.entries(data).length > 1, {
+  message: 'Se requiere mínimo un campo además',
+});
 
-const getBalanceSchema = Joi.object({
-  from: Joi.string().pattern(dateRegex).optional(),
-  to: Joi.string().pattern(dateRegex).optional(),
+const getBalanceSchema = z.object({
+  from: z.string().regex(dateRegex).optional(),
+  to: z.string().regex(dateRegex).optional(),
 });
 
 export {

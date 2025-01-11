@@ -24,6 +24,7 @@
       "@/*": ["./*"],
       "@lib/*": ["src/lib/*"],
       "@database/*": ["src/database/*"],
+      "@schemas/*": ["src/database/schemas/*"],
       "@controllers/*": ["src/controllers/*"],
       "@middlewares/*": ["src/middleware/*"],
       "@router/*": ["src/router/*"]
@@ -42,5 +43,5 @@
     "src/database/config/config.cjs",
     "src/mails/VerifyAccount.jsx",
     "src/index.mts"
-, "src/database/migrations/20240925025414-create-user.cjs"  ]
+, "src/database/migrations/20240925025414-create-user.cjs", "src/lib/scripts/generateMigration.Cjs"  ]
 }

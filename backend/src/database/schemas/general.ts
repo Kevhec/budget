@@ -1,36 +1,44 @@
-import { OccurrenceType, WeekDays } from '@/src/lib/types';
-import Joi from 'joi';
+import { CONCURRENCE_TYPE, DEFAULT_CONCURRENCES, WEEKDAYS } from '@/src/lib/constants';
+import { z } from 'zod';
 
-const positiveInteger = Joi.number().positive();
+const positiveInteger = z.number().positive();
 
-const getObjectByUUID = Joi.object({
-  id: Joi.string().guid().required(),
+const getObjectByUUID = z.object({
+  id: z.string().uuid(),
 });
 
-const getTokenUUID = Joi.object({
-  token: Joi.string().guid().required(),
+const getTokenUUID = z.object({
+  token: z.string().uuid(),
 });
 
-const recurrenceSchema = Joi.object({
-  concurrence: Joi.object({
-    type: Joi.string().valid(...Object.values(OccurrenceType)),
-    steps: Joi.number(),
-  }),
-  weekDay: Joi.object({
-    value: Joi.string().valid(...Object.values(WeekDays)).optional(),
-    ordinal: Joi.string().valid('first', 'second', 'third', 'fourth', 'fifth').optional(),
-  }),
-  time: Joi.object({
-    hour: Joi.number().integer().min(0).max(23),
-    minute: Joi.number().integer().min(0).max(59),
-    timezone: Joi.string().optional(),
-  }).optional(),
-  endDate: Joi.date().optional(),
+const concurrenceSchema = z.object({
+  defaults: z
+    .enum(DEFAULT_CONCURRENCES),
+  type: z
+    .enum(CONCURRENCE_TYPE),
+  steps: z
+    .coerce
+    .number()
+    .int()
+    .positive(),
+  withEndDate: z
+    .enum(['true', 'false']),
+  endDate: z
+    .string()
+    .datetime()
+    .optional(),
+  weekDay: z
+    .enum(WEEKDAYS),
+  time: z
+    .string()
+    .datetime(),
+  monthSelect: z
+    .enum(['exact', 'ordinal']),
 });
 
 export {
   positiveInteger,
   getTokenUUID,
   getObjectByUUID,
-  recurrenceSchema,
+  concurrenceSchema,
 };

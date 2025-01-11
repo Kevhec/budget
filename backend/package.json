@@ -6,6 +6,7 @@
   "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "createMigration": "node ./src/lib/scripts/generateMigration.js",
     "dev": "tsx watch ./src/index.ts"
   },
   "keywords": [],
@@ -35,7 +36,6 @@
     "cron-parser": "^4.9.0",
     "cross-env": "^7.0.3",
     "express": "^4.19.2",
-    "joi": "^17.13.1",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3",
     "pg": "^8.11.5",
@@ -44,6 +44,7 @@
     "react-dom": "^18.2.0",
     "resend": "^4.0.0",
     "sequelize": "^6.37.3",
-    "umzug": "^3.8.2"
+    "umzug": "^3.8.2",
+    "zod": "^3.23.8"
   }
 }

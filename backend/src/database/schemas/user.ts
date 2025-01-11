@@ -1,25 +1,35 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
-const userSchema = Joi.object({
-  username: Joi.string().min(3).max(30).required(),
-  email: Joi.string().email().required(),
-  birthday: Joi.date().required(),
-  password: Joi.string()
-    .pattern(/^(?=.*d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/)
-    .required(),
-  repeatPassword: Joi.string()
-    .valid(Joi.ref('password'))
-    .required()
-    .messages({
-      'any.only': 'Las contraseñas deben coincidir',
-    }),
-}).with('password', 'repeatPassword');
+const userSchema = z.object({
+  username: z.string().min(3).max(30),
+  email: z.string().email(),
+  test: z.coerce.date(),
+  birthday: z.date(),
+  password: z
+    .string({ required_error: 'Campo obligatorio' })
+    .min(8, { message: 'Debe contener mínimo 8 caracteres' })
+    .refine((val) => /[A-Z]/.test(val), { message: 'Debe contener al menos una mayúscula' })
+    .refine((val) => /[a-z]/.test(val), { message: 'Debe contener al menos una minúscula' })
+    .refine((val) => /\d/.test(val), { message: 'Debe contener al menos un número' })
+    .refine((val) => /[a-zA-Z]/.test(val), { message: 'Debe contener al menos una letra' }),
+  repeatPassword: z
+    .string(),
+}).refine((data) => data.password === data.repeatPassword, {
+  message: 'Las contraseñas no coincide',
+  path: ['repeatPassword'],
+});
 
-const guestSchema = Joi.object({
-  username: Joi.string().min(3).max(30).required(),
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+});
+
+const guestSchema = z.object({
+  username: z.string().min(3).max(30),
 });
 
 export {
   userSchema,
   guestSchema,
+  loginSchema,
 };

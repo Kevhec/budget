@@ -1,4 +1,4 @@
-import { Ordinals, WeekDays } from './common';
+import { Ordinals, SimplifiedConcurrence, WeekDays } from './common';
 import { OccurrenceType } from './recurrence';
 import type { TransactionType } from './transaction';
 
@@ -60,7 +60,7 @@ export interface ApiMessage {
 export type MessageResponse = ApiResponse<ApiMessage>;
 
 export interface ApiRecurrence {
-  concurrence: {
+  recurrence: {
     type: OccurrenceType
     steps: number
   }
@@ -81,15 +81,15 @@ export interface ApiBudget {
   totalAmount: number
   startDate: Date
   endDate?: Date
-  recurrence?: ApiRecurrence
+  concurrence?: SimplifiedConcurrence
 }
 
 export interface ApiTransaction {
   description: string
   amount: number
-  date: string
+  date: Date
   type: TransactionType
   budgetId?: string
   categoryId?: string
-  recurrence?: ApiRecurrence
+  concurrence?: SimplifiedConcurrence
 }

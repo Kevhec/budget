@@ -21,6 +21,8 @@ export default class User
 
   declare birthday: Date;
 
+  declare timezone: string;
+
   declare role: CreationOptional<string>;
 
   declare confirmed: CreationOptional<boolean>;
@@ -61,6 +63,10 @@ User.init({
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: null,
+  },
+  timezone: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   role: {
     type: DataTypes.STRING,

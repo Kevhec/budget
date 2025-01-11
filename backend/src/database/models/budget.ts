@@ -9,6 +9,7 @@ import {
 import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
 import CronTask from './cronTask';
+import Concurrence from './concurrence';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -24,6 +25,8 @@ class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budg
   declare endDate: CreationOptional<Date>;
 
   declare cronTaskId: ForeignKey<CronTask['id']> | null;
+
+  declare concurrenceId: ForeignKey<Concurrence['id']> | null;
 
   declare userId: ForeignKey<User['id']>;
 }
