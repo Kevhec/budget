@@ -122,6 +122,7 @@ async function createTransaction(
     }
   } catch (error) {
     // TODO!: ERROR HANDLING
+    console.log(error);
     dispatch({
       type: TransactionActionType.CREATE_TRANSACTION,
       payload: null,

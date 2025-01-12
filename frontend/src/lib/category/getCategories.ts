@@ -4,7 +4,6 @@ import { ApiResponse, Category } from '@/types';
 async function getCategories() {
   try {
     const { data } = await axiosClient.get<ApiResponse<Category[]>>('/category/');
-    console.log({ data });
 
     const categories = data.data;
 
@@ -13,7 +12,6 @@ async function getCategories() {
     }
     return null;
   } catch (error: any) {
-    console.log('CATEGORY ERROR: ', error);
     throw new Error(error);
   }
 }

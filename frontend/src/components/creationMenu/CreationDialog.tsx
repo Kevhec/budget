@@ -1,5 +1,3 @@
-import { z } from 'zod';
-import { budgetSchema, transactionSchema } from '@/schemas/creation';
 import useTransactions from '@/hooks/useTransactions';
 import {
   Budget, CreateBudgetParams, CreateTransactionParams, Transaction,
@@ -34,11 +32,6 @@ const formMapping: {
   budget: BudgetForm,
 };
 
-const schemaMapping = {
-  transaction: transactionSchema,
-  budget: budgetSchema,
-};
-
 const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
   type, triggerLabel, item, editMode, modalTitle,
 }, ref) => {
@@ -50,23 +43,34 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
   const { createTransaction } = useTransactions();
   const { createBudget } = useBudgets();
 
-  const schema = schemaMapping[type];
-
   const FormComponent = formMapping[type];
   const formId = `${type}-creation-form`;
 
-  const handleSubmit = async (value: z.infer<typeof schema>) => {
-    switch (type) {
-      case 'transaction':
-        createTransaction(value as CreateTransactionParams);
-        break;
-      case 'budget':
-        createBudget(value as CreateBudgetParams);
-        break;
-      default:
-        throw new Error(`Unhandled creation type: ${type}`);
+  const formHandlers = {
+    creation: {
+      transaction: (value: CreateTransactionParams) => {
+        createTransaction(value);
+      },
+      budget: (value: CreateBudgetParams) => {
+        createBudget(value);
+      },
+    },
+    edition: {
+      transaction: () => null,
+      budget: () => null,
+    },
+  };
+
+  const handleSubmit = async (value: any) => {
+    const modeKey = editMode ? 'edition' : 'creation';
+
+    const handler = formHandlers[modeKey][type];
+
+    if (!handler) {
+      throw new Error(`Unhandled creation type: ${type}`);
     }
 
+    handler(value);
     setIsOpen(false);
   };
 

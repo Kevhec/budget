@@ -18,6 +18,7 @@ import {
   createConcurrence as createConcurrenceJob,
 } from '../lib/jobs';
 import setupJob from '../lib/cron_manager/setupJob';
+import Concurrence from '../database/models/concurrence';
 
 // Create
 async function createTransaction(
@@ -85,8 +86,6 @@ async function createTransaction(
       concurrenceId,
     });
 
-    console.log({ newTransaction });
-
     if (!newTransaction) {
       return res.status(500).json('There was an error creating the new transaction');
     }
@@ -136,6 +135,14 @@ async function getAllTransactions(
         attributes: ['id', 'name', 'color'],
         as: 'category',
       },
+      {
+        identifier: 'concurrence',
+        model: Concurrence,
+        attributes: {
+          exclude: ['createdAt', 'updatedAt', 'userId', 'id'],
+        },
+        as: 'concurrence',
+      },
     ],
   });
 
@@ -179,7 +186,10 @@ async function getAllTransactions(
       where: whereClause,
       offset: intOffset,
       limit: intLimit,
-      include: includes,
+      include: includes ? includes.includedModels : [],
+      attributes: {
+        exclude: includes ? includes.includedIdentifiers : [],
+      },
       order: [['createdAt', 'DESC']],
     });
 

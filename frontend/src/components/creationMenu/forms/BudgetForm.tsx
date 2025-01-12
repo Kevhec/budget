@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { cn, nthDay } from '@/lib/utils';
+import { cn, getModeValue, nthDay } from '@/lib/utils';
 import { budgetSchema } from '@/schemas/creation';
 import { format } from '@formkit/tempo';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,17 +19,19 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
+  useMemo,
 } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
-import { WEEKDAYS } from '@/lib/constants';
+import { concurrenceFormDefaults } from '@/lib/constants';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
 import Typography from '@/components/Typography';
-import { type Budget } from '@/types';
+import { CreateBudgetParams, type Budget } from '@/types';
 import ConcurrenceDialog from '../ConcurrenceDialog';
 
 export type BudgetFormProps = {
-  onSubmit: (value: z.infer<typeof budgetSchema>) => void
+  onSubmit: (value: CreateBudgetParams) => void
   formId: string
   className?: string
   dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
@@ -37,32 +39,33 @@ export type BudgetFormProps = {
   item?: Budget
 };
 
-const defaultStartDate = new Date();
-const defaultEndDate = new Date(defaultStartDate);
-
-defaultEndDate.setMonth(defaultEndDate.getMonth() + 1);
+// TODO: Verify if context to share currently editing item is a good idea
 
 export default function BudgetForm({
-  onSubmit, formId, className, dirtyChecker, item,
+  formId, className, editMode, item, onSubmit, dirtyChecker,
 }: BudgetFormProps) {
   const [isConcurrenceSelectOpen, setConcurrenceSelectOpen] = useState(false);
   const [isConcurrenceOptionHovered, setIsConcurrenceOptionHovered] = useState(false);
 
+  const getValue = getModeValue(editMode);
+
+  const { defaultStartDate, defaultEndDate } = useMemo(() => {
+    const memoStartDate = new Date();
+    const memoEndDate = new Date(memoStartDate);
+
+    memoEndDate.setMonth(memoEndDate.getMonth() + 1);
+
+    return { defaultStartDate: memoStartDate, defaultEndDate: memoEndDate };
+  }, []);
+
   const form = useForm<z.infer<typeof budgetSchema>>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
-      name: '',
-      totalAmount: 0,
-      startDate: undefined,
-      endDate: undefined,
-      concurrenceDefaults: 'none',
-      concurrenceTime: new Date(),
-      concurrenceSteps: 1,
-      concurrenceWithEndDate: 'true',
-      concurrenceType: 'daily',
-      concurrenceWeekDay: format(new Date(), 'dddd', 'en').toLowerCase() as typeof WEEKDAYS[number],
-      concurrenceMonthSelect: 'exact',
-      concurrenceEndDate: undefined,
+      name: getValue(item?.name, ''),
+      totalAmount: getValue(item?.totalAmount, 0),
+      startDate: getValue(new Date(item?.startDate || ''), defaultStartDate),
+      endDate: getValue(new Date(item?.endDate || ''), defaultEndDate),
+      ...concurrenceFormDefaults,
     },
   });
 
@@ -96,9 +99,14 @@ export default function BudgetForm({
   useEffect(() => {
     console.log(item);
   }, [item]);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if (currentStartDate) {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (currentStartDate && currentStartDate !== defaultStartDate) {
       const newEndDate = new Date(currentStartDate);
       newEndDate.setMonth(newEndDate.getMonth() + 1);
 
@@ -107,7 +115,7 @@ export default function BudgetForm({
     } else {
       form.setValue('concurrenceDefaults', 'none');
     }
-  }, [currentStartDate, form]);
+  }, [currentStartDate, form, defaultStartDate]);
 
   const containerClasses = cn('flex relative flex-col gap-6', className);
 

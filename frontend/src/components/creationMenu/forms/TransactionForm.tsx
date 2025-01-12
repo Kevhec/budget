@@ -18,7 +18,7 @@ import {
   Popover, PopoverContent, PopoverContentNoPortal, PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { cn, nthDay } from '@/lib/utils';
+import { cn, getModeValue, nthDay } from '@/lib/utils';
 import {
   Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from '@/components/ui/command';
@@ -30,41 +30,40 @@ import { Calendar } from '@/components/ui/calendar';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
 import { concurrenceFormDefaults } from '@/lib/constants';
 import { CreateTransactionParams } from '@/types';
-import useTransactions from '@/hooks/useTransactions';
 import ConcurrenceDialog from '../ConcurrenceDialog';
 
 type TransactionFormType = z.infer<typeof transactionSchema>;
 
 export type TransactionFormProps = {
-  onSubmit: (value: z.infer<typeof transactionSchema>) => void
   formId: string
   className?: string
-  dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
   editMode?: boolean
   item?: CreateTransactionParams
+  onSubmit: (value: CreateTransactionParams) => void
+  dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
 };
 
 export default function TransactionForm({
-  formId, className, dirtyChecker, editMode, item,
+  formId, className, editMode, item, onSubmit, dirtyChecker,
 }: TransactionFormProps) {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [budgetsOpen, setBudgetsOpen] = useState(false);
   const [isConcurrenceSelectOpen, setConcurrenceSelectOpen] = useState(false);
   const [isConcurrenceOptionHovered, setIsConcurrenceOptionHovered] = useState(false);
-  const { createTransaction } = useTransactions();
   const { state: { categories } } = useCategories();
   const { state: { budgets } } = useBudgets();
-  const hasItemInEdit = editMode && item;
+
+  const getValue = getModeValue(editMode);
 
   const form = useForm<TransactionFormType>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      description: hasItemInEdit ? item.description : '',
-      type: hasItemInEdit ? item.type : 'expense',
-      amount: hasItemInEdit ? item.amount : 0,
-      categoryId: hasItemInEdit ? item.categoryId : categories.find((category) => category.name === 'General')?.id,
-      budgetId: hasItemInEdit ? item.budgetId : undefined,
-      date: hasItemInEdit ? new Date(item.date) : new Date(),
+      description: getValue(item?.description, ''),
+      type: getValue(item?.type, 'expense'),
+      amount: getValue(item?.amount, 0),
+      categoryId: getValue(item?.categoryId, categories.find((category) => category.name === 'General')?.id),
+      budgetId: getValue(item?.budgetId, undefined),
+      date: getValue(new Date(item?.date || ''), new Date()),
       ...concurrenceFormDefaults,
     },
   });
@@ -75,12 +74,6 @@ export default function TransactionForm({
   });
 
   const { formState: { isDirty } } = form;
-
-  const onSubmit = (value: z.infer<typeof transactionSchema>) => {
-    if (!editMode) {
-      createTransaction(value);
-    }
-  };
 
   const handleConcurrenceSelectOpen = useCallback((open: boolean) => {
     if (!isConcurrenceOptionHovered) {
@@ -114,6 +107,10 @@ export default function TransactionForm({
     value: budget.id,
     label: budget.name,
   }));
+
+  useEffect(() => {
+    console.log(item);
+  }, [item]);
 
   return (
     <Form {...form}>

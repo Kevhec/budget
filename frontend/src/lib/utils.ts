@@ -95,3 +95,9 @@ export function generateYearsList(from: number, to?: number) {
 
   return yearsList;
 }
+
+export function getModeValue(editMode: boolean | undefined) {
+  return function selectValue <T>(editValue: T, defaultValue: T) {
+    return editMode && editValue ? editValue : defaultValue;
+  };
+}
