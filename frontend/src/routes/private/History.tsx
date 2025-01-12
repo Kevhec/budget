@@ -11,7 +11,7 @@ export default function History() {
     changePage({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
-      include: 'budget,category',
+      include: 'budget,category,concurrence',
     });
   };
 

@@ -1,18 +1,26 @@
-import { Model, Includeable, ModelStatic } from 'sequelize';
+import {
+  Model, Includeable, ModelStatic, FindAttributeOptions,
+} from 'sequelize';
 
 interface Options {
   models: {
     identifier: string
     model: ModelStatic<Model>
-    attributes?: string[]
+    attributes?: FindAttributeOptions
     as?: string
   }[];
 }
 
-function parseIncludes(includeString: string, options: Options): Includeable[] {
-  if (!includeString) return [];
+interface ReturnType {
+  includedModels: Includeable[]
+  includedIdentifiers: string[]
+}
+
+function parseIncludes(includeString: string, options: Options): ReturnType | null {
+  if (!includeString) return null;
 
   const includesArr = includeString.split(',');
+  const includedIdentifiers: string[] = [];
 
   const includedModels: Includeable[] = [];
 
@@ -23,10 +31,12 @@ function parseIncludes(includeString: string, options: Options): Includeable[] {
         attributes: item.attributes,
         as: item.as,
       });
+
+      includedIdentifiers.push(`${item.identifier}Id`);
     }
   });
 
-  return includedModels;
+  return { includedModels, includedIdentifiers };
 }
 
 export default parseIncludes;
