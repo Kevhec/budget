@@ -1,7 +1,8 @@
 import { cn } from '@/lib/utils';
-import { format } from '@formkit/tempo';
+import { Format, format } from '@formkit/tempo';
 import { CalendarIcon } from 'lucide-react';
 import {
+  ControllerRenderProps,
   FieldValues, Path, UseFormReturn, useWatch,
 } from 'react-hook-form';
 import {
@@ -22,10 +23,17 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
     form,
   }: Props<T>,
 ) {
-  const [endDate, concurrenceDefault, startDate] = useWatch({
+  const [withEndDate, concurrenceDefaults, startDate] = useWatch({
     control: form.control,
-    name: ['concurrenceEndDate', 'concurrenceDefault', 'startDate'] as Path<T>[],
+    name: ['concurrenceWithEndDate', 'concurrenceDefaults', 'startDate'] as Path<T>[],
   });
+
+  const getFormattedDate = (field: ControllerRenderProps<T, Path<T>>, formatType: Format) => {
+    if (Number.isNaN(field.value.getTime())) {
+      return withEndDate === 'true' ? format(new Date(), formatType) : '';
+    }
+    return format(field.value, formatType);
+  };
 
   return (
     <div className="flex gap-4 relative">
@@ -35,7 +43,7 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
         render={({ field }) => (
           <FormItem className="grid grid-rows-[min-content,1fr] gap-2">
             <FormLabel>
-              Hasta
+              Parar
             </FormLabel>
             <FormControl>
               <RadioGroup
@@ -47,13 +55,13 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
                     <RadioGroupItem
                       value="false"
                       disabled={
-                      concurrenceDefault === 'none'
+                      concurrenceDefaults === 'none'
                     }
                     />
                   </FormControl>
                   <FormLabel
                     className={cn({
-                      'text-slate-500': concurrenceDefault === 'none',
+                      'text-slate-500': concurrenceDefaults === 'none',
                     })}
                   >
                     Nunca
@@ -72,9 +80,6 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
           </FormItem>
         )}
       />
-      {/*           {
-      !['none', 'custom'].includes(defaultConcurrence) && ()
-    } */}
       <FormField
         control={form.control}
         name={'concurrenceEndDate' as Path<T>}
@@ -82,7 +87,7 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
           <FormItem className="flex-1 grid grid-rows-2">
             <FormLabel className="sr-only">Fecha límite</FormLabel>
             <Popover>
-              <PopoverTrigger asChild>
+              <PopoverTrigger asChild disabled={withEndDate === 'false'}>
                 <FormControl>
                   <Button
                     variant="outline"
@@ -90,17 +95,19 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
                       'w-full pl-3 text-left font-normal row-start-2',
                       !field.value && 'text-muted-foreground',
                     )}
-                    disabled={
-                      endDate === 'false'
-                    }
+                    disabled={withEndDate === 'false'}
                   >
                     {field.value ? (
                       <>
                         <Typography variant="span" className="md:hidden">
-                          {format((field.value || new Date()), 'medium')}
+                          {
+                            getFormattedDate(field, 'medium')
+                          }
                         </Typography>
                         <Typography variant="span" className="hidden md:inline">
-                          {format((field.value || new Date()), 'long')}
+                          {
+                            getFormattedDate(field, 'long')
+                          }
                         </Typography>
                       </>
                     ) : (

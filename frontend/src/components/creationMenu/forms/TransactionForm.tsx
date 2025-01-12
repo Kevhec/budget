@@ -28,8 +28,8 @@ import useBudgets from '@/hooks/useBudgets';
 import { format } from '@formkit/tempo';
 import { Calendar } from '@/components/ui/calendar';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
-import { concurrenceFormDefaults } from '@/lib/constants';
-import { CreateTransactionParams } from '@/types';
+import { concurrenceInit } from '@/lib/constants';
+import { CreateTransactionParams, Transaction, TransactionType } from '@/types';
 import ConcurrenceDialog from '../ConcurrenceDialog';
 
 type TransactionFormType = z.infer<typeof transactionSchema>;
@@ -38,7 +38,7 @@ export type TransactionFormProps = {
   formId: string
   className?: string
   editMode?: boolean
-  item?: CreateTransactionParams
+  item?: Transaction
   onSubmit: (value: CreateTransactionParams) => void
   dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
 };
@@ -59,12 +59,19 @@ export default function TransactionForm({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       description: getValue(item?.description, ''),
-      type: getValue(item?.type, 'expense'),
+      type: getValue(item?.type, TransactionType.Expense),
       amount: getValue(item?.amount, 0),
       categoryId: getValue(item?.categoryId, categories.find((category) => category.name === 'General')?.id),
       budgetId: getValue(item?.budgetId, undefined),
       date: getValue(new Date(item?.date || ''), new Date()),
-      ...concurrenceFormDefaults,
+      concurrenceDefaults: getValue(item?.concurrence?.defaults, concurrenceInit.defaults),
+      concurrenceTime: getValue(new Date(item?.concurrence?.time || ''), concurrenceInit.time),
+      concurrenceSteps: getValue(item?.concurrence?.steps, concurrenceInit.steps),
+      concurrenceWithEndDate: getValue(item?.concurrence?.withEndDate ? 'true' : 'false', concurrenceInit.withEndDate),
+      concurrenceType: getValue(item?.concurrence?.type, concurrenceInit.type),
+      concurrenceWeekDay: getValue(item?.concurrence?.weekDay, concurrenceInit.weekDay),
+      concurrenceMonthSelect: getValue(item?.concurrence?.monthSelect, concurrenceInit.monthSelect),
+      concurrenceEndDate: getValue(new Date(item?.concurrence?.endDate || ''), concurrenceInit.endDate),
     },
   });
 
@@ -107,10 +114,6 @@ export default function TransactionForm({
     value: budget.id,
     label: budget.name,
   }));
-
-  useEffect(() => {
-    console.log(item);
-  }, [item]);
 
   return (
     <Form {...form}>

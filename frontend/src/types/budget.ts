@@ -2,7 +2,7 @@ import { Reducer } from 'react';
 import { z } from 'zod';
 import { budgetSchema } from '@/schemas/creation';
 import { PaginatedApiResponse } from './api';
-import { LoadingAction } from './common';
+import { LoadingAction, SimplifiedConcurrence } from './common';
 import { PaginatedParams } from './transaction';
 
 export interface Budget {
@@ -15,6 +15,7 @@ export interface Budget {
   updatedAt: string
   userId: string
   hidden?: boolean
+  concurrence?: SimplifiedConcurrence
   balance: {
     totalExpense: number
     totalIncome: number

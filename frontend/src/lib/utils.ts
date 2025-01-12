@@ -2,7 +2,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CreationParamsUnion, SimplifiedConcurrence } from '@/types';
-import { concurrenceFormDefaults, DAY_NAMES_SPANISH, SPANISH_MONTHS } from './constants';
+import { concurrenceInit, DAY_NAMES_SPANISH, SPANISH_MONTHS } from './constants';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -75,8 +75,9 @@ export function extractConcurrenceData(data: CreationParamsUnion) {
   ) as unknown as SimplifiedConcurrence;
 }
 
+// FIXME: This function is broken due to the structure of concurrenceInit
 export function resetConcurrence(formSetter: (name: string, value: unknown) => void) {
-  const entries = Object.entries(concurrenceFormDefaults);
+  const entries = Object.entries(concurrenceInit);
 
   entries.forEach(([name, value]) => {
     formSetter(name, value);

@@ -24,7 +24,7 @@ import {
 } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
-import { concurrenceFormDefaults } from '@/lib/constants';
+import { concurrenceInit } from '@/lib/constants';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
 import Typography from '@/components/Typography';
 import { CreateBudgetParams, type Budget } from '@/types';
@@ -65,7 +65,14 @@ export default function BudgetForm({
       totalAmount: getValue(item?.totalAmount, 0),
       startDate: getValue(new Date(item?.startDate || ''), defaultStartDate),
       endDate: getValue(new Date(item?.endDate || ''), defaultEndDate),
-      ...concurrenceFormDefaults,
+      concurrenceDefaults: getValue(item?.concurrence?.defaults, concurrenceInit.defaults),
+      concurrenceTime: getValue(new Date(item?.concurrence?.time || ''), concurrenceInit.time),
+      concurrenceSteps: getValue(item?.concurrence?.steps, concurrenceInit.steps),
+      concurrenceWithEndDate: getValue(item?.concurrence?.withEndDate ? 'true' : 'false', concurrenceInit.withEndDate),
+      concurrenceType: getValue(item?.concurrence?.type, concurrenceInit.type),
+      concurrenceWeekDay: getValue(item?.concurrence?.weekDay, concurrenceInit.weekDay),
+      concurrenceMonthSelect: getValue(item?.concurrence?.monthSelect, concurrenceInit.monthSelect),
+      concurrenceEndDate: getValue(new Date(item?.concurrence?.endDate || ''), concurrenceInit.endDate),
     },
   });
 
@@ -96,9 +103,6 @@ export default function BudgetForm({
     }
   }, [isDirty, dirtyChecker]);
 
-  useEffect(() => {
-    console.log(item);
-  }, [item]);
   const isFirstRender = useRef(true);
 
   useEffect(() => {

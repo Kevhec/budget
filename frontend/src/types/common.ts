@@ -54,17 +54,6 @@ export type CreationParamsUnion =
 
 export type DefaultConcurrency = typeof DEFAULT_CONCURRENCES[number];
 
-export interface ConcurrenceFormData {
-  concurrenceDefaults: DefaultConcurrency
-  concurrenceType: typeof CONCURRENCE_TYPE[number],
-  concurrenceSteps: number,
-  concurrenceWeekDay: WeekDays,
-  concurrenceTime: Date,
-  concurrenceMonthSelect: 'exact' | 'ordinal'
-  concurrenceEndDate?: Date
-  concurrenceWithEndDate: 'true' | 'false'
-}
-
 export interface SimplifiedConcurrence {
   defaults: DefaultConcurrency
   type: typeof CONCURRENCE_TYPE[number],
