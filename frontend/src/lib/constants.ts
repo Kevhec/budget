@@ -1,4 +1,4 @@
-import { type ConcurrenceFormData, type WeekDays } from '@/types';
+import { type SimplifiedConcurrence, type WeekDays } from '@/types';
 import { format } from '@formkit/tempo';
 
 const dateStringRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -35,15 +35,15 @@ const ENGLISH_ORDINALS = ['first', 'second', 'third', 'fourth', 'fifth'] as cons
 
 const SPANISH_MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-const concurrenceFormDefaults: ConcurrenceFormData = {
-  concurrenceDefaults: 'none',
-  concurrenceTime: new Date(),
-  concurrenceSteps: 1,
-  concurrenceWithEndDate: 'true',
-  concurrenceType: 'daily',
-  concurrenceWeekDay: format(new Date(), 'dddd', 'en').toLowerCase() as WeekDays,
-  concurrenceMonthSelect: 'exact',
-  concurrenceEndDate: undefined,
+const concurrenceInit: SimplifiedConcurrence = {
+  defaults: 'none',
+  time: new Date(),
+  steps: 1,
+  withEndDate: 'true',
+  type: 'daily',
+  weekDay: format(new Date(), 'dddd', 'en').toLowerCase() as WeekDays,
+  monthSelect: 'exact',
+  endDate: undefined,
 };
 
 export {
@@ -52,7 +52,7 @@ export {
   defaultPaginatedOptions,
   CONCURRENCE_TYPE,
   DEFAULT_CONCURRENCES,
-  concurrenceFormDefaults,
+  concurrenceInit,
   WEEKDAYS,
   DAY_NAMES_SPANISH,
   ENGLISH_ORDINALS,

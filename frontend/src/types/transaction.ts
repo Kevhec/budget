@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { transactionSchema } from '@/schemas/creation';
 import { Category } from './category';
 import { PaginatedApiResponse } from './api';
-import { LoadingAction } from './common';
+import { LoadingAction, SimplifiedConcurrence } from './common';
 import { BalanceData } from './balance';
 import { type Budget } from './budget';
 
@@ -21,11 +21,12 @@ export interface Transaction {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
-  budgetId: number;
+  budgetId?: string;
   categoryId?: string
   budget?: Budget | null;
   category?: Category | null;
   hidden?: boolean
+  concurrence?: SimplifiedConcurrence
 }
 
 export interface PaginatedParams {
