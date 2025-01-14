@@ -61,6 +61,8 @@ export function hasOneYearPassed(fromDate: Date) {
 }
 
 export function extractConcurrenceData(data: CreationParamsUnion) {
+  if (data.concurrenceDefaults === 'none') return undefined;
+
   const concurrenceOnlyEntries = Object.entries(data).filter(([key]) => key.startsWith('concurrence'));
 
   const simplifiedEntries = concurrenceOnlyEntries.map(([key, value]) => {

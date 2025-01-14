@@ -1,96 +1,83 @@
-import CronJob from '@/src/database/models/cronJobs';
 import { User } from '@/src/database/models';
-import CronTask from '@/src/database/models/cronTask';
-import parseConcurrence from '../utils/concurrence/formatConcurrence';
 import getDateTimeDifference from '../utils/time/getDateTimeDifference';
-import generateCronExpression from './generateCronExpression';
 import generateNextExecutionDate from './generateNextExecutionDate';
 import { Job, scheduleCronTask } from './taskScheduler';
 import { Concurrence, JobTypes } from '../types';
+import prepareJobData from './prepareJobData';
+import upsertCronTask from './upsertCronTask';
+import upsertCronJob from './upsertCronJob';
 
 interface Params<T> {
   user: User
   concurrence: Concurrence
   startDate: Date
   particularJobArgs: T
+  jobName: JobTypes
   startDateOnly?: boolean
+  existingTaskId?: string
+  existingJobId?: string
 }
 
-async function setupJob<T>({
+async function setupOrUpdateJob<T>({
   user,
   concurrence,
   startDate,
   startDateOnly,
+  jobName,
   particularJobArgs,
+  existingTaskId,
+  existingJobId,
 }: Params<T>) {
-  const userTimezone = user?.dataValues.timezone || 'UTC';
-
-  const parsedConcurrence = parseConcurrence(concurrence, startDate, userTimezone);
   const {
-    time,
-    endDate: parsedEndDate,
-    weekDay,
-  } = parsedConcurrence;
-
-  const { minute, hour, timezone } = time;
-  const { steps, type } = concurrence;
-
-  const concurrenceEndDate = parsedEndDate || undefined;
-
-  const cronExpression = generateCronExpression({
-    recurrence: {
-      type,
-      steps,
-    },
-    startDate,
-    time: {
-      minute,
-      hour,
-      timezone,
-    },
-    weekDay,
-  });
+    cronExpression,
+    endDate: concurrenceEndDate,
+    timezone,
+  } = prepareJobData(user, concurrence, startDate);
 
   // When recurring the end date for each budget is calculated automatically, not by the user
   const nextExecutionDate = generateNextExecutionDate(cronExpression, { tz: timezone });
 
   const intervalMilliseconds = getDateTimeDifference(startDate, nextExecutionDate);
 
-  const newTask = await CronTask.create({
-    cronExpression,
-    endDate: concurrenceEndDate || null,
-    timezone,
-    userId: user?.id,
+  const newOrUpdatedTaskId = await upsertCronTask({
+    user,
+    data: {
+      cronExpression,
+      endDate: concurrenceEndDate,
+      timezone,
+    },
+    taskId: existingTaskId,
   });
 
-  const job = await CronJob.create({
-    jobName: JobTypes.CREATE_BUDGET,
-    jobArgs: {
-      ...particularJobArgs,
-      intervalMilliseconds: startDateOnly ? null : intervalMilliseconds,
-      userId: user?.id || '',
-      cronTaskId: newTask.id,
+  const job = await upsertCronJob({
+    user,
+    data: {
+      jobName,
+      jobArgs: {
+        ...particularJobArgs,
+        intervalMilliseconds: startDateOnly ? null : intervalMilliseconds,
+        userId: user?.id || '',
+        cronTaskId: newOrUpdatedTaskId,
+      },
     },
-    cronTaskId: newTask.id,
-    userId: user?.id,
+    taskId: newOrUpdatedTaskId,
+    jobId: existingJobId,
   });
 
   const typedJob = job as unknown as Job;
-
-  const taskId = newTask.dataValues.id;
 
   scheduleCronTask({
     cronExpression,
     endDate: concurrenceEndDate,
     timezone,
-    taskId,
+    taskId: newOrUpdatedTaskId,
     jobs: [typedJob],
   });
 
   return {
     nextExecutionDate,
-    taskId: taskId.toString(),
+    taskId: newOrUpdatedTaskId.toString(),
   };
 }
 
-export default setupJob;
+export default setupOrUpdateJob;

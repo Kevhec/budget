@@ -1,6 +1,5 @@
 import CronTask from '@/src/database/models/cronTask';
 import CronJob from '@/src/database/models/cronJobs';
-import parser from 'cron-parser';
 import { type Job, scheduleCronTask } from './taskScheduler';
 
 async function loadCronTasks() {
@@ -28,13 +27,6 @@ async function loadCronTasks() {
       if (!cronJobs) {
         throw new Error('No jobs associated to provided task');
       }
-
-      const interval = parser.parseExpression(cronExpression);
-      const { fields } = interval;
-      console.log({
-        cronExpression,
-        fields,
-      });
 
       scheduleCronTask({
         cronExpression,

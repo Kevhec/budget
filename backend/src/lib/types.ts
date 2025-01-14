@@ -12,6 +12,14 @@ export interface BalanceResponse {
   balance: number
 }
 
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JSONValue[]
+  | { [key: string]: JSONValue };
+
 export interface TypedRequest<T> extends Request {
   body: T
 }

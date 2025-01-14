@@ -97,7 +97,7 @@ async function createTransaction(
     type: transaction.type as TransactionType,
     budgetId: transaction.budgetId,
     categoryId: transaction.categoryId,
-    concurrence: concurrencyFormData || undefined,
+    concurrence: concurrencyFormData,
   };
 
   try {
