@@ -1,15 +1,13 @@
 import { Dispatch } from 'react';
 import { getPaginatedTransactions } from '@/lib/transaction';
 import {
-  ApiTransaction,
   CreateTransactionParams,
   PaginatedParams, Transaction, TransactionAction, TransactionActionType,
   TransactionState,
-  TransactionType,
 } from '@/types';
 import axiosClient from '@/config/axios';
 import getBalance from '@/lib/balance/getBalance';
-import { extractConcurrenceData } from '@/lib/utils';
+import formatTransactionData from '@/lib/transaction/formatTransactionData';
 import { initialRecentTransactionsState, initialTransactionState } from './transactionReducer';
 
 async function syncRecentTransactions(dispatch: Dispatch<TransactionAction>) {
@@ -22,7 +20,7 @@ async function syncRecentTransactions(dispatch: Dispatch<TransactionAction>) {
     const response = await getPaginatedTransactions({
       page: 1,
       limit: 4,
-      include: 'budget,category',
+      include: 'budget,category,concurrence',
     });
 
     const recentTransactions = response.data;
@@ -88,17 +86,7 @@ async function createTransaction(
   const currentPage = currentPaginated.meta?.currentPage;
   const currentLimit = currentPaginated.meta?.itemsPerPage;
 
-  const concurrencyFormData = extractConcurrenceData(transaction);
-
-  const formattedTransaction: ApiTransaction = {
-    description: transaction.description,
-    amount: transaction.amount,
-    date: transaction.date,
-    type: transaction.type as TransactionType,
-    budgetId: transaction.budgetId,
-    categoryId: transaction.categoryId,
-    concurrence: concurrencyFormData,
-  };
+  const formattedTransaction = formatTransactionData(transaction);
 
   try {
     const { data } = await axiosClient.post('/transaction', {
@@ -165,9 +153,32 @@ async function getHistoricalBalance(
   }
 }
 
+async function updateTransaction(
+  dispatch: Dispatch<TransactionAction>,
+  transaction: CreateTransactionParams,
+  id: string,
+) {
+  console.log({
+    transaction,
+    id,
+  });
+  try {
+    const formattedTransaction = formatTransactionData(transaction);
+
+    const { data } = await axiosClient.patch(`/transaction/${id}`, {
+      ...formattedTransaction,
+    });
+
+    console.log({ data });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export {
   syncRecentTransactions,
   syncPaginatedTransactions,
   createTransaction,
   getHistoricalBalance,
+  updateTransaction,
 };

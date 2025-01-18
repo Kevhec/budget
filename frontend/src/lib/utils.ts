@@ -101,6 +101,15 @@ export function generateYearsList(from: number, to?: number) {
 
 export function getModeValue(editMode: boolean | undefined) {
   return function selectValue <T>(editValue: T, defaultValue: T) {
+    if (editValue instanceof Date && Number.isNaN(editValue.getTime())) {
+      return defaultValue;
+    }
+
     return editMode && editValue ? editValue : defaultValue;
   };
+}
+
+export function isValidDate(dateString: string) {
+  const date = new Date(dateString);
+  return !Number.isNaN(date.getTime());
 }

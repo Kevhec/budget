@@ -15,6 +15,7 @@ async function startCronManager() {
       deleteUnverifiedUsers();
     });
     console.log(`${cliTheme.server('[Server]')} Unverified users deletion task initialized`);
+    console.log(`${cliTheme.server('[Server]')} Cron manager initialized correctly`);
   } catch (error) {
     console.log(`${cliTheme.serverWarn('[Server]')} Cron tasks couldn't be loaded`, error);
   }

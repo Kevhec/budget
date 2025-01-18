@@ -20,10 +20,7 @@ import {
 } from '../lib/jobs';
 import setupOrUpdateJob from '../lib/cron_manager/setupJob';
 import Concurrence from '../database/models/concurrence';
-import CronTask from '../database/models/cronTask';
-import { stopCronTask } from '../lib/cron_manager/taskScheduler';
-import CronJob from '../database/models/cronJobs';
-import parseConcurrenceObj from '../lib/jobs/parseConcurrenceObj';
+import upsertConcurrence from '../lib/cron_manager/upsertConcurrence';
 
 // Create
 async function createTransaction(
@@ -362,77 +359,41 @@ async function updateTransaction(
     } = req;
 
     const transactionPrevData = transaction.get();
-    let { concurrenceId, cronTaskId } = transactionPrevData;
-    const dateObject = new Date(date);
+    const {
+      concurrenceId: prevConcurrenceId,
+      cronTaskId: prevCronTaskId,
+    } = transactionPrevData;
+    const dateObject = date ? new Date(date) : transactionPrevData.date;
+
+    let newConcurrenceId = prevConcurrenceId;
+    let newCronTaskId = prevCronTaskId;
 
     if (concurrence && user) {
-      // Add concurrence to existing non-concurrent transaction
-      if (!concurrenceId || !cronTaskId) {
-        const newConcurrence = await createConcurrenceJob({ concurrence, user });
+      const newConcurrenceData = await upsertConcurrence({
+        user,
+        concurrence,
+        startDate: dateObject,
+        startDateOnly: true,
+        jobName: JobTypes.CREATE_TRANSACTION,
+        jobArgs: {
+          description,
+          amount,
+          date,
+          type,
+          categoryId,
+          budgetId: budgetId || '',
+        },
+        prevConcurrenceId,
+        prevCronTaskId,
+      });
 
-        concurrenceId = newConcurrence.id;
-
-        const {
-          taskId: newTaskId,
-        } = await setupOrUpdateJob({
-          user,
-          concurrence,
-          startDate: dateObject,
-          startDateOnly: true,
-          jobName: JobTypes.CREATE_TRANSACTION,
-          particularJobArgs: {
-            description,
-            amount,
-            date,
-            type,
-            categoryId,
-            budgetId: budgetId || '',
-          },
-        });
-
-        cronTaskId = newTaskId;
-      } else {
-        // Modify existing concurrence data
-        const associatedConcurrence = await Concurrence.findByPk(concurrenceId);
-        const associatedTask = await CronTask.findByPk(cronTaskId);
-        const associatedJob = await CronJob.findOne({
-          where: {
-            userId: user.id,
-            cronTaskId: associatedTask?.id,
-            jobName: JobTypes.CREATE_TRANSACTION,
-          },
-        });
-
-        if (!associatedConcurrence || !associatedTask || !associatedJob) {
-          return res.status(500).json('Internal server error');
-        }
-
-        // Stop currently running task to start modification
-        stopCronTask(associatedTask.id);
-
-        const concurrenceObj = parseConcurrenceObj(concurrence);
-
-        // Update concurrence form data
-        await associatedConcurrence.update(concurrenceObj);
-
-        await setupOrUpdateJob({
-          user,
-          concurrence,
-          startDate: dateObject,
-          startDateOnly: true,
-          jobName: JobTypes.CREATE_TRANSACTION,
-          particularJobArgs: {
-            description,
-            amount,
-            date,
-            type,
-            categoryId,
-            budgetId: budgetId || '',
-          },
-          existingTaskId: associatedTask.id,
-          existingJobId: associatedJob.id,
-        });
+      if (!newConcurrenceData) {
+        return res.status(500).json('Internal server error');
       }
+
+      const { concurrenceId, taskId } = newConcurrenceData;
+      newConcurrenceId = concurrenceId;
+      newCronTaskId = taskId;
     }
 
     const updatedTransaction = await transaction.update({
@@ -442,7 +403,8 @@ async function updateTransaction(
       categoryId,
       budgetId,
       date: dateObject,
-      cronTaskId,
+      cronTaskId: newCronTaskId,
+      concurrenceId: newConcurrenceId,
     });
 
     return res.status(200).json({ data: updatedTransaction });
@@ -456,6 +418,7 @@ async function updateTransaction(
         }
       }
     }
+    console.log('ERRRRRRRRRRRRRRRRRROOOOOOOOOOOOOOOOOOOOOOOORRRRRRRRRRRRRRRRRRRRR', error);
     return res.status(500).json('Internal server error');
   }
 }

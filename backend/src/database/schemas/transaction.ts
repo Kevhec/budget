@@ -24,8 +24,8 @@ const updateTransactionSchema = z.object({
   budgetId: z.string().uuid().optional(),
   categoryId: z.string().uuid().optional(),
   concurrence: concurrenceSchema.optional(),
-}).refine((data) => Object.entries(data).length > 1, {
-  message: 'Se requiere mínimo un campo además',
+}).refine((data) => Object.entries(data).length > 0, {
+  message: 'Se requiere mínimo un campo',
 });
 
 const getBalanceSchema = z.object({

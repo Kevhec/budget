@@ -55,6 +55,10 @@ export default function TransactionForm({
 
   const getValue = getModeValue(editMode);
 
+  const {
+    concurrence,
+  } = item || {};
+
   const form = useForm<TransactionFormType>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -64,14 +68,14 @@ export default function TransactionForm({
       categoryId: getValue(item?.categoryId, categories.find((category) => category.name === 'General')?.id),
       budgetId: getValue(item?.budgetId, undefined),
       date: getValue(new Date(item?.date || ''), new Date()),
-      concurrenceDefaults: getValue(item?.concurrence?.defaults, concurrenceInit.defaults),
-      concurrenceTime: getValue(new Date(item?.concurrence?.time || ''), concurrenceInit.time),
-      concurrenceSteps: getValue(item?.concurrence?.steps, concurrenceInit.steps),
-      concurrenceWithEndDate: getValue(item?.concurrence?.withEndDate ? 'true' : 'false', concurrenceInit.withEndDate),
-      concurrenceType: getValue(item?.concurrence?.type, concurrenceInit.type),
-      concurrenceWeekDay: getValue(item?.concurrence?.weekDay, concurrenceInit.weekDay),
-      concurrenceMonthSelect: getValue(item?.concurrence?.monthSelect, concurrenceInit.monthSelect),
-      concurrenceEndDate: getValue(new Date(item?.concurrence?.endDate || ''), concurrenceInit.endDate),
+      concurrenceDefaults: getValue(concurrence?.defaults, concurrenceInit.defaults),
+      concurrenceTime: getValue(new Date(concurrence?.time || ''), concurrenceInit.time),
+      concurrenceSteps: getValue(concurrence?.steps, concurrenceInit.steps),
+      concurrenceWithEndDate: getValue(concurrence?.withEndDate ? 'true' : 'false', concurrenceInit.withEndDate),
+      concurrenceType: getValue(concurrence?.type, concurrenceInit.type),
+      concurrenceWeekDay: getValue(concurrence?.weekDay, concurrenceInit.weekDay),
+      concurrenceMonthSelect: getValue(concurrence?.monthSelect, concurrenceInit.monthSelect),
+      concurrenceEndDate: getValue(new Date(concurrence?.endDate || ''), concurrenceInit.endDate),
     },
   });
 

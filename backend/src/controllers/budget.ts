@@ -1,5 +1,7 @@
 import type { Request, Response } from 'express';
-import { fn, literal, Op } from 'sequelize';
+import {
+  DatabaseError, fn, literal, Op,
+} from 'sequelize';
 import { format } from '@formkit/tempo';
 import { Budget, Transaction } from '../database/models';
 import generateDateRange from '../lib/utils/generateDateRange';
@@ -7,11 +9,12 @@ import {
   createBudget as createBudgetJob,
   createConcurrence as createConcurrenceJob,
 } from '../lib/jobs';
-import { type CreateBudgetRequestBody, type TypedRequest } from '../lib/types';
+import { JobTypes, type CreateBudgetRequestBody, type TypedRequest } from '../lib/types';
 import { generateLinksMetadata, sanitizeObject } from '../lib/utils';
 import extractBudgetBalance from '../lib/jobs/extractBudgetBalance';
-import setupJob from '../lib/cron_manager/setupJob';
+import setupOrUpdateJob from '../lib/cron_manager/setupJob';
 import Concurrence from '../database/models/concurrence';
+import upsertConcurrence from '../lib/cron_manager/upsertConcurrence';
 
 // TODO: Sanitize returned objects to not return userId
 
@@ -50,10 +53,11 @@ async function createBudget(
       const {
         nextExecutionDate,
         taskId: newTaskId,
-      } = await setupJob({
+      } = await setupOrUpdateJob({
         user,
         concurrence,
         startDate: startDateObj,
+        jobName: JobTypes.CREATE_BUDGET,
         particularJobArgs: {
           name,
           totalAmount,
@@ -302,15 +306,11 @@ async function getBudgetBalance(
 
 // Update
 async function updateBudget(
-  req: Request,
+  req: TypedRequest<CreateBudgetRequestBody>,
   res: Response,
 ): Promise<Response | undefined> {
   const budgetId = req.params.id;
   const reqBody = req.body;
-
-  if (Object.keys(reqBody).length === 0) {
-    return res.status(400).json({ message: 'Request body cannot be empty' });
-  }
 
   try {
     const budget = await Budget.findByPk(budgetId);
@@ -319,14 +319,82 @@ async function updateBudget(
       return res.status(404).json(`Budget not found for specified id: ${budgetId}`);
     }
 
-    const updatedBudget = await budget.update(reqBody);
+    const {
+      name,
+      totalAmount,
+      startDate,
+      endDate,
+      concurrence,
+    } = reqBody;
+
+    const {
+      user,
+    } = req;
+
+    const prevBudgetData = budget.get();
+    const {
+      concurrenceId: prevConcurrenceId,
+      cronTaskId: prevCronTaskId,
+      startDate: prevStartDate,
+      endDate: prevEndDate,
+    } = prevBudgetData;
+
+    const startDateObj = startDate ? new Date(startDate) : prevStartDate;
+    let endDateObj = endDate ? new Date(endDate) : prevEndDate;
+
+    let newConcurrenceId = prevConcurrenceId;
+    let newCronTaskId = prevCronTaskId;
+
+    if (concurrence && user) {
+      const newConcurrenceData = await upsertConcurrence({
+        user,
+        concurrence,
+        startDate: startDateObj,
+        jobName: JobTypes.CREATE_BUDGET,
+        jobArgs: {
+          name,
+          totalAmount,
+        },
+        prevConcurrenceId,
+        prevCronTaskId,
+      });
+
+      if (!newConcurrenceData) {
+        return res.status(500).json('Internal server error');
+      }
+
+      const {
+        concurrenceId,
+        taskId,
+        nextExecutionDate,
+      } = newConcurrenceData;
+
+      newConcurrenceId = concurrenceId;
+      newCronTaskId = taskId;
+      endDateObj = nextExecutionDate;
+    }
+
+    const updatedBudget = await budget.update({
+      name,
+      totalAmount,
+      startDate: startDateObj,
+      endDate: endDateObj,
+      concurrenceId: newConcurrenceId,
+      cronTaskId: newCronTaskId,
+    });
 
     const sanitizedBudget = sanitizeObject(updatedBudget.toJSON(), ['cronTaskId']);
 
     return res.status(200).json({ data: sanitizedBudget });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error('ERROR: ', error.message);
+    if (error instanceof DatabaseError) {
+      const sequelizeError = error as { parent?: { code?: string, detail?: string } };
+
+      if (sequelizeError.parent && sequelizeError.parent.code === '23503') {
+        if (sequelizeError.parent && sequelizeError.parent.code === '23503') {
+          return res.status(409).json(sequelizeError.parent.detail);
+        }
+      }
     }
     return res.status(500).json('Internal server error');
   }
