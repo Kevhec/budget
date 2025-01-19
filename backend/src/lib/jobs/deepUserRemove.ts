@@ -2,6 +2,7 @@ import SequelizeConnection from '@/src/database/config/SequelizeConnection';
 import {
   Budget, Category, Transaction, User,
 } from '@/src/database/models';
+import Concurrence from '@/src/database/models/concurrence';
 import CronJob from '@/src/database/models/cronJobs';
 import CronTask from '@/src/database/models/cronTask';
 
@@ -40,6 +41,13 @@ async function deepUserRemove(user: User) {
     });
 
     await CronJob.destroy({
+      where: {
+        userId: user.id,
+      },
+      transaction: t,
+    });
+
+    await Concurrence.destroy({
       where: {
         userId: user.id,
       },

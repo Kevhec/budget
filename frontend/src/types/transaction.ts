@@ -43,8 +43,9 @@ export enum TransactionActionType {
   SYNC_RECENT = 'SYNC_RECENT',
   SYNC_PAGINATED = 'SYNC_PAGINATED',
   CREATE_TRANSACTION = 'CREATE_TRANSACTION',
-  SET_LOADING = 'SET_LOADING',
   GET_BALANCE = 'GET_BALANCE',
+  UPDATE_TRANSACTION = 'UPDATE_TRANSACTION',
+  SET_LOADING = 'SET_LOADING',
 }
 
 export interface SyncRecentAction {
@@ -67,11 +68,17 @@ export interface CreateTransactionAction {
   payload: Transaction | null
 }
 
+export interface UpdateTransactionAction {
+  type: TransactionActionType.UPDATE_TRANSACTION
+  payload: Transaction | null
+}
+
 export type TransactionAction =
   | SyncRecentAction
   | SyncPaginatedAction
   | CreateTransactionAction
   | GetBalanceAction
+  | UpdateTransactionAction
   | LoadingAction<TransactionActionType.SET_LOADING>;
 
 export interface TransactionState {
@@ -88,4 +95,5 @@ export interface TransactionsContextType {
   createTransaction: (data: CreateTransactionParams) => void;
   getBalance: (from?: string, to?: string) => void;
   changePage: (params: PaginatedParams) => void;
+  updateTransaction: (id: string, data: CreateTransactionParams) => void;
 }

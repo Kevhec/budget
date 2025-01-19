@@ -6,19 +6,21 @@ import { Budget, Category, Transaction } from '../database/models';
 import generateLinksMetadata from '../lib/utils/generateLinksMetadata';
 import generateDateRange from '../lib/utils/generateDateRange';
 import {
+  JobTypes,
   type BalanceData,
   type BalanceResponse,
   type CreateTransactionRequestBody,
   type MonthData,
   type TypedRequest,
 } from '../lib/types';
-import { cliTheme, parseIncludes, sanitizeObject } from '../lib/utils';
+import { parseIncludes, sanitizeObject } from '../lib/utils';
 import {
   createTransaction as createTransactionJob,
   createConcurrence as createConcurrenceJob,
 } from '../lib/jobs';
-import setupJob from '../lib/cron_manager/setupJob';
+import setupOrUpdateJob from '../lib/cron_manager/setupJob';
 import Concurrence from '../database/models/concurrence';
+import upsertConcurrence from '../lib/cron_manager/upsertConcurrence';
 
 // Create
 async function createTransaction(
@@ -35,8 +37,6 @@ async function createTransaction(
     concurrence,
   } = req.body;
 
-  console.log({ body: req.body });
-
   const {
     user,
   } = req;
@@ -47,8 +47,6 @@ async function createTransaction(
 
     const dateObject = new Date(date);
 
-    console.log(cliTheme.server('HERE I AM CREATING A TRANSACTION'));
-
     if (concurrence && user) {
       const newConcurrence = await createConcurrenceJob({ concurrence, user });
 
@@ -56,11 +54,12 @@ async function createTransaction(
 
       const {
         taskId: newTaskId,
-      } = await setupJob({
+      } = await setupOrUpdateJob({
         user,
         concurrence,
         startDate: dateObject,
         startDateOnly: true,
+        jobName: JobTypes.CREATE_TRANSACTION,
         particularJobArgs: {
           description,
           amount,
@@ -332,15 +331,11 @@ async function getBalance(
 
 // Update
 async function updateTransaction(
-  req: Request,
+  req: TypedRequest<CreateTransactionRequestBody>,
   res: Response,
 ): Promise<Response | undefined> {
   const transactionId = req.params.id;
   const reqBody = req.body;
-
-  if (Object.keys(reqBody).length === 0) {
-    return res.status(400).json({ message: 'Request body cannot be empty' });
-  }
 
   try {
     const transaction = await Transaction.findByPk(transactionId);
@@ -349,7 +344,68 @@ async function updateTransaction(
       return res.status(404).json(`Transaction not found for specified id: ${transactionId}`);
     }
 
-    const updatedTransaction = await transaction.update(reqBody);
+    const {
+      description,
+      amount,
+      date,
+      type,
+      categoryId,
+      budgetId,
+      concurrence,
+    } = reqBody;
+
+    const {
+      user,
+    } = req;
+
+    const transactionPrevData = transaction.get();
+    const {
+      concurrenceId: prevConcurrenceId,
+      cronTaskId: prevCronTaskId,
+    } = transactionPrevData;
+    const dateObject = date ? new Date(date) : transactionPrevData.date;
+
+    let newConcurrenceId = prevConcurrenceId;
+    let newCronTaskId = prevCronTaskId;
+
+    if (concurrence && user) {
+      const newConcurrenceData = await upsertConcurrence({
+        user,
+        concurrence,
+        startDate: dateObject,
+        startDateOnly: true,
+        jobName: JobTypes.CREATE_TRANSACTION,
+        jobArgs: {
+          description,
+          amount,
+          date,
+          type,
+          categoryId,
+          budgetId: budgetId || '',
+        },
+        prevConcurrenceId,
+        prevCronTaskId,
+      });
+
+      if (!newConcurrenceData) {
+        return res.status(500).json('Internal server error');
+      }
+
+      const { concurrenceId, taskId } = newConcurrenceData;
+      newConcurrenceId = concurrenceId;
+      newCronTaskId = taskId;
+    }
+
+    const updatedTransaction = await transaction.update({
+      description,
+      amount,
+      type,
+      categoryId,
+      budgetId,
+      date: dateObject,
+      cronTaskId: newCronTaskId,
+      concurrenceId: newConcurrenceId,
+    });
 
     return res.status(200).json({ data: updatedTransaction });
   } catch (error: unknown) {
@@ -362,6 +418,7 @@ async function updateTransaction(
         }
       }
     }
+    console.log('ERRRRRRRRRRRRRRRRRROOOOOOOOOOOOOOOOOOOOOOOORRRRRRRRRRRRRRRRRRRRR', error);
     return res.status(500).json('Internal server error');
   }
 }

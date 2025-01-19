@@ -8,6 +8,7 @@ import {
   syncRecentTransactions as syncRecentTransactionsAction,
   syncPaginatedTransactions as syncPaginatedTransactionsAction,
   getHistoricalBalance as getHistoricalBalanceAction,
+  updateTransaction as updateTransactionAction,
 } from '@/reducers/transaction/transactionActions';
 import { defaultPaginatedOptions } from '@/lib/constants';
 import { PaginatedParams } from '../types/transaction';
@@ -32,12 +33,17 @@ function TransactionsProvider({ children }: PropsWithChildren) {
     syncPaginatedTransactionsAction(dispatch, params);
   }, []);
 
+  const updateTransaction = useCallback((id: string, data: CreateTransactionParams) => {
+    updateTransactionAction(dispatch, data, id);
+  }, []);
+
   const contextValue = useMemo<TransactionsContextType>(() => ({
     state,
     createTransaction,
     getBalance,
     changePage,
-  }), [state, createTransaction, getBalance, changePage]);
+    updateTransaction,
+  }), [state, createTransaction, getBalance, changePage, updateTransaction]);
 
   useEffect(() => {
     syncRecentTransactionsAction(dispatch);

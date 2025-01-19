@@ -6,20 +6,12 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
-import { JobTypes } from '@/src/lib/types';
+import { JobTypes, JSONValue } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import CronTask from './cronTask';
 import User from './user';
 
 const sequelize = SequelizeConnection.getInstance();
-
-type JSONValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JSONValue[]
-  | { [key: string]: JSONValue };
 
 class CronJob extends Model<InferAttributes<CronJob>, InferCreationAttributes<CronJob>> {
   declare id: CreationOptional<string>;

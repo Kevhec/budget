@@ -40,7 +40,7 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertResolve, setAlertResolve] = useState<(value: boolean) => void>(() => {});
   const [confirm, setConfirm] = useState(false);
-  const { createTransaction } = useTransactions();
+  const { createTransaction, updateTransaction } = useTransactions();
   const { createBudget } = useBudgets();
 
   const FormComponent = formMapping[type];
@@ -56,12 +56,18 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
       },
     },
     edition: {
-      transaction: () => null,
+      transaction: (value: CreateTransactionParams) => {
+        if (item) {
+          console.log(value);
+          updateTransaction(item.id, value);
+        }
+      },
       budget: () => null,
     },
   };
 
   const handleSubmit = async (value: any) => {
+    console.log('SUBMIT');
     const modeKey = editMode ? 'edition' : 'creation';
 
     const handler = formHandlers[modeKey][type];
@@ -123,7 +129,7 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
               onSubmit={handleSubmit}
               formId={formId}
               dirtyChecker={setIsFormDirty}
-              item={item as CreateTransactionParams & Budget}
+              item={item as (Transaction & Budget) | undefined}
               editMode={editMode}
             />
           </ScrollArea>
