@@ -428,12 +428,14 @@ async function deleteTransaction(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
-  const budgetId = req.params.id;
+  const transactionId = req.params.id;
 
   try {
+    // TODO: Verify if cascade is needed on any deletion operation
+
     await Transaction.destroy({
       where: {
-        id: budgetId,
+        id: transactionId,
         userId: req.user?.id,
       },
     });
@@ -441,7 +443,7 @@ async function deleteTransaction(
     return res.status(200).json({
       data: {
         message: 'Transaction deleted successfully',
-        deletedBudgetId: parseInt(budgetId, 10),
+        deletedTransactionId: transactionId,
       },
     });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

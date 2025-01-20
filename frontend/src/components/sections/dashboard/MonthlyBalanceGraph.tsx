@@ -87,7 +87,7 @@ const FilterSchema = z.object({
 export default function MonthlyBalanceGraph() {
   const {
     state: {
-      user: { createdAt },
+      user,
     },
   } = useAuth();
   const { getBalance, state: { balance, recentTransactions } } = useTransactions();
@@ -119,21 +119,22 @@ export default function MonthlyBalanceGraph() {
   }, [getBalance, recentTransactions, selectedYear]);
 
   useEffect(() => {
-    const userCreationDate = new Date(createdAt);
+    const userCreationDate = new Date(user.createdAt);
 
     const yearsSinceCreation = generateYearsList(userCreationDate.getFullYear());
 
     setFilterYearsList(yearsSinceCreation);
-  }, [createdAt]);
+  }, [user.createdAt]);
 
   useEffect(() => {
-    const currentYear = new Date().getFullYear();
+    const selectedYearBalanceHistory = balance[selectedYear];
 
-    const currentYearBalanceHistory = balance[currentYear];
+    if (!selectedYearBalanceHistory) {
+      setChartData([]);
+      return;
+    }
 
-    if (!currentYearBalanceHistory) return;
-
-    const months = Object.keys(currentYearBalanceHistory);
+    const months = Object.keys(selectedYearBalanceHistory);
 
     const newChartData: any[] = [];
 
@@ -144,7 +145,7 @@ export default function MonthlyBalanceGraph() {
         balance: totalBalance,
         totalExpense,
         totalIncome,
-      } = currentYearBalanceHistory[month];
+      } = selectedYearBalanceHistory[month];
 
       const dataPiece = {
         month: monthName,
@@ -157,7 +158,7 @@ export default function MonthlyBalanceGraph() {
     });
 
     setChartData(newChartData);
-  }, [balance]);
+  }, [balance, selectedYear]);
 
   return (
     <section className="md:col-span-10 xl:col-span-10">
@@ -246,48 +247,54 @@ export default function MonthlyBalanceGraph() {
         )}
       >
         <ChartContainer config={chartConfig} className="h-full w-full">
-          <LineChart
-            accessibilityLayer
-            data={chartData}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid />
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              className="capitalize"
-              tickFormatter={(value) => value.slice(0, 3)}
-            />
-            <YAxis
-              type="number"
-              tickFormatter={(value) => `$${suffixNumberFormatter.format(value)}`}
-              tickMargin={8}
-              axisLine={false}
-              width={35}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent customValueFormatter={formatMoney} hideLabel />}
-            />
-            {
-              chartLines.map((line) => (
-                <Line
-                  key={`chart-line-${line.dataKey}`}
-                  dataKey={line.dataKey}
-                  type="linear"
-                  stroke={line.stroke}
-                  strokeWidth={2}
-                  dot={false}
-                  hide={!filterTypesValues.find((item) => item === line.dataKey)}
+          {
+            chartData.length > 0 ? (
+              <LineChart
+                accessibilityLayer
+                data={chartData}
+                margin={{
+                  left: 12,
+                  right: 12,
+                }}
+              >
+                <CartesianGrid />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  className="capitalize"
+                  tickFormatter={(value) => value.slice(0, 3)}
                 />
-              ))
-            }
-          </LineChart>
+                <YAxis
+                  type="number"
+                  tickFormatter={(value) => `$${suffixNumberFormatter.format(value)}`}
+                  tickMargin={8}
+                  axisLine={false}
+                  width={35}
+                />
+                <ChartTooltip
+                  cursor={false}
+                  content={<ChartTooltipContent customValueFormatter={formatMoney} hideLabel />}
+                />
+                {
+                  chartLines.map((line) => (
+                    <Line
+                      key={`chart-line-${line.dataKey}`}
+                      dataKey={line.dataKey}
+                      type="linear"
+                      stroke={line.stroke}
+                      strokeWidth={2}
+                      dot={false}
+                      hide={!filterTypesValues.find((item) => item === line.dataKey)}
+                    />
+                  ))
+                }
+              </LineChart>
+            ) : (
+              <p>Sin datos</p>
+            )
+          }
         </ChartContainer>
       </ChartCard>
     </section>

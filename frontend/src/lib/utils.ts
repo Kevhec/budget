@@ -113,3 +113,42 @@ export function isValidDate(dateString: string) {
   const date = new Date(dateString);
   return !Number.isNaN(date.getTime());
 }
+
+export function updateArrayItem<T extends { id: string }>(arr: T[], id: string, item: T) {
+  let found = false;
+
+  if (!arr || !id || !item) {
+    throw new Error('All params must be provided');
+  }
+
+  const updatedArr = arr.map((currentItem) => {
+    if (currentItem.id === id) {
+      found = true;
+      return item;
+    }
+
+    return currentItem;
+  });
+
+  return found ? updatedArr : arr;
+}
+
+export function removeFromArrayById<T extends { id: string }>(arr: T[], id: string) {
+  if (arr.length === 0) {
+    throw new Error('Array cannot be empty');
+  }
+
+  if (!id) {
+    throw new Error('Item id must be provided');
+  }
+
+  const itemIndex = arr.findIndex((item) => item.id === id);
+
+  if (itemIndex < 0) {
+    return arr;
+  }
+
+  const updatedArray = arr.toSpliced(itemIndex, 1);
+
+  return updatedArray;
+}

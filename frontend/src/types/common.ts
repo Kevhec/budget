@@ -69,3 +69,5 @@ export interface TablePagination {
   pageIndex: number
   pageSize: number
 }
+
+export type CreationType = 'transaction' | 'budget';

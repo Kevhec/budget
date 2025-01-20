@@ -45,6 +45,7 @@ export enum TransactionActionType {
   CREATE_TRANSACTION = 'CREATE_TRANSACTION',
   GET_BALANCE = 'GET_BALANCE',
   UPDATE_TRANSACTION = 'UPDATE_TRANSACTION',
+  DELETE_TRANSACTION = 'DELETE_TRANSACTION',
   SET_LOADING = 'SET_LOADING',
 }
 
@@ -73,12 +74,20 @@ export interface UpdateTransactionAction {
   payload: Transaction | null
 }
 
+export interface DeleteTransactionAction {
+  type: TransactionActionType.DELETE_TRANSACTION
+  payload: {
+    deletedTransactionId: string
+  }
+}
+
 export type TransactionAction =
   | SyncRecentAction
   | SyncPaginatedAction
   | CreateTransactionAction
   | GetBalanceAction
   | UpdateTransactionAction
+  | DeleteTransactionAction
   | LoadingAction<TransactionActionType.SET_LOADING>;
 
 export interface TransactionState {
@@ -91,9 +100,10 @@ export interface TransactionState {
 export type TransactionReducer = Reducer<TransactionState, TransactionAction>;
 
 export interface TransactionsContextType {
-  state: TransactionState,
-  createTransaction: (data: CreateTransactionParams) => void;
-  getBalance: (from?: string, to?: string) => void;
-  changePage: (params: PaginatedParams) => void;
-  updateTransaction: (id: string, data: CreateTransactionParams) => void;
+  state: TransactionState
+  createTransaction: (data: CreateTransactionParams) => void
+  getBalance: (from?: string, to?: string) => void
+  changePage: (params: PaginatedParams) => void
+  updateTransaction: (id: string, data: CreateTransactionParams) => void
+  deleteTransaction: (id: string) => void
 }

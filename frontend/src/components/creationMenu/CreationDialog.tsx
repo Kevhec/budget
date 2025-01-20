@@ -7,6 +7,7 @@ import {
   ComponentType,
   ElementRef, forwardRef, useCallback, useEffect, useState,
 } from 'react';
+import { cn } from '@/lib/utils';
 import TransactionForm, { TransactionFormProps } from './forms/TransactionForm';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
@@ -19,6 +20,7 @@ import ConfirmDialog from '../ConfirmDialog';
 interface Props {
   type: 'transaction' | 'budget'
   triggerLabel: string
+  triggerClassname?: string
   modalTitle?: string
   item?: Budget | Transaction
   editMode?: boolean
@@ -33,7 +35,7 @@ const formMapping: {
 };
 
 const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
-  type, triggerLabel, item, editMode, modalTitle,
+  type, triggerLabel, item, editMode, modalTitle, triggerClassname,
 }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
@@ -45,6 +47,8 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
 
   const FormComponent = formMapping[type];
   const formId = `${type}-creation-form`;
+
+  const triggerClasses = cn(triggerClassname);
 
   const formHandlers = {
     creation: {
@@ -58,7 +62,6 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
     edition: {
       transaction: (value: CreateTransactionParams) => {
         if (item) {
-          console.log(value);
           updateTransaction(item.id, value);
         }
       },
@@ -67,7 +70,6 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
   };
 
   const handleSubmit = async (value: any) => {
-    console.log('SUBMIT');
     const modeKey = editMode ? 'edition' : 'creation';
 
     const handler = formHandlers[modeKey][type];
@@ -109,7 +111,7 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleOpen} modal>
-        <DialogTrigger ref={ref}>
+        <DialogTrigger ref={ref} className={triggerClasses}>
           {triggerLabel}
         </DialogTrigger>
         <DialogContent className="p-0 max-w-lg w-[calc(100%-2rem)] rounded-sm">

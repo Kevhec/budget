@@ -1,4 +1,5 @@
 import { initialPaginatedState } from '@/lib/constants';
+import { updateArrayItem } from '@/lib/utils';
 import {
   PaginatedApiResponse,
   Transaction, TransactionAction, TransactionActionType, TransactionState,
@@ -72,6 +73,36 @@ function transactionReducer(
         ...state,
         loading: action.payload,
       });
+    case TransactionActionType.UPDATE_TRANSACTION: {
+      const updatedTransaction = action.payload;
+
+      if (!updatedTransaction) {
+        return { ...state };
+      }
+
+      const updatedRecent = updateArrayItem(
+        state.recentTransactions,
+        updatedTransaction.id,
+        updatedTransaction,
+      );
+
+      const updatedPaginatedData = updateArrayItem(
+        state.paginatedTransactions.data || [],
+        updatedTransaction.id,
+        updatedTransaction,
+      );
+
+      const updatedPaginated = {
+        ...state.paginatedTransactions,
+        data: updatedPaginatedData,
+      };
+
+      return ({
+        ...state,
+        recentTransactions: updatedRecent,
+        paginatedTransactions: updatedPaginated,
+      });
+    }
     default:
       return state;
   }

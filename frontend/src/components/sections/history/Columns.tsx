@@ -2,18 +2,8 @@ import { formatMoney } from '@/lib/formatNumber';
 import { Transaction } from '@/types';
 import { format } from '@formkit/tempo';
 import { type ColumnDef } from '@tanstack/react-table';
-
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreHorizontal } from 'lucide-react';
-import CreationDialog from '@/components/creationMenu/CreationDialog';
 import { DataTableColumnHeader } from './DataTableColumnHeader';
+import ActionsMenu from './ActionsMenu';
 
 export const columns: ColumnDef<Transaction>[] = [
   {
@@ -83,31 +73,10 @@ export const columns: ColumnDef<Transaction>[] = [
         remain on document body, possible fix, persist dropdown open if escape key was pressed to
         close modal, then make the user press it again to close dropdown menu
         if wants to close it */
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="space-y-2">
-            <DropdownMenuLabel>
-              Acciones
-            </DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <CreationDialog
-                type="transaction"
-                triggerLabel="Editar"
-                modalTitle="Editar Transacción"
-                item={transaction}
-                editMode
-              />
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Eliminar
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ActionsMenu
+          item={transaction}
+          type="transaction"
+        />
       );
     },
   },
