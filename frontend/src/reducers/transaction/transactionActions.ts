@@ -8,7 +8,11 @@ import {
 import axiosClient from '@/config/axios';
 import getBalance from '@/lib/balance/getBalance';
 import formatTransactionData from '@/lib/transaction/formatTransactionData';
+import getPaginationOptions from '@/lib/transaction/getPaginationOptions';
 import { initialRecentTransactionsState, initialTransactionState } from './transactionReducer';
+
+// TODO! When there are not paginated transaction in the history page,
+// TODO! it start making requests in an infinite loop
 
 async function syncRecentTransactions(dispatch: Dispatch<TransactionAction>) {
   dispatch({
@@ -101,12 +105,10 @@ async function createTransaction(
     });
 
     if (currentPage !== 1) {
-      syncPaginatedTransactions(dispatch, {
-        page: currentPage || 1,
-        limit: currentLimit || 30,
-        date: new Date(),
-        include: 'budget,category',
-      });
+      syncPaginatedTransactions(dispatch, getPaginationOptions({
+        currentPage,
+        currentLimit,
+      }));
     }
   } catch (error) {
     // TODO!: ERROR HANDLING
@@ -158,20 +160,73 @@ async function updateTransaction(
   transaction: CreateTransactionParams,
   id: string,
 ) {
-  console.log({
-    transaction,
-    id,
+  dispatch({
+    type: TransactionActionType.SET_LOADING,
+    payload: true,
   });
   try {
     const formattedTransaction = formatTransactionData(transaction);
 
+    const query = new URLSearchParams([
+      ['include', 'budget,category,concurrence'],
+    ]);
+
     const { data } = await axiosClient.patch(`/transaction/${id}`, {
       ...formattedTransaction,
+    }, { params: query });
+
+    dispatch({
+      type: TransactionActionType.UPDATE_TRANSACTION,
+      payload: data.data,
+    });
+  } catch (error) {
+    dispatch({
+      type: TransactionActionType.UPDATE_TRANSACTION,
+      payload: null,
+    });
+  } finally {
+    dispatch({
+      type: TransactionActionType.SET_LOADING,
+      payload: false,
+    });
+  }
+}
+
+async function deleteTransaction(
+  dispatch: Dispatch<TransactionAction>,
+  id: string,
+  state: TransactionState,
+) {
+  dispatch({
+    type: TransactionActionType.SET_LOADING,
+    payload: true,
+  });
+  try {
+    const { data } = await axiosClient.delete(`/transaction/${id}`);
+
+    const { deletedTransactionId } = data.data;
+
+    if (!deletedTransactionId) return;
+
+    const paginatedOptions = getPaginationOptions({
+      currentPage: state.paginatedTransactions.meta?.currentPage,
+      currentLimit: state.paginatedTransactions.meta?.itemsPerPage,
     });
 
-    console.log({ data });
+    await syncPaginatedTransactions(dispatch, paginatedOptions);
+    await syncRecentTransactions(dispatch);
   } catch (error) {
-    console.log(error);
+    dispatch({
+      type: TransactionActionType.DELETE_TRANSACTION,
+      payload: {
+        deletedTransactionId: '',
+      },
+    });
+  } finally {
+    dispatch({
+      type: TransactionActionType.SET_LOADING,
+      payload: false,
+    });
   }
 }
 
@@ -181,4 +236,5 @@ export {
   createTransaction,
   getHistoricalBalance,
   updateTransaction,
+  deleteTransaction,
 };

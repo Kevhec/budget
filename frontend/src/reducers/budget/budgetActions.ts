@@ -1,11 +1,10 @@
 import { getPaginatedBudgets } from '@/lib/budget';
 import {
-  ApiBudget,
   Budget, BudgetAction, BudgetActionType, BudgetState, CreateBudgetParams, PaginatedParams,
 } from '@/types';
 import { Dispatch } from 'react';
 import axiosClient from '@/config/axios';
-import { extractConcurrenceData } from '@/lib/utils';
+import formatBudgetData from '@/lib/budget/formatBudgetData';
 import { initialBudgetState, initialRecentBudgetsState } from './budgetReducer';
 
 async function syncRecentBudgets(dispatch: Dispatch<BudgetAction>) {
@@ -95,15 +94,7 @@ async function createBudget(
   const currentPage = currentPaginated.meta?.currentPage;
   const currentLimit = currentPaginated.meta?.itemsPerPage;
 
-  const concurrencyFormData = extractConcurrenceData(budget);
-
-  const formattedBudget: ApiBudget = {
-    name: budget.name,
-    totalAmount: budget.totalAmount,
-    startDate: budget.startDate,
-    endDate: budget.endDate || undefined,
-    concurrence: concurrencyFormData.defaults === 'none' ? undefined : concurrencyFormData,
-  };
+  const formattedBudget = formatBudgetData(budget);
 
   try {
     const { data } = await axiosClient.post('/budget', {

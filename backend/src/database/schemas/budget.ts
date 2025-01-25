@@ -5,7 +5,7 @@ const createBudgetSchema = z.object({
   name: z.string(),
   totalAmount: z.number().positive(),
   startDate: z.string().datetime(),
-  endDate: z.string().datetime(),
+  endDate: z.string().datetime().optional(),
   concurrence: concurrenceSchema.optional(),
 });
 

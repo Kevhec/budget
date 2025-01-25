@@ -2,7 +2,7 @@ import { ApiTransaction, CreateTransactionParams, TransactionType } from '@/type
 import { extractConcurrenceData } from '../utils';
 
 function formatTransactionData(transaction: CreateTransactionParams) {
-  const concurrencyFormData = extractConcurrenceData(transaction);
+  const concurrenceFormData = extractConcurrenceData(transaction);
 
   const formattedTransaction: ApiTransaction = {
     description: transaction.description,
@@ -11,7 +11,7 @@ function formatTransactionData(transaction: CreateTransactionParams) {
     type: transaction.type as TransactionType,
     budgetId: transaction.budgetId,
     categoryId: transaction.categoryId,
-    concurrence: concurrencyFormData,
+    concurrence: concurrenceFormData,
   };
 
   return formattedTransaction;

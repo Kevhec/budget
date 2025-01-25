@@ -70,16 +70,19 @@ export default function DataTable<TData, TValue>({
   });
 
   useEffect(() => {
+    const isDataEmpty = data.length === 0;
+
+    if (!onPageChange || isDataEmpty) return;
+
+    const isDifferentPage = (pagination.pageIndex + 1) !== meta?.currentPage;
+    const didPageSizeChanged = pagination.pageSize !== meta?.itemsPerPage;
+
     if (
-      onPageChange
-      && (
-        (pagination.pageIndex + 1) !== meta?.currentPage
-        || pagination.pageSize !== meta?.itemsPerPage
-      )
+      isDifferentPage || didPageSizeChanged
     ) {
       debouncedPageChange(pagination);
     }
-  }, [pagination, onPageChange, debouncedPageChange, meta?.currentPage, meta?.itemsPerPage]);
+  }, [pagination, onPageChange, debouncedPageChange, meta?.currentPage, meta?.itemsPerPage, data]);
 
   return (
     <div className="space-y-4">

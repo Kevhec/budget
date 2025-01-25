@@ -18,11 +18,13 @@ export default function GeneralResume() {
       const currentYear = currentDate.getFullYear();
       const currentMonth = currentDate.getMonth() + 1;
 
-      if (data) {
-        const newBalance = data[currentYear][currentMonth];
+      if (!data) return;
 
-        setBalance(newBalance);
-      }
+      const newBalance = data?.[currentYear]?.[currentMonth];
+
+      if (!newBalance) return;
+
+      setBalance(newBalance);
     };
 
     getData();
