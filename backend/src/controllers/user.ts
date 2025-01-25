@@ -138,7 +138,7 @@ const logIn = async (req: Request, res: Response) => {
       const plainUserObj = user.toJSON();
 
       // Sanitize user object to send it to client for profiling purposes
-      const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'updatedAt', 'createdAt']);
+      const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'updatedAt']);
 
       // send user data
       return res.status(201).json({ data: sanitizedUser });
@@ -242,7 +242,7 @@ const getInfo = async (req: Request, res: Response) => {
     const plainUserObj = user.toJSON();
 
     // Remove sensitive or unnecessary data from user object to use for profiling purposes
-    const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
+    const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'updatedAt']);
 
     return res.status(200).json({ data: sanitizedUser });
   } catch (error: unknown) {

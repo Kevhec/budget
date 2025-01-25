@@ -5,9 +5,10 @@ import {
 import useBudgets from '@/hooks/useBudgets';
 import {
   ComponentType,
-  ElementRef, forwardRef, useCallback, useEffect, useState,
+  ElementRef, forwardRef, useEffect, useState,
 } from 'react';
 import { cn } from '@/lib/utils';
+import useAlert from '@/hooks/useAlert';
 import TransactionForm, { TransactionFormProps } from './forms/TransactionForm';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
@@ -39,11 +40,15 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
 }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [alertResolve, setAlertResolve] = useState<(value: boolean) => void>(() => {});
-  const [confirm, setConfirm] = useState(false);
   const { createTransaction, updateTransaction } = useTransactions();
   const { createBudget } = useBudgets();
+  const {
+    isAlertOpen,
+    confirm,
+    setIsAlertOpen,
+    showAlert,
+    handleConfirm,
+  } = useAlert();
 
   const FormComponent = formMapping[type];
   const formId = `${type}-creation-form`;
@@ -82,20 +87,9 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
     setIsOpen(false);
   };
 
-  const showAlert = useCallback((): Promise<boolean> => new Promise((resolve) => {
-    setIsAlertOpen(true);
-    setAlertResolve(() => resolve);
-  }), []);
-
-  const handleConfirm = (value: boolean) => {
-    alertResolve(value);
-  };
-
   const handleOpen = async (open: boolean) => {
     if (isFormDirty && !open) {
-      const confirmResult = await showAlert();
-
-      setConfirm(confirmResult);
+      await showAlert();
     } else {
       setIsOpen(open);
     }
@@ -104,7 +98,6 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
   useEffect(() => {
     if (isFormDirty && confirm) {
       setIsOpen(false);
-      setConfirm(false);
     }
   }, [confirm, isFormDirty]);
 

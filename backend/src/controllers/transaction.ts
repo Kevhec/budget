@@ -336,6 +336,7 @@ async function updateTransaction(
 ): Promise<Response | undefined> {
   const transactionId = req.params.id;
   const reqBody = req.body;
+  const { include } = req.query;
 
   try {
     const transaction = await Transaction.findByPk(transactionId);
@@ -407,7 +408,41 @@ async function updateTransaction(
       concurrenceId: newConcurrenceId,
     });
 
-    return res.status(200).json({ data: updatedTransaction });
+    const includes = parseIncludes(String(include), {
+      models: [
+        {
+          identifier: 'budget',
+          model: Budget,
+          attributes: ['id', 'name', 'totalAmount', 'startDate', 'endDate'],
+          as: 'budget',
+        },
+        {
+          identifier: 'category',
+          model: Category,
+          attributes: ['id', 'name', 'color'],
+          as: 'category',
+        },
+        {
+          identifier: 'concurrence',
+          model: Concurrence,
+          attributes: {
+            exclude: ['createdAt', 'updatedAt', 'userId', 'id'],
+          },
+          as: 'concurrence',
+        },
+      ],
+    });
+
+    const fullTransaction = await Transaction.findByPk(updatedTransaction.id, {
+      include: includes ? includes.includedModels : [],
+      attributes: {
+        exclude: includes ? includes.includedIdentifiers : [],
+      },
+    });
+
+    console.log(fullTransaction);
+
+    return res.status(200).json({ data: fullTransaction });
   } catch (error: unknown) {
     if (error instanceof DatabaseError) {
       const sequelizeError = error as { parent?: { code?: string, detail?: string } };

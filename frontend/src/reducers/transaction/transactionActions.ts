@@ -167,9 +167,13 @@ async function updateTransaction(
   try {
     const formattedTransaction = formatTransactionData(transaction);
 
+    const query = new URLSearchParams([
+      ['include', 'budget,category,concurrence'],
+    ]);
+
     const { data } = await axiosClient.patch(`/transaction/${id}`, {
       ...formattedTransaction,
-    });
+    }, { params: query });
 
     dispatch({
       type: TransactionActionType.UPDATE_TRANSACTION,
