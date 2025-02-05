@@ -33,20 +33,21 @@ Budget.belongsTo(Page, { foreignKey: 'pageId' }); */
 Budget.hasMany(Transaction, { foreignKey: 'budgetId' });
 Transaction.belongsTo(Budget, { foreignKey: 'budgetId', as: 'budget' });
 
-CronTask.hasOne(Budget, { foreignKey: 'cronTaskId' });
-CronTask.hasOne(Transaction, { foreignKey: 'cronTaskId' });
+// Concurrence relationships
+CronTask.hasOne(Budget, { foreignKey: 'cronTaskId', onDelete: 'CASCADE' });
+CronTask.hasOne(Transaction, { foreignKey: 'cronTaskId', onDelete: 'CASCADE' });
 
 Budget.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
 Transaction.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
 
-Concurrence.hasOne(Transaction, { foreignKey: 'concurrenceId' });
-Concurrence.hasOne(Budget, { foreignKey: 'concurrenceId' });
+Concurrence.hasOne(Transaction, { foreignKey: 'concurrenceId', onDelete: 'CASCADE' });
+Concurrence.hasOne(Budget, { foreignKey: 'concurrenceId', onDelete: 'CASCADE' });
 
 Transaction.belongsTo(Concurrence, { foreignKey: 'concurrenceId', as: 'concurrence' });
 Budget.belongsTo(Concurrence, { foreignKey: 'concurrenceId', as: 'concurrence' });
 
-CronTask.hasMany(CronJob, { foreignKey: 'cronTaskId', as: 'cronJobs' });
-CronJob.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask' });
+CronTask.hasMany(CronJob, { foreignKey: 'cronTaskId', as: 'cronJobs', onDelete: 'CASCADE' });
+CronJob.belongsTo(CronTask, { foreignKey: 'cronTaskId', as: 'cronTask', onDelete: 'CASCADE' });
 
 // One category can have many transactions
 // but a transaction can have only one category

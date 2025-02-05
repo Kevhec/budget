@@ -21,6 +21,7 @@ import {
 import setupOrUpdateJob from '../lib/cron_manager/setupJob';
 import Concurrence from '../database/models/concurrence';
 import upsertConcurrence from '../lib/cron_manager/upsertConcurrence';
+import CronTask from '../database/models/cronTask';
 
 // Create
 async function createTransaction(
@@ -366,8 +367,8 @@ async function updateTransaction(
     } = transactionPrevData;
     const dateObject = date ? new Date(date) : transactionPrevData.date;
 
-    let newConcurrenceId = prevConcurrenceId;
-    let newCronTaskId = prevCronTaskId;
+    let newConcurrenceId = !concurrence ? null : prevConcurrenceId;
+    let newCronTaskId = !concurrence ? null : prevCronTaskId;
 
     if (concurrence && user) {
       const newConcurrenceData = await upsertConcurrence({
@@ -397,7 +398,21 @@ async function updateTransaction(
       newCronTaskId = taskId;
     }
 
-    const updatedTransaction = await transaction.update({
+    if (!concurrence && prevConcurrenceId && prevCronTaskId) {
+      await Concurrence.destroy({
+        where: {
+          id: prevConcurrenceId,
+        },
+      });
+
+      await CronTask.destroy({
+        where: {
+          id: prevCronTaskId,
+        },
+      });
+    }
+
+    await transaction.update({
       description,
       amount,
       type,
@@ -433,14 +448,14 @@ async function updateTransaction(
       ],
     });
 
-    const fullTransaction = await Transaction.findByPk(updatedTransaction.id, {
+    const fullTransaction = await transaction.reload({
       include: includes ? includes.includedModels : [],
       attributes: {
         exclude: includes ? includes.includedIdentifiers : [],
       },
     });
 
-    console.log(fullTransaction);
+    console.log(fullTransaction.get());
 
     return res.status(200).json({ data: fullTransaction });
   } catch (error: unknown) {
@@ -453,7 +468,6 @@ async function updateTransaction(
         }
       }
     }
-    console.log('ERRRRRRRRRRRRRRRRRROOOOOOOOOOOOOOOOOOOOOOOORRRRRRRRRRRRRRRRRRRRR', error);
     return res.status(500).json('Internal server error');
   }
 }
