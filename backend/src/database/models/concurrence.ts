@@ -14,6 +14,11 @@ import { CONCURRENCE_TYPE } from '@/src/lib/constants';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
 
+enum TargetType {
+  TRANSACTION = 'Transaction',
+  BUDGET = 'Budget',
+}
+
 const sequelize = SequelizeConnection.getInstance();
 
 // TODO: Define relationship foreign key with transaction or budget
@@ -41,6 +46,10 @@ InferCreationAttributes<Concurrence>
   declare monthSelect: CreationOptional<MonthSelect>;
 
   declare userId: ForeignKey<User['id']>;
+
+  declare targetId: ForeignKey<string>;
+
+  declare targetType: TargetType;
 }
 
 Concurrence.init({
@@ -88,6 +97,14 @@ Concurrence.init({
   monthSelect: {
     type: DataTypes.ENUM(...Object.values(MonthSelect)),
     defaultValue: MonthSelect.EXACT,
+    allowNull: false,
+  },
+  targetId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  targetType: {
+    type: DataTypes.ENUM(...Object.values(TargetType)),
     allowNull: false,
   },
 }, {
