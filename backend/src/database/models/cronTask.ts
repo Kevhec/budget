@@ -7,6 +7,7 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
+import type { Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type CronJob from './cronJobs';
 import User from './user';
@@ -38,6 +39,24 @@ class CronTask extends Model<InferAttributes<CronTask>, InferCreationAttributes<
   declare targetType: TargetType;
 
   declare userId: ForeignKey<User['id']>;
+
+  public static associate(models: Models) {
+    this.belongsTo(models.Budget, {
+      foreignKey: 'targetId',
+      constraints: false,
+      as: 'budgetCronTask',
+    });
+    this.belongsTo(models.Transaction, {
+      foreignKey: 'targetId',
+      constraints: false,
+      as: 'transactionCronTask',
+    });
+    this.hasMany(models.CronJob, {
+      foreignKey: 'cronTaskId',
+      as: 'cronJobs',
+      onDelete: 'CASCADE',
+    });
+  }
 }
 
 CronTask.init({

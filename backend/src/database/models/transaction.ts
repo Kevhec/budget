@@ -6,6 +6,7 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
+import type { Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';
 import Budget from './budget';
@@ -42,6 +43,29 @@ class Transaction
   declare categoryId: ForeignKey<Category['id']> | null;
 
   declare budgetId: ForeignKey<Budget['id']>;
+
+  public static associate(models: Models) {
+    this.belongsTo(models.Budget, {
+      foreignKey: 'budgetId',
+      as: 'budget',
+    });
+    this.belongsTo(models.Category, {
+      foreignKey: 'categoryId',
+      as: 'category',
+    });
+    this.hasOne(models.CronTask, {
+      foreignKey: 'targetId',
+      constraints: false,
+      scope: { targetType: 'Transaction' },
+      onDelete: 'CASCADE',
+    });
+    this.hasOne(models.Concurrence, {
+      foreignKey: 'targetId',
+      constraints: false,
+      scope: { targetType: 'Transaction' },
+      onDelete: 'CASCADE',
+    });
+  }
 }
 
 Transaction.init({

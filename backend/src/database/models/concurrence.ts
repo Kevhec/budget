@@ -7,7 +7,7 @@ import {
   type InferCreationAttributes,
 } from 'sequelize';
 import {
-  ConcurrenceType, DefaultConcurrences, MonthSelect, WeekDays, WithEndDate,
+  ConcurrenceType, DefaultConcurrences, type Models, MonthSelect, WeekDays, WithEndDate,
 } from '@/src/lib/types';
 import { format } from '@formkit/tempo';
 import { CONCURRENCE_TYPE } from '@/src/lib/constants';
@@ -50,6 +50,19 @@ InferCreationAttributes<Concurrence>
   declare targetId: ForeignKey<string>;
 
   declare targetType: TargetType;
+
+  public static associate(models: Models) {
+    this.belongsTo(models.Budget, {
+      foreignKey: 'targetId',
+      constraints: false,
+      as: 'budgetConcurrence',
+    });
+    this.belongsTo(models.Transaction, {
+      foreignKey: 'targetId',
+      constraints: false,
+      as: 'transactionConcurrence',
+    });
+  }
 }
 
 Concurrence.init({

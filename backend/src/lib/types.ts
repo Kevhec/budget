@@ -3,6 +3,16 @@ import { type Request } from 'express';
 import { type TransactionType } from '../database/models/transaction';
 import { concurrenceSchema } from '../database/schemas/general';
 import { CONCURRENCE_TYPE, DEFAULT_CONCURRENCES } from './constants';
+import type {
+  Budget,
+  Category,
+  Page,
+  User,
+  Transaction,
+  Concurrence as ConcurrenceModel,
+  CronJob,
+  CronTask,
+} from '../database/models';
 
 export interface BalanceResponse {
   year: string
@@ -184,4 +194,15 @@ export enum WithEndDate {
 export enum MonthSelect {
   EXACT = 'exact',
   ORDINAL = 'ordinal',
+}
+
+export interface Models {
+  User: typeof User
+  Budget: typeof Budget
+  Concurrence: typeof ConcurrenceModel
+  CronJob: typeof CronJob
+  CronTask: typeof CronTask
+  Transaction: typeof Transaction
+  Category: typeof Category
+  Page: typeof Page
 }

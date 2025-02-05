@@ -6,6 +6,7 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
+import type { Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';
 
@@ -17,7 +18,6 @@ enum CategoryType {
 
 const sequelize = SequelizeConnection.getInstance();
 
-// TODO: Limitar categorías a 10
 class Category extends Model<InferAttributes<Category>, InferCreationAttributes<Category>> {
   declare id: CreationOptional<string>;
 
@@ -30,6 +30,10 @@ class Category extends Model<InferAttributes<Category>, InferCreationAttributes<
   declare type: CategoryType;
 
   declare userId: ForeignKey<User['id']>;
+
+  public static associate(models: Models) {
+    this.hasMany(models.Transaction, { foreignKey: 'categoryId' });
+  }
 }
 
 Category.init({
