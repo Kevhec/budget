@@ -27,6 +27,7 @@ class CronJob extends Model<InferAttributes<CronJob>, InferCreationAttributes<Cr
   public static associate(models: Models) {
     this.belongsTo(models.CronTask, {
       foreignKey: 'cronTaskId',
+      as: 'cronTask',
     });
   }
 }

@@ -16,7 +16,7 @@ async function loadCronTasks() {
       ],
     });
 
-    tasks.forEach((task) => {
+    tasks.forEach(async (task) => {
       const {
         cronExpression,
         timezone,
@@ -28,7 +28,7 @@ async function loadCronTasks() {
         throw new Error('No jobs associated to provided task');
       }
 
-      scheduleCronTask({
+      await scheduleCronTask({
         cronExpression,
         timezone,
         endDate: endDate ? new Date(endDate) : undefined,

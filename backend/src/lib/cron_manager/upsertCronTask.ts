@@ -1,5 +1,7 @@
 import { User } from '@/src/database/models';
 import CronTask from '@/src/database/models/cronTask';
+import { Transaction } from 'sequelize';
+import { TargetType, Target } from '../types';
 
 interface Params {
   user: User,
@@ -8,14 +10,19 @@ interface Params {
     endDate?: Date
     timezone?: string
   }
+  target: Target<TargetType>
   taskId?: string
 }
 
-async function upsertCronTask({
-  user,
-  data,
-  taskId,
-}: Params) {
+async function upsertCronTask(
+  {
+    user,
+    data,
+    taskId,
+    target,
+  }: Params,
+  { transaction }: { transaction?: Transaction } = {},
+) {
   try {
     if (taskId) {
       await CronTask.update({
@@ -25,6 +32,7 @@ async function upsertCronTask({
           id: taskId,
           userId: user.id,
         },
+        transaction,
       });
 
       return taskId;
@@ -33,7 +41,9 @@ async function upsertCronTask({
     const newTask = await CronTask.create({
       ...data,
       userId: user.id,
-    });
+      targetId: target.id,
+      targetType: target.type,
+    }, { transaction });
 
     return newTask.id;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

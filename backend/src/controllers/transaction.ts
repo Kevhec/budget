@@ -6,6 +6,7 @@ import { Budget, Category, Transaction } from '../database/models';
 import generateLinksMetadata from '../lib/utils/generateLinksMetadata';
 import generateDateRange from '../lib/utils/generateDateRange';
 import {
+  TargetType,
   JobTypes,
   type BalanceData,
   type BalanceResponse,
@@ -16,12 +17,18 @@ import {
 import { parseIncludes, sanitizeObject } from '../lib/utils';
 import {
   createTransaction as createTransactionJob,
-  createConcurrence as createConcurrenceJob,
 } from '../lib/jobs';
-import setupOrUpdateJob from '../lib/cron_manager/setupJob';
 import Concurrence from '../database/models/concurrence';
 import upsertConcurrence from '../lib/cron_manager/upsertConcurrence';
 import CronTask from '../database/models/cronTask';
+import prepareJobData from '../lib/cron_manager/prepareJobData';
+import SequelizeConnection from '../database/config/SequelizeConnection';
+import { stopCronTask } from '../lib/cron_manager/taskScheduler';
+import deleteCronTask from '../lib/cron_manager/deleteCronTask';
+import deleteConcurrence from '../lib/cron_manager/deleteConcurrence';
+import renameObjectKey from '../lib/utils/renameObjectKey';
+
+const sequelize = SequelizeConnection.getInstance();
 
 // Create
 async function createTransaction(
@@ -31,7 +38,7 @@ async function createTransaction(
   const {
     description,
     amount,
-    date,
+    startDate,
     type,
     categoryId,
     budgetId,
@@ -42,58 +49,71 @@ async function createTransaction(
     user,
   } = req;
 
-  try {
-    let taskId: null | string = null;
-    let concurrenceId: null | string = null;
+  const transaction = await sequelize.transaction();
 
-    const dateObject = new Date(date);
+  try {
+    const dateObject = new Date(startDate);
+    let jobData;
 
     if (concurrence && user) {
-      const newConcurrence = await createConcurrenceJob({ concurrence, user });
-
-      concurrenceId = newConcurrence.id;
-
-      const {
-        taskId: newTaskId,
-      } = await setupOrUpdateJob({
-        user,
-        concurrence,
-        startDate: dateObject,
-        startDateOnly: true,
-        jobName: JobTypes.CREATE_TRANSACTION,
-        particularJobArgs: {
-          description,
-          amount,
-          date,
-          type,
-          categoryId,
-          budgetId: budgetId || '',
-        },
-      });
-
-      taskId = newTaskId;
+      jobData = prepareJobData(user, concurrence, dateObject);
     }
 
     const newTransaction = await createTransactionJob({
       description,
       amount,
-      date: dateObject,
+      startDate: dateObject,
       type,
       budgetId,
       categoryId,
-      cronTaskId: taskId,
       userId: req.user?.id || '',
-      concurrenceId,
-    });
+    }, { transaction });
+
+    if (jobData && user) {
+      const {
+        cronExpression,
+        concurrenceEndDate,
+        nextExecutionDate,
+        timezone,
+      } = jobData;
+
+      await upsertConcurrence({
+        user,
+        target: {
+          id: newTransaction.id,
+          type: TargetType.TRANSACTION,
+        },
+        jobName: JobTypes.CREATE_TRANSACTION,
+        jobArgs: {
+          description,
+          amount,
+          startDate,
+          type,
+          categoryId,
+          budgetId: budgetId || '',
+        },
+        concurrence,
+        endDate: concurrenceEndDate,
+        startDate: dateObject,
+        cronExpression,
+        timezone,
+        nextExecutionDate,
+        startDateOnly: true,
+      }, { transaction });
+    }
 
     if (!newTransaction) {
       return res.status(500).json('There was an error creating the new transaction');
     }
 
+    await transaction.commit();
+
     const sanitizedTransaction = sanitizeObject(newTransaction.toJSON(), ['cronTaskId']);
 
     return res.status(201).json({ data: { transaction: sanitizedTransaction } });
   } catch (error: unknown) {
+    await transaction.rollback();
+
     if (error instanceof DatabaseError) {
       const sequelizeError = error as { parent?: { code?: string, detail?: string } };
 
@@ -106,7 +126,6 @@ async function createTransaction(
 
     console.log(error);
 
-    // TODO: Define res body on error with the key "error" followed by the message
     return res.status(500).json('Internal server error');
   }
 }
@@ -120,6 +139,8 @@ async function getAllTransactions(
   const {
     offset, limit, month, include,
   } = req.query;
+
+  console.log({ include });
 
   const includes = parseIncludes(String(include), {
     models: [
@@ -141,7 +162,7 @@ async function getAllTransactions(
         attributes: {
           exclude: ['createdAt', 'updatedAt', 'userId', 'id'],
         },
-        as: 'concurrence',
+        as: 'transactionConcurrence',
       },
     ],
   });
@@ -204,8 +225,14 @@ async function getAllTransactions(
       count, rows, offset: intOffset, limit: intLimit,
     });
 
+    const concurrenceRenamedRows = rows.map((transaction) => {
+      console.log({ transaction: transaction.toJSON() });
+      const renamedTransaction = renameObjectKey(transaction.toJSON(), 'transactionConcurrence', 'concurrence');
+      return renamedTransaction;
+    });
+
     return res.status(200).json({
-      data: rows,
+      data: concurrenceRenamedRows,
       meta,
       links,
     });
@@ -339,8 +366,22 @@ async function updateTransaction(
   const reqBody = req.body;
   const { include } = req.query;
 
+  const t = await sequelize.transaction();
+
   try {
-    const transaction = await Transaction.findByPk(transactionId);
+    const transaction = await Transaction.findByPk(transactionId, {
+      include: [
+        {
+          model: Concurrence,
+          as: 'transactionConcurrence',
+        },
+        {
+          model: CronTask,
+          as: 'transactionCronTask',
+        },
+      ],
+      transaction: t,
+    });
 
     if (!transaction) {
       return res.status(404).json(`Transaction not found for specified id: ${transactionId}`);
@@ -349,7 +390,7 @@ async function updateTransaction(
     const {
       description,
       amount,
-      date,
+      startDate,
       type,
       categoryId,
       budgetId,
@@ -362,54 +403,60 @@ async function updateTransaction(
 
     const transactionPrevData = transaction.get();
     const {
-      concurrenceId: prevConcurrenceId,
-      cronTaskId: prevCronTaskId,
+      date: prevDate,
+      transactionConcurrence: prevConcurrence,
+      transactionCronTask: prevCronTask,
     } = transactionPrevData;
-    const dateObject = date ? new Date(date) : transactionPrevData.date;
 
-    let newConcurrenceId = !concurrence ? null : prevConcurrenceId;
-    let newCronTaskId = !concurrence ? null : prevCronTaskId;
+    const dateObject = startDate ? new Date(startDate) : prevDate;
+
+    let jobData;
 
     if (concurrence && user) {
-      const newConcurrenceData = await upsertConcurrence({
+      jobData = prepareJobData(user, concurrence, dateObject);
+    }
+
+    const updatedConcurrenceId = concurrence ? prevConcurrence?.id : null;
+    const updatedCronTaskId = concurrence ? prevCronTask?.id : null;
+
+    if (jobData && user) {
+      const {
+        concurrenceEndDate,
+        cronExpression,
+        nextExecutionDate,
+        timezone,
+      } = jobData;
+
+      await upsertConcurrence({
         user,
-        concurrence,
         startDate: dateObject,
         startDateOnly: true,
+        concurrence,
         jobName: JobTypes.CREATE_TRANSACTION,
         jobArgs: {
           description,
           amount,
-          date,
+          startDate,
           type,
           categoryId,
           budgetId: budgetId || '',
         },
-        prevConcurrenceId,
-        prevCronTaskId,
-      });
-
-      if (!newConcurrenceData) {
-        return res.status(500).json('Internal server error');
-      }
-
-      const { concurrenceId, taskId } = newConcurrenceData;
-      newConcurrenceId = concurrenceId;
-      newCronTaskId = taskId;
+        target: {
+          id: transaction.id,
+          type: TargetType.TRANSACTION,
+        },
+        endDate: concurrenceEndDate,
+        cronExpression,
+        nextExecutionDate,
+        timezone,
+        prevConcurrenceId: updatedConcurrenceId,
+        prevCronTaskId: updatedCronTaskId,
+      }, { transaction: t });
     }
 
-    if (!concurrence && prevConcurrenceId && prevCronTaskId) {
-      await Concurrence.destroy({
-        where: {
-          id: prevConcurrenceId,
-        },
-      });
-
-      await CronTask.destroy({
-        where: {
-          id: prevCronTaskId,
-        },
-      });
+    if (!concurrence && updatedConcurrenceId && updatedCronTaskId) {
+      await deleteConcurrence(updatedConcurrenceId, { transaction: t });
+      await deleteCronTask(updatedCronTaskId, { transaction: t });
     }
 
     await transaction.update({
@@ -419,9 +466,7 @@ async function updateTransaction(
       categoryId,
       budgetId,
       date: dateObject,
-      cronTaskId: newCronTaskId,
-      concurrenceId: newConcurrenceId,
-    });
+    }, { transaction: t });
 
     const includes = parseIncludes(String(include), {
       models: [
@@ -443,7 +488,7 @@ async function updateTransaction(
           attributes: {
             exclude: ['createdAt', 'updatedAt', 'userId', 'id'],
           },
-          as: 'concurrence',
+          as: 'transactionConcurrence',
         },
       ],
     });
@@ -453,12 +498,14 @@ async function updateTransaction(
       attributes: {
         exclude: includes ? includes.includedIdentifiers : [],
       },
+      transaction: t,
     });
 
-    console.log(fullTransaction.get());
+    await t.commit();
 
     return res.status(200).json({ data: fullTransaction });
   } catch (error: unknown) {
+    await t.rollback();
     if (error instanceof DatabaseError) {
       const sequelizeError = error as { parent?: { code?: string, detail?: string } };
 
@@ -467,6 +514,8 @@ async function updateTransaction(
           return res.status(409).json(sequelizeError.parent.detail);
         }
       }
+    } else if (error instanceof Error) {
+      console.log('Errorrrrr: ', error);
     }
     return res.status(500).json('Internal server error');
   }
@@ -479,15 +528,46 @@ async function deleteTransaction(
 ): Promise<Response | undefined> {
   const transactionId = req.params.id;
 
+  const t = await sequelize.transaction();
+
   try {
-    // TODO: Verify if cascade is needed on any deletion operation
+    const transaction = await Transaction.findByPk(transactionId, {
+      include: [
+        {
+          model: CronTask,
+          as: 'transactionCronTask',
+        },
+        {
+          model: Concurrence,
+          as: 'transactionConcurrence',
+        },
+      ],
+      transaction: t,
+    });
+
+    const currentTask = transaction?.transactionCronTask;
+    const currentConcurrence = transaction?.transactionConcurrence;
+
+    if (currentTask) {
+      const taskId = currentTask.id;
+      stopCronTask(taskId, { transaction: t });
+      await deleteCronTask(taskId, { transaction: t });
+    }
+
+    if (currentConcurrence) {
+      const concurrenceId = currentConcurrence.id;
+      await deleteConcurrence(concurrenceId, { transaction: t });
+    }
 
     await Transaction.destroy({
       where: {
         id: transactionId,
         userId: req.user?.id,
       },
+      transaction: t,
     });
+
+    await t.commit();
 
     return res.status(200).json({
       data: {
@@ -497,6 +577,7 @@ async function deleteTransaction(
     });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: unknown) {
+    await t.rollback();
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
     }

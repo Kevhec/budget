@@ -9,6 +9,8 @@ import {
 import type { Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
+import Concurrence from './concurrence';
+import CronTask from './cronTask';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -23,6 +25,10 @@ class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budg
 
   declare endDate: CreationOptional<Date>;
 
+  declare budgetConcurrence?: Concurrence;
+
+  declare budgetCronTask?: CronTask;
+
   declare userId: ForeignKey<User['id']>;
 
   public static associate(models: Models) {
@@ -33,12 +39,14 @@ class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budg
       constraints: false,
       scope: { targetType: 'Budget' },
       onDelete: 'CASCADE',
+      as: 'budgetCronTask',
     });
     this.hasOne(models.Concurrence, {
       foreignKey: 'targetId',
       constraints: false,
       scope: { targetType: 'Budget' },
       onDelete: 'CASCADE',
+      as: 'budgetConcurrence',
     });
   }
 }

@@ -8,8 +8,6 @@ async function createBudget({
   endDate,
   intervalMilliseconds,
   userId,
-  cronTaskId,
-  concurrenceId,
 }: CreateBudgetParams) {
   try {
     let calculatedEndDate = endDate;
@@ -26,8 +24,6 @@ async function createBudget({
       startDate,
       endDate: calculatedEndDate,
       userId,
-      cronTaskId,
-      concurrenceId,
     });
 
     return newBudget;

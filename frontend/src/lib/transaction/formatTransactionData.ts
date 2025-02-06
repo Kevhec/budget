@@ -7,7 +7,7 @@ function formatTransactionData(transaction: CreateTransactionParams) {
   const formattedTransaction: ApiTransaction = {
     description: transaction.description,
     amount: transaction.amount,
-    date: transaction.date,
+    startDate: transaction.startDate,
     type: transaction.type as TransactionType,
     budgetId: transaction.budgetId,
     categoryId: transaction.categoryId,

@@ -11,6 +11,8 @@ import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';
 import Budget from './budget';
 import Category from './category';
+import Concurrence from './concurrence';
+import CronTask from './cronTask';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -38,6 +40,10 @@ class Transaction
 
   declare type: TransactionType;
 
+  declare transactionConcurrence?: Concurrence;
+
+  declare transactionCronTask?: CronTask;
+
   declare userId: ForeignKey<User['id']>;
 
   declare categoryId: ForeignKey<Category['id']> | null;
@@ -58,12 +64,14 @@ class Transaction
       constraints: false,
       scope: { targetType: 'Transaction' },
       onDelete: 'CASCADE',
+      as: 'transactionCronTask',
     });
     this.hasOne(models.Concurrence, {
       foreignKey: 'targetId',
       constraints: false,
       scope: { targetType: 'Transaction' },
       onDelete: 'CASCADE',
+      as: 'transactionConcurrence',
     });
   }
 }

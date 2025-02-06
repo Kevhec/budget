@@ -7,6 +7,7 @@ import {
   type InferCreationAttributes,
 } from 'sequelize';
 import {
+  TargetType,
   ConcurrenceType, DefaultConcurrences, type Models, MonthSelect, WeekDays, WithEndDate,
 } from '@/src/lib/types';
 import { format } from '@formkit/tempo';
@@ -14,14 +15,7 @@ import { CONCURRENCE_TYPE } from '@/src/lib/constants';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
 
-enum TargetType {
-  TRANSACTION = 'Transaction',
-  BUDGET = 'Budget',
-}
-
 const sequelize = SequelizeConnection.getInstance();
-
-// TODO: Define relationship foreign key with transaction or budget
 
 class Concurrence extends Model<
 InferAttributes<Concurrence>,

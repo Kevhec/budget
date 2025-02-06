@@ -87,7 +87,7 @@ export interface ApiBudget {
 export interface ApiTransaction {
   description: string
   amount: number
-  date: Date
+  startDate: Date
   type: TransactionType
   budgetId?: string
   categoryId?: string

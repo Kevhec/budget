@@ -42,7 +42,7 @@ app.use('/api/transaction', transactionRoutes);
 app.use('/api/page', pageRouter);
 app.use('/api/category', categoryRouter);
 
-sequelize.sync({ force: true }).then(async () => {
+sequelize.sync().then(async () => {
   console.log(`${cliTheme.db('[SEQUELIZE]')}: Database synchronized`);
 });
 

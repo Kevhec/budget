@@ -86,8 +86,6 @@ export interface CreateBudgetParams {
   intervalMilliseconds?: number
   datesOffset?: string | number
   userId: string,
-  cronTaskId: string | null,
-  concurrenceId: string | null,
 }
 
 export enum JobTypes {
@@ -111,7 +109,7 @@ export interface CreateBudgetRequestBody {
 export interface CreateTransactionRequestBody {
   description: string
   amount: number
-  date: string
+  startDate: string
   type: TransactionType
   budgetId?: string
   categoryId: string
@@ -130,13 +128,11 @@ export interface CreateUserRequestBody {
 export interface CreateTransactionParams {
   description: string
   amount: number
-  date: Date
+  startDate: Date
   type: TransactionType
   budgetId?: string
   categoryId: string
-  cronTaskId: string | null
   userId: string
-  concurrenceId: string | null
 }
 
 export type DefaultConcurrency = typeof DEFAULT_CONCURRENCES[number];
@@ -205,4 +201,14 @@ export interface Models {
   Transaction: typeof Transaction
   Category: typeof Category
   Page: typeof Page
+}
+
+export enum TargetType {
+  TRANSACTION = 'Transaction',
+  BUDGET = 'Budget',
+}
+
+export interface Target<T> {
+  id: string,
+  type: T
 }

@@ -59,6 +59,8 @@ export default function TransactionForm({
     concurrence,
   } = item || {};
 
+  console.log({ item });
+
   const form = useForm<TransactionFormType>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -67,11 +69,11 @@ export default function TransactionForm({
       amount: getValue(item?.amount, 0),
       categoryId: getValue(item?.categoryId, categories.find((category) => category.name === 'General')?.id),
       budgetId: getValue(item?.budgetId, undefined),
-      date: getValue(new Date(item?.date || ''), new Date()),
+      startDate: getValue(new Date(item?.date || ''), new Date()),
       concurrenceDefaults: getValue(concurrence?.defaults, concurrenceInit.defaults),
       concurrenceTime: getValue(new Date(concurrence?.time || ''), concurrenceInit.time),
       concurrenceSteps: getValue(concurrence?.steps, concurrenceInit.steps),
-      concurrenceWithEndDate: getValue(concurrence?.withEndDate ? 'true' : 'false', concurrenceInit.withEndDate),
+      concurrenceWithEndDate: getValue(concurrence?.withEndDate, concurrenceInit.withEndDate),
       concurrenceType: getValue(concurrence?.type, concurrenceInit.type),
       concurrenceWeekDay: getValue(concurrence?.weekDay, concurrenceInit.weekDay),
       concurrenceMonthSelect: getValue(concurrence?.monthSelect, concurrenceInit.monthSelect),
@@ -79,9 +81,9 @@ export default function TransactionForm({
     },
   });
 
-  const [currentDefaultConcurrence, currentDate] = useWatch({
+  const [currentDefaultConcurrence, currentStartDate] = useWatch({
     control: form.control,
-    name: ['concurrenceDefaults', 'date'],
+    name: ['concurrenceDefaults', 'startDate'],
   });
 
   const { formState: { isDirty } } = form;
@@ -183,7 +185,7 @@ export default function TransactionForm({
         />
         <FormField
           control={form.control}
-          name="date"
+          name="startDate"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Fecha</FormLabel>
@@ -387,7 +389,7 @@ export default function TransactionForm({
                 value={field.value}
                 open={isConcurrenceSelectOpen}
                 onOpenChange={handleConcurrenceSelectOpen}
-                disabled={currentDate === undefined}
+                disabled={currentStartDate === undefined}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -404,19 +406,19 @@ export default function TransactionForm({
                   <SelectItem value="weekly">
                     Cada semana, el
                     {' '}
-                    {format((currentDate || new Date()), 'dddd')}
+                    {format((currentStartDate || new Date()), 'dddd')}
                   </SelectItem>
                   <SelectItem value="monthly">
                     Todos los meses, el
                     {' '}
-                    {nthDay(currentDate)}
+                    {nthDay(currentStartDate)}
                   </SelectItem>
                   <SelectItem value="yearly" className="peer">
                     Anualmente, el
                     {' '}
-                    {(currentDate || new Date()).getDate()}
+                    {(currentStartDate || new Date()).getDate()}
                     {' de '}
-                    {format((currentDate || new Date()), 'MMMM')}
+                    {format((currentStartDate || new Date()), 'MMMM')}
                   </SelectItem>
                   <ConcurrenceDialog
                     form={form}

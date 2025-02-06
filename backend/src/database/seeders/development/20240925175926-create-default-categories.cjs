@@ -2,9 +2,10 @@ const categories = [
   // Default Categories
   {
     id: crypto.randomUUID(),
+    type: 'general',
     name: 'General',
     isDefault: true,
-    color: '#A9A9A9', // Neutral gray for default
+    color: '#A9A9A9',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
@@ -13,210 +14,235 @@ const categories = [
   {
     id: crypto.randomUUID(),
     name: 'Vivienda',
+    type: 'expense',
     isDefault: true,
-    color: '#FF6F61', // Coral (kept, works well)
+    color: '#FF6F61',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Comestibles',
+    type: 'expense',
     isDefault: true,
-    color: '#6B8E23', // Olive Green (kept, earthy and fitting)
+    color: '#6B8E23',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Transporte',
+    type: 'expense',
     isDefault: true,
-    color: '#4682B4', // Steel Blue (kept, calming and professional)
+    color: '#4682B4',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Entretenimiento',
+    type: 'expense',
     isDefault: true,
-    color: '#FFB347', // Pastel Orange (kept, vibrant and fun)
+    color: '#FFB347',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Comidas Fuera',
+    type: 'expense',
     isDefault: true,
-    color: '#F4A460', // Sandy Brown (kept, warm and food-related)
+    color: '#F4A460',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Salud',
+    type: 'expense',
     isDefault: true,
-    color: '#2E8B57', // Sea Green (kept, fresh and health-related)
+    color: '#2E8B57',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Cuidado Personal',
+    type: 'expense',
     isDefault: true,
-    color: '#FF69B4', // Hot Pink (kept, playful and fitting)
+    color: '#FF69B4',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Ropa',
+    type: 'expense',
     isDefault: true,
-    color: '#9370DB', // Medium Purple (kept, stylish and unique)
+    color: '#9370DB',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Pago de Deudas',
+    type: 'expense',
     isDefault: true,
-    color: '#8B4513', // Saddle Brown (kept, serious and grounded)
+    color: '#8B4513',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Ahorros e Inversiones',
+    type: 'expense',
     isDefault: true,
-    color: '#228B22', // Forest Green (kept, growth-related)
+    color: '#228B22',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Educación',
+    type: 'expense',
     isDefault: true,
-    color: '#468499', // Teal Blue (kept, calming and intellectual)
+    color: '#468499',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Regalos',
+    type: 'expense',
     isDefault: true,
-    color: '#D2691E', // Chocolate (kept, warm and gift-like)
+    color: '#D2691E',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Donaciones',
+    type: 'expense',
     isDefault: true,
-    color: '#DAA520', // Goldenrod (new, distinct from Regalos)
+    color: '#DAA520',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Seguros',
+    type: 'expense',
     isDefault: true,
-    color: '#708090', // Slate Gray (kept, neutral and professional)
+    color: '#708090',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Suscripciones',
+    type: 'expense',
     isDefault: true,
-    color: '#FF6347', // Tomato (kept, vibrant and attention-grabbing)
+    color: '#FF6347',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Viajes',
+    type: 'expense',
     isDefault: true,
-    color: '#FFD700', // Gold (kept, luxurious and travel-related)
+    color: '#FFD700',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Mascotas',
+    type: 'expense',
     isDefault: true,
-    color: '#DA70D6', // Orchid (kept, playful and pet-friendly)
+    color: '#DA70D6',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Cuidado Infantil',
+    type: 'expense',
     isDefault: true,
-    color: '#FF8C00', // Dark Orange (kept, warm and family-related)
+    color: '#FF8C00',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Deudas',
+    type: 'expense',
     isDefault: true,
-    color: '#B22222', // Firebrick (kept, urgent and serious)
+    color: '#B22222',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
 
-  // New Categories
   {
     id: crypto.randomUUID(),
     name: 'Servicios Públicos',
+    type: 'expense',
     isDefault: true,
-    color: '#20B2AA', // Light Sea Green (fresh and utility-related)
+    color: '#20B2AA',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Impuestos',
+    type: 'expense',
     isDefault: true,
-    color: '#CD5C5C', // Indian Red (serious and tax-related)
+    color: '#CD5C5C',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Mantenimiento del Auto',
+    type: 'expense',
     isDefault: true,
-    color: '#808080', // Gray (neutral and mechanical)
+    color: '#808080',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Reparaciones del Hogar',
+    type: 'expense',
     isDefault: true,
-    color: '#8FBC8F', // Dark Sea Green (home-related and calming)
+    color: '#8FBC8F',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Gimnasio',
+    type: 'expense',
     isDefault: true,
-    color: '#4169E1', // Royal Blue (energetic and fitness-related)
+    color: '#4169E1',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Electrónicos',
+    type: 'expense',
     isDefault: true,
-    color: '#9932CC', // Dark Orchid (techy and modern)
+    color: '#9932CC',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Comisiones Bancarias',
+    type: 'expense',
     isDefault: true,
-    color: '#778899', // Light Slate Gray (neutral and financial)
+    color: '#778899',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
@@ -225,40 +251,45 @@ const categories = [
   {
     id: crypto.randomUUID(),
     name: 'Sueldo',
+    type: 'income',
     isDefault: true,
-    color: '#32CD32', // Lime Green (kept, fresh and income-related)
+    color: '#32CD32',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Ingresos por Inversiones',
+    type: 'income',
     isDefault: true,
-    color: '#228B22', // Forest Green (growth-related)
+    color: '#228B22',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Bonificaciones',
+    type: 'income',
     isDefault: true,
-    color: '#FFD700', // Gold (luxurious and bonus-related)
+    color: '#FFD700',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Trabajo Independiente',
+    type: 'income',
     isDefault: true,
-    color: '#00CED1', // Dark Turquoise (modern and freelance-related)
+    color: '#00CED1',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
   {
     id: crypto.randomUUID(),
     name: 'Alquiler',
+    type: 'income',
     isDefault: true,
-    color: '#8A2BE2', // Blue Violet (unique and income-related)
+    color: '#8A2BE2',
     createdAt: new Date(),
     updatedAt: new Date(),
   },
