@@ -6,10 +6,11 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
+import type { Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
-import CronTask from './cronTask';
 import Concurrence from './concurrence';
+import CronTask from './cronTask';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -24,11 +25,30 @@ class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budg
 
   declare endDate: CreationOptional<Date>;
 
-  declare cronTaskId: ForeignKey<CronTask['id']> | null;
+  declare budgetConcurrence?: Concurrence;
 
-  declare concurrenceId: ForeignKey<Concurrence['id']> | null;
+  declare budgetCronTask?: CronTask;
 
   declare userId: ForeignKey<User['id']>;
+
+  public static associate(models: Models) {
+    this.belongsTo(models.User, { foreignKey: 'userId' });
+    this.hasMany(models.Transaction, { foreignKey: 'budgetId' });
+    this.hasOne(models.CronTask, {
+      foreignKey: 'targetId',
+      constraints: false,
+      scope: { targetType: 'Budget' },
+      onDelete: 'CASCADE',
+      as: 'budgetCronTask',
+    });
+    this.hasOne(models.Concurrence, {
+      foreignKey: 'targetId',
+      constraints: false,
+      scope: { targetType: 'Budget' },
+      onDelete: 'CASCADE',
+      as: 'budgetConcurrence',
+    });
+  }
 }
 
 Budget.init({

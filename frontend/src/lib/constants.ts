@@ -20,7 +20,7 @@ const defaultPaginatedOptions = {
   page: 1,
   limit: 5,
   date: new Date(),
-  include: 'budget,category',
+  include: 'budget,category,concurrence',
 };
 
 const CONCURRENCE_TYPE = ['daily', 'weekly', 'monthly', 'semestrial', 'yearly'] as const;
@@ -39,7 +39,7 @@ const concurrenceInit: SimplifiedConcurrence = {
   defaults: 'none',
   time: new Date(),
   steps: 1,
-  withEndDate: 'true',
+  withEndDate: 'false',
   type: 'daily',
   weekDay: format(new Date(), 'dddd', 'en').toLowerCase() as WeekDays,
   monthSelect: 'exact',

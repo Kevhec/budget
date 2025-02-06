@@ -1,5 +1,6 @@
 import cron, { type ScheduledTask } from 'node-cron';
 import CronTask from '@/src/database/models/cronTask';
+import { Transaction } from 'sequelize';
 import {
   JobTypes,
   type CreateBudgetParams,
@@ -31,21 +32,25 @@ const jobsMapping = {
   'create-transaction': createTransactionJob,
 } as const;
 
-async function scheduleCronTask({
-  cronExpression,
-  timezone,
-  endDate,
-  taskId,
-  jobs,
-}: Params) {
+async function scheduleCronTask(
+  {
+    cronExpression,
+    timezone,
+    endDate,
+    taskId,
+    jobs,
+  }: Params,
+  { transaction }: { transaction?: Transaction } = {},
+) {
   try {
     if (!cron.validate(cronExpression)) {
       throw new Error('Invalid cron expression');
     }
 
-    const task = await CronTask.findByPk(taskId);
+    const task = await CronTask.findByPk(taskId, { transaction });
     if (!task) throw new Error(`Task with ID ${taskId} not found.`);
 
+    console.log({ endDate });
     const cronTask = cron.schedule(
       cronExpression,
       async () => {
@@ -73,7 +78,7 @@ async function scheduleCronTask({
                 case JobTypes.CREATE_TRANSACTION:
                   await createTransactionJob({
                     ...jobArgs,
-                    date: now,
+                    startDate: now,
                   } as CreateTransactionParams);
                   break;
                 default:
@@ -96,9 +101,12 @@ async function scheduleCronTask({
   }
 }
 
-async function stopCronTask(taskId: string) {
+async function stopCronTask(
+  taskId: string,
+  { transaction }: { transaction?: Transaction } = {},
+) {
   try {
-    const task = await CronTask.findByPk(taskId);
+    const task = await CronTask.findByPk(taskId, { transaction });
     if (!task) throw new Error(`Task with ID ${taskId} not found.`);
 
     task.update({

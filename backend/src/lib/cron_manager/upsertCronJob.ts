@@ -1,5 +1,6 @@
 import { User } from '@/src/database/models';
 import CronJob from '@/src/database/models/cronJobs';
+import { Transaction } from 'sequelize';
 import { JobTypes, JSONValue } from '../types';
 
 interface Params {
@@ -12,12 +13,15 @@ interface Params {
   jobId?: string
 }
 
-async function upsertCronJob({
-  user,
-  data,
-  taskId,
-  jobId,
-}: Params) {
+async function upsertCronJob(
+  {
+    user,
+    data,
+    taskId,
+    jobId,
+  }: Params,
+  { transaction }: { transaction?: Transaction } = {},
+) {
   try {
     if (jobId) {
       await CronJob.update({
@@ -28,9 +32,10 @@ async function upsertCronJob({
           id: taskId,
           userId: user.id,
         },
+        transaction,
       });
 
-      const updatedJob = await CronJob.findByPk(jobId);
+      const updatedJob = await CronJob.findByPk(jobId, { transaction });
 
       return updatedJob;
     }
@@ -39,7 +44,7 @@ async function upsertCronJob({
       ...data,
       cronTaskId: taskId,
       userId: user.id,
-    });
+    }, { transaction });
 
     return newJob;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

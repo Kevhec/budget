@@ -1,53 +1,57 @@
 import { User } from '@/src/database/models';
+import { Transaction } from 'sequelize';
 import getDateTimeDifference from '../utils/time/getDateTimeDifference';
-import generateNextExecutionDate from './generateNextExecutionDate';
 import { Job, scheduleCronTask } from './taskScheduler';
-import { Concurrence, JobTypes } from '../types';
-import prepareJobData from './prepareJobData';
+import {
+  TargetType, JobTypes, Target,
+} from '../types';
 import upsertCronTask from './upsertCronTask';
 import upsertCronJob from './upsertCronJob';
 
 interface Params<T> {
   user: User
-  concurrence: Concurrence
+  cronExpression: string
   startDate: Date
+  endDate?: Date
+  timezone: string
+  nextExecutionDate: Date
   particularJobArgs: T
   jobName: JobTypes
   startDateOnly?: boolean
   existingTaskId?: string
   existingJobId?: string
+  target: Target<TargetType>
 }
 
-async function setupOrUpdateJob<T>({
-  user,
-  concurrence,
-  startDate,
-  startDateOnly,
-  jobName,
-  particularJobArgs,
-  existingTaskId,
-  existingJobId,
-}: Params<T>) {
-  const {
-    cronExpression,
-    endDate: concurrenceEndDate,
+async function setupOrUpdateJob<T>(
+  {
+    user,
     timezone,
-  } = prepareJobData(user, concurrence, startDate);
-
-  // When recurring the end date for each budget is calculated automatically, not by the user
-  const nextExecutionDate = generateNextExecutionDate(cronExpression, { tz: timezone });
-
+    startDate,
+    cronExpression,
+    endDate,
+    nextExecutionDate,
+    startDateOnly,
+    jobName,
+    particularJobArgs,
+    existingTaskId,
+    existingJobId,
+    target,
+  }: Params<T>,
+  { transaction }: { transaction?: Transaction } = {},
+) {
   const intervalMilliseconds = getDateTimeDifference(startDate, nextExecutionDate);
 
   const newOrUpdatedTaskId = await upsertCronTask({
     user,
     data: {
       cronExpression,
-      endDate: concurrenceEndDate,
+      endDate,
       timezone,
     },
     taskId: existingTaskId,
-  });
+    target,
+  }, { transaction });
 
   const job = await upsertCronJob({
     user,
@@ -62,22 +66,17 @@ async function setupOrUpdateJob<T>({
     },
     taskId: newOrUpdatedTaskId,
     jobId: existingJobId,
-  });
+  }, { transaction });
 
   const typedJob = job as unknown as Job;
 
-  scheduleCronTask({
+  await scheduleCronTask({
     cronExpression,
-    endDate: concurrenceEndDate,
+    endDate,
     timezone,
     taskId: newOrUpdatedTaskId,
     jobs: [typedJob],
-  });
-
-  return {
-    nextExecutionDate,
-    taskId: newOrUpdatedTaskId.toString(),
-  };
+  }, { transaction });
 }
 
 export default setupOrUpdateJob;

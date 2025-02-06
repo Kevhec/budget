@@ -20,6 +20,7 @@ module.exports = {
         birthday: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
+        timezone: 'UTC',
       },
     ]);
   },

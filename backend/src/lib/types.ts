@@ -3,6 +3,16 @@ import { type Request } from 'express';
 import { type TransactionType } from '../database/models/transaction';
 import { concurrenceSchema } from '../database/schemas/general';
 import { CONCURRENCE_TYPE, DEFAULT_CONCURRENCES } from './constants';
+import type {
+  Budget,
+  Category,
+  Page,
+  User,
+  Transaction,
+  Concurrence as ConcurrenceModel,
+  CronJob,
+  CronTask,
+} from '../database/models';
 
 export interface BalanceResponse {
   year: string
@@ -76,8 +86,6 @@ export interface CreateBudgetParams {
   intervalMilliseconds?: number
   datesOffset?: string | number
   userId: string,
-  cronTaskId: string | null,
-  concurrenceId: string | null,
 }
 
 export enum JobTypes {
@@ -101,7 +109,7 @@ export interface CreateBudgetRequestBody {
 export interface CreateTransactionRequestBody {
   description: string
   amount: number
-  date: string
+  startDate: string
   type: TransactionType
   budgetId?: string
   categoryId: string
@@ -120,13 +128,11 @@ export interface CreateUserRequestBody {
 export interface CreateTransactionParams {
   description: string
   amount: number
-  date: Date
+  startDate: Date
   type: TransactionType
   budgetId?: string
   categoryId: string
-  cronTaskId: string | null
   userId: string
-  concurrenceId: string | null
 }
 
 export type DefaultConcurrency = typeof DEFAULT_CONCURRENCES[number];
@@ -184,4 +190,25 @@ export enum WithEndDate {
 export enum MonthSelect {
   EXACT = 'exact',
   ORDINAL = 'ordinal',
+}
+
+export interface Models {
+  User: typeof User
+  Budget: typeof Budget
+  Concurrence: typeof ConcurrenceModel
+  CronJob: typeof CronJob
+  CronTask: typeof CronTask
+  Transaction: typeof Transaction
+  Category: typeof Category
+  Page: typeof Page
+}
+
+export enum TargetType {
+  TRANSACTION = 'Transaction',
+  BUDGET = 'Budget',
+}
+
+export interface Target<T> {
+  id: string,
+  type: T
 }

@@ -3,20 +3,22 @@ import {
   DatabaseError, fn, literal, Op,
 } from 'sequelize';
 import { format } from '@formkit/tempo';
-import { Budget, Transaction } from '../database/models';
+import { Budget, CronTask, Transaction } from '../database/models';
 import generateDateRange from '../lib/utils/generateDateRange';
 import {
   createBudget as createBudgetJob,
-  createConcurrence as createConcurrenceJob,
 } from '../lib/jobs';
-import { JobTypes, type CreateBudgetRequestBody, type TypedRequest } from '../lib/types';
+import {
+  JobTypes,
+  TargetType,
+  type CreateBudgetRequestBody,
+  type TypedRequest,
+} from '../lib/types';
 import { generateLinksMetadata, sanitizeObject } from '../lib/utils';
 import extractBudgetBalance from '../lib/jobs/extractBudgetBalance';
-import setupOrUpdateJob from '../lib/cron_manager/setupJob';
 import Concurrence from '../database/models/concurrence';
 import upsertConcurrence from '../lib/cron_manager/upsertConcurrence';
-
-// TODO: Sanitize returned objects to not return userId
+import prepareJobData from '../lib/cron_manager/prepareJobData';
 
 // Create
 async function createBudget(
@@ -36,39 +38,16 @@ async function createBudget(
   } = req;
 
   try {
-    let taskId: null | string = null;
-    let concurrenceId: null | string = null;
-
     const startDateObj = new Date(startDate);
+    let jobData;
+
+    if (concurrence && user) {
+      jobData = prepareJobData(user, concurrence, startDateObj);
+    }
 
     // If recurrence is provided, overwrite endDateObj to
     // nextExecutionDate instead of normal non concurrent budgets end date.
-    let endDateObj = new Date(endDate);
-
-    if (concurrence && user) {
-      const newConcurrence = await createConcurrenceJob({ concurrence, user });
-
-      concurrenceId = newConcurrence.id;
-
-      const {
-        nextExecutionDate,
-        taskId: newTaskId,
-      } = await setupOrUpdateJob({
-        user,
-        concurrence,
-        startDate: startDateObj,
-        jobName: JobTypes.CREATE_BUDGET,
-        particularJobArgs: {
-          name,
-          totalAmount,
-        },
-      });
-
-      // Budget ends when a new one of the same task is going to be created
-      endDateObj = nextExecutionDate;
-
-      taskId = newTaskId;
-    }
+    const endDateObj = jobData?.nextExecutionDate || new Date(endDate);
 
     const newBudget = await createBudgetJob({
       name,
@@ -76,11 +55,37 @@ async function createBudget(
       startDate: startDateObj,
       endDate: endDateObj,
       userId: user?.id || '',
-      cronTaskId: taskId,
-      concurrenceId,
     });
 
-    const sanitizedBudget = sanitizeObject(newBudget.toJSON(), ['cronTaskId', 'userId']);
+    if (jobData && user) {
+      const {
+        cronExpression,
+        concurrenceEndDate,
+        nextExecutionDate,
+        timezone,
+      } = jobData;
+
+      await upsertConcurrence({
+        user,
+        cronExpression,
+        concurrence,
+        timezone,
+        nextExecutionDate,
+        startDate: startDateObj,
+        endDate: concurrenceEndDate,
+        jobName: JobTypes.CREATE_BUDGET,
+        jobArgs: {
+          name,
+          totalAmount,
+        },
+        target: {
+          id: newBudget.id,
+          type: TargetType.BUDGET,
+        },
+      });
+    }
+
+    const sanitizedBudget = sanitizeObject(newBudget.toJSON(), ['userId']);
 
     return res.status(201).json({ data: { budget: sanitizedBudget } });
   } catch (error: unknown) {
@@ -141,13 +146,13 @@ async function getAllBudgets(
       include: [
         {
           model: Concurrence,
-          as: 'concurrence',
+          as: 'budgetConcurrence',
           attributes: {
-            exclude: ['createdAt', 'updatedAt', 'userId', 'id'],
+            exclude: ['createdAt', 'updatedAt', 'userId', 'id', 'budgetId'],
           },
         },
       ],
-      attributes: { exclude: ['cronTaskId', 'userId', 'concurrenceId'] },
+      attributes: { exclude: ['userId'] },
       order: [['createdAt', 'DESC']],
     });
 
@@ -160,7 +165,7 @@ async function getAllBudgets(
       count, rows, offset: intOffset, limit: intLimit,
     });
 
-    let budgetsToReturn = rows.map((item) => item.get());
+    let budgetsToReturn;
 
     if (balance) {
       const budgetsIds = rows.map((budget) => budget.id) as string[];
@@ -171,6 +176,8 @@ async function getAllBudgets(
         ...budget.get(),
         balance: budgetsBalance ? budgetsBalance[budget.id] : { totalIncome: 0, totalExpense: 0 },
       }));
+    } else {
+      budgetsToReturn = rows.map((item) => item.get());
     }
 
     return res.status(200).json({
@@ -199,7 +206,7 @@ async function getBudget(
         userId: req.user?.id,
       },
       attributes: {
-        exclude: ['cronTaskId', 'userId'],
+        exclude: ['userId'],
       },
     });
 
@@ -207,7 +214,9 @@ async function getBudget(
       return res.status(404).json(`Budget not found for specified id: ${budgetId}`);
     }
 
-    return res.status(200).json({ data: budget });
+    const sanitizedBudget = sanitizeObject(budget.toJSON(), ['userId']);
+
+    return res.status(200).json({ data: sanitizedBudget });
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -313,7 +322,18 @@ async function updateBudget(
   const reqBody = req.body;
 
   try {
-    const budget = await Budget.findByPk(budgetId);
+    const budget = await Budget.findByPk(budgetId, {
+      include: [
+        {
+          model: Concurrence,
+          as: 'budgetConcurrence',
+        },
+        {
+          model: CronTask,
+          as: 'budgetCronTask',
+        },
+      ],
+    });
 
     if (!budget) {
       return res.status(404).json(`Budget not found for specified id: ${budgetId}`);
@@ -333,44 +353,53 @@ async function updateBudget(
 
     const prevBudgetData = budget.get();
     const {
-      concurrenceId: prevConcurrenceId,
-      cronTaskId: prevCronTaskId,
       startDate: prevStartDate,
       endDate: prevEndDate,
+      budgetConcurrence: prevConcurrence,
+      budgetCronTask: prevCronTask,
     } = prevBudgetData;
 
     const startDateObj = startDate ? new Date(startDate) : prevStartDate;
     let endDateObj = endDate ? new Date(endDate) : prevEndDate;
 
-    let newConcurrenceId = prevConcurrenceId;
-    let newCronTaskId = prevCronTaskId;
+    let jobData;
 
     if (concurrence && user) {
-      const newConcurrenceData = await upsertConcurrence({
+      jobData = prepareJobData(user, concurrence, startDateObj);
+    }
+
+    const updatedConcurrenceId = concurrence ? prevConcurrence?.id : null;
+    const updatedCronTaskId = concurrence ? prevCronTask?.id : null;
+
+    if (jobData && user) {
+      const {
+        concurrenceEndDate,
+        cronExpression,
+        nextExecutionDate,
+        timezone,
+      } = jobData;
+
+      await upsertConcurrence({
         user,
         concurrence,
+        endDate: concurrenceEndDate,
+        cronExpression,
+        timezone,
         startDate: startDateObj,
         jobName: JobTypes.CREATE_BUDGET,
         jobArgs: {
           name,
           totalAmount,
         },
-        prevConcurrenceId,
-        prevCronTaskId,
+        nextExecutionDate,
+        prevConcurrenceId: updatedConcurrenceId,
+        prevCronTaskId: updatedCronTaskId,
+        target: {
+          id: budget.id,
+          type: TargetType.BUDGET,
+        },
       });
 
-      if (!newConcurrenceData) {
-        return res.status(500).json('Internal server error');
-      }
-
-      const {
-        concurrenceId,
-        taskId,
-        nextExecutionDate,
-      } = newConcurrenceData;
-
-      newConcurrenceId = concurrenceId;
-      newCronTaskId = taskId;
       endDateObj = nextExecutionDate;
     }
 
@@ -379,8 +408,6 @@ async function updateBudget(
       totalAmount,
       startDate: startDateObj,
       endDate: endDateObj,
-      concurrenceId: newConcurrenceId,
-      cronTaskId: newCronTaskId,
     });
 
     const sanitizedBudget = sanitizeObject(updatedBudget.toJSON(), ['cronTaskId']);

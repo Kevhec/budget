@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { fn, literal, Op } from 'sequelize';
 import { Category, Transaction } from '../database/models';
 import generateDateRange from '../lib/utils/generateDateRange';
+import { cliTheme } from '../lib/utils';
 
 // Create
 async function createCategory(
@@ -11,6 +12,7 @@ async function createCategory(
   const {
     name,
     color,
+    type,
   } = req.body;
 
   try {
@@ -19,6 +21,7 @@ async function createCategory(
       color,
       isDefault: false,
       userId: req.user?.id || '',
+      type,
     });
 
     return res.status(201).json({ data: { category: newCategory } });
@@ -120,8 +123,8 @@ async function getCategoriesMonthlyBalance(
       ],
       where: whereClause,
       attributes: [
-        [fn('SUM', literal('CASE WHEN "type" = \'income\' THEN "amount" ELSE 0 END')), 'totalIncome'],
-        [fn('SUM', literal('CASE WHEN "type" = \'expense\' THEN "amount" ELSE 0 END')), 'totalExpense'],
+        [fn('SUM', literal('CASE WHEN "Transaction"."type" = \'income\' THEN "amount" ELSE 0 END')), 'totalIncome'],
+        [fn('SUM', literal('CASE WHEN "Transaction"."type" = \'expense\' THEN "amount" ELSE 0 END')), 'totalExpense'],
       ],
       group: ['categoryId', 'category.id'],
     });
@@ -138,7 +141,7 @@ async function getCategoriesMonthlyBalance(
     });
   } catch (error) {
     if (error instanceof Error) {
-      console.error('ERROR: ', error.message);
+      console.log(`${cliTheme.serverWarn('ERROR at getCategoriesMonthlyBalance')}: ${error.message}`);
     }
     return res.status(500).json('Internal server error');
   }

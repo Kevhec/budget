@@ -1,36 +1,37 @@
 import { Category, Transaction } from '@/src/database/models';
+import { Transaction as TransactionType } from 'sequelize';
 import type { CreateTransactionParams } from '../types';
 
-async function createTransaction({
-  description,
-  amount,
-  date,
-  type,
-  budgetId,
-  categoryId,
-  cronTaskId,
-  userId,
-  concurrenceId,
-}: CreateTransactionParams) {
+async function createTransaction(
+  {
+    description,
+    amount,
+    startDate,
+    type,
+    budgetId,
+    categoryId,
+    userId,
+  }: CreateTransactionParams,
+  { transaction }: { transaction?: TransactionType } = {},
+) {
   try {
     const generalCategory = await Category.findOne({
       where: {
         name: 'General',
         isDefault: true,
       },
+      transaction,
     });
 
     const newTransaction = await Transaction.create({
       description,
       amount,
-      date,
+      date: startDate,
       type,
       budgetId,
       categoryId: categoryId || generalCategory?.id,
-      cronTaskId,
       userId,
-      concurrenceId,
-    });
+    }, { transaction });
 
     const transactionWithCategory = await Transaction.findOne({
       where: { id: newTransaction.id },
@@ -40,7 +41,12 @@ async function createTransaction({
         attributes: ['id', 'name', 'color'],
         as: 'category',
       }],
+      transaction,
     });
+
+    if (!transactionWithCategory) {
+      throw new Error('Error while looking for newly created transaction');
+    }
 
     return transactionWithCategory;
   } catch (error) {

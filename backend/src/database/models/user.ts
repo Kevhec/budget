@@ -5,11 +5,12 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
+import type { Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 
 const sequelize = SequelizeConnection.getInstance();
 
-export default class User
+class User
   extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   declare id: CreationOptional<string>;
 
@@ -32,6 +33,16 @@ export default class User
   declare createdAt?: CreationOptional<Date>;
 
   declare updatedAt?: CreationOptional<Date>;
+
+  public static associate(models: Models) {
+    this.hasMany(models.Page, { foreignKey: 'userId' });
+    this.hasMany(models.Budget, { foreignKey: 'userId' });
+    this.hasMany(models.Transaction, { foreignKey: 'userId' });
+    this.hasMany(models.Category, { foreignKey: 'userId' });
+    this.hasMany(models.CronTask, { foreignKey: 'userId' });
+    this.hasMany(models.CronJob, { foreignKey: 'userId' });
+    this.hasMany(models.Concurrence, { foreignKey: 'userId' });
+  }
 }
 
 User.init({
@@ -103,3 +114,5 @@ User.init({
     },
   },
 });
+
+export default User;

@@ -6,12 +6,13 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
+import type { Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import User from './user';
 import Budget from './budget';
 import Category from './category';
-import CronTask from './cronTask';
 import Concurrence from './concurrence';
+import CronTask from './cronTask';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -39,7 +40,9 @@ class Transaction
 
   declare type: TransactionType;
 
-  declare cronTaskId: ForeignKey<CronTask['id']> | null;
+  declare transactionConcurrence?: Concurrence;
+
+  declare transactionCronTask?: CronTask;
 
   declare userId: ForeignKey<User['id']>;
 
@@ -47,7 +50,30 @@ class Transaction
 
   declare budgetId: ForeignKey<Budget['id']>;
 
-  declare concurrenceId: ForeignKey<Concurrence['id']> | null;
+  public static associate(models: Models) {
+    this.belongsTo(models.Budget, {
+      foreignKey: 'budgetId',
+      as: 'budget',
+    });
+    this.belongsTo(models.Category, {
+      foreignKey: 'categoryId',
+      as: 'category',
+    });
+    this.hasOne(models.CronTask, {
+      foreignKey: 'targetId',
+      constraints: false,
+      scope: { targetType: 'Transaction' },
+      onDelete: 'CASCADE',
+      as: 'transactionCronTask',
+    });
+    this.hasOne(models.Concurrence, {
+      foreignKey: 'targetId',
+      constraints: false,
+      scope: { targetType: 'Transaction' },
+      onDelete: 'CASCADE',
+      as: 'transactionConcurrence',
+    });
+  }
 }
 
 Transaction.init({

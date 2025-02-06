@@ -6,7 +6,7 @@ import {
   type InferAttributes,
   type InferCreationAttributes,
 } from 'sequelize';
-import { JobTypes, JSONValue } from '@/src/lib/types';
+import { JobTypes, JSONValue, type Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
 import CronTask from './cronTask';
 import User from './user';
@@ -23,6 +23,13 @@ class CronJob extends Model<InferAttributes<CronJob>, InferCreationAttributes<Cr
   declare cronTaskId: ForeignKey<CronTask['id']>;
 
   declare userId: ForeignKey<User['id']>;
+
+  public static associate(models: Models) {
+    this.belongsTo(models.CronTask, {
+      foreignKey: 'cronTaskId',
+      as: 'cronTask',
+    });
+  }
 }
 
 CronJob.init({

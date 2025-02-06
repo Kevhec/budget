@@ -7,7 +7,8 @@ import {
   type InferCreationAttributes,
 } from 'sequelize';
 import {
-  ConcurrenceType, DefaultConcurrences, MonthSelect, WeekDays, WithEndDate,
+  TargetType,
+  ConcurrenceType, DefaultConcurrences, type Models, MonthSelect, WeekDays, WithEndDate,
 } from '@/src/lib/types';
 import { format } from '@formkit/tempo';
 import { CONCURRENCE_TYPE } from '@/src/lib/constants';
@@ -15,8 +16,6 @@ import SequelizeConnection from '../config/SequelizeConnection';
 import type User from './user';
 
 const sequelize = SequelizeConnection.getInstance();
-
-// TODO: Define relationship foreign key with transaction or budget
 
 class Concurrence extends Model<
 InferAttributes<Concurrence>,
@@ -41,6 +40,23 @@ InferCreationAttributes<Concurrence>
   declare monthSelect: CreationOptional<MonthSelect>;
 
   declare userId: ForeignKey<User['id']>;
+
+  declare targetId: ForeignKey<string>;
+
+  declare targetType: TargetType;
+
+  public static associate(models: Models) {
+    this.belongsTo(models.Budget, {
+      foreignKey: 'targetId',
+      constraints: false,
+      as: 'budgetConcurrence',
+    });
+    this.belongsTo(models.Transaction, {
+      foreignKey: 'targetId',
+      constraints: false,
+      as: 'transactionConcurrence',
+    });
+  }
 }
 
 Concurrence.init({
@@ -88,6 +104,14 @@ Concurrence.init({
   monthSelect: {
     type: DataTypes.ENUM(...Object.values(MonthSelect)),
     defaultValue: MonthSelect.EXACT,
+    allowNull: false,
+  },
+  targetId: {
+    type: DataTypes.UUID,
+    allowNull: false,
+  },
+  targetType: {
+    type: DataTypes.ENUM(...Object.values(TargetType)),
     allowNull: false,
   },
 }, {
