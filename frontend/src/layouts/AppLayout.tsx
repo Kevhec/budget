@@ -1,6 +1,6 @@
 import {
   Navigate, Outlet, useLocation,
-} from 'react-router-dom';
+} from 'react-router';
 import { CirclePlus } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import Header from '@/components/Header';

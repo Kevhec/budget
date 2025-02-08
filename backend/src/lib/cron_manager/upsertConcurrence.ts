@@ -1,4 +1,3 @@
-import { User } from '@/src/database/models';
 import Concurrence from '@/src/database/models/concurrence';
 import CronTask from '@/src/database/models/cronTask';
 import CronJob from '@/src/database/models/cronJobs';
@@ -9,12 +8,13 @@ import {
 } from '../jobs';
 import {
   TargetType, JobTypes, JSONValue, Target, type Concurrence as ConcurrenceType,
+  UserAttributes,
 } from '../types';
 import { stopCronTask } from './taskScheduler';
 import parseConcurrenceObj from '../jobs/parseConcurrenceObj';
 
 interface Params {
-  user: User
+  user: UserAttributes
   target: Target<TargetType>
   concurrence: ConcurrenceType
   startDate: Date

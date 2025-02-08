@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@budmin/transactional": "workspace:*",
-    "@dotenvx/dotenvx": "^1.14.1"
+    "@dotenvx/dotenvx": "^1.34.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.8.0",

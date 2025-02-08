@@ -1,6 +1,6 @@
 import Typography from '@/components/Typography';
 import Countdown from 'react-countdown';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 
 export default function SuccessSignUp() {
   const countdownRenderer: (...args: any[]) => any = ({ seconds, completed }) => {

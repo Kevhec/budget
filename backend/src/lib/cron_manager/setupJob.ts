@@ -1,15 +1,15 @@
-import { User } from '@/src/database/models';
 import { Transaction } from 'sequelize';
 import getDateTimeDifference from '../utils/time/getDateTimeDifference';
 import { Job, scheduleCronTask } from './taskScheduler';
 import {
   TargetType, JobTypes, Target,
+  UserAttributes,
 } from '../types';
 import upsertCronTask from './upsertCronTask';
 import upsertCronJob from './upsertCronJob';
 
 interface Params<T> {
-  user: User
+  user: UserAttributes
   cronExpression: string
   startDate: Date
   endDate?: Date

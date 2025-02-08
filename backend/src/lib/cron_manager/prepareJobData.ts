@@ -1,13 +1,12 @@
-import { User } from '@/src/database/models';
-import { Concurrence } from '../types';
+import { Concurrence, UserAttributes } from '../types';
 import parseConcurrence from '../utils/concurrence/formatConcurrence';
 import generateCronExpression from './generateCronExpression';
 import generateNextExecutionDate from './generateNextExecutionDate';
 
-function prepareJobData(user: User, concurrence: Concurrence, startDate: Date) {
-  if (!concurrence) return null;
+function prepareJobData(user: UserAttributes, concurrence: Concurrence, startDate: Date) {
+  if (!concurrence || !user) return null;
 
-  const userTimezone = user?.dataValues.timezone || 'UTC';
+  const userTimezone = user.preferences?.timezone || 'UTC';
   const parsedConcurrence = parseConcurrence(concurrence, startDate, userTimezone);
   const {
     time,

@@ -4,7 +4,7 @@ import Typography from '@/components/Typography';
 import useBudgets from '@/hooks/useBudgets';
 import BudgetResumeCard from '@/components/BudgetResumeCard';
 import { CircleDollarSign } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router';
 import { Separator } from '@/components/ui/separator';
 import useTransactions from '@/hooks/useTransactions';
 

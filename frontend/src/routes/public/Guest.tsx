@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   NavLink,
-} from 'react-router-dom';
+} from 'react-router';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';

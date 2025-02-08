@@ -1,12 +1,14 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const bcrypt = require('bcrypt');
 
+const userId = crypto.randomUUID();
+const preferencesId = crypto.randomUUID();
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash('admin', salt);
-    const userId = crypto.randomUUID();
 
     await queryInterface.bulkInsert('users', [
       {
@@ -20,7 +22,21 @@ module.exports = {
         birthday: new Date(),
         createdAt: new Date(),
         updatedAt: new Date(),
+      },
+    ]);
+
+    await queryInterface.bulkInsert('user-preferences', [
+      {
+        id: preferencesId,
+        language: 'es',
+        currency: 'COP',
+        dateFormat: 'DD-MM-YYYY',
+        timeFormat: '12',
+        theme: 'dark',
         timezone: 'UTC',
+        userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ]);
   },
@@ -29,6 +45,10 @@ module.exports = {
     await queryInterface.bulkDelete('users', {
       username: 'admin',
       email: 'admin@admin.com',
+    });
+
+    await queryInterface.bulkDelete('user-preferences', {
+      id: preferencesId,
     });
   },
 };

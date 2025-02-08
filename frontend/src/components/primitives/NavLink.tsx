@@ -1,5 +1,5 @@
 import { ArrowRight, type LucideIcon } from 'lucide-react';
-import { NavLink, NavLinkProps } from 'react-router-dom';
+import { NavLink, NavLinkProps } from 'react-router';
 import { useMediaQuery } from 'react-responsive';
 import { cn } from '@/lib/utils';
 

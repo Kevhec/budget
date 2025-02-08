@@ -1,6 +1,6 @@
 import {
   BrowserRouter, Route, Routes,
-} from 'react-router-dom';
+} from 'react-router';
 import { AuthProvider } from './context/AuthProvider';
 import Login from './routes/public/Login';
 import Guest from './routes/public/Guest';
@@ -22,7 +22,7 @@ function App() {
       <TooltipProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<AuthLayout />}>
+            <Route element={<AuthLayout />}>
               <Route
                 index
                 element={(
@@ -32,21 +32,22 @@ function App() {
                 )}
               />
               <Route
-                path="/register"
+                path="register"
                 element={(
                   <NoAuthOnly>
                     <SignUp />
                   </NoAuthOnly>
                 )}
-              />
-              <Route
-                path="/register/success"
-                element={(
-                  <NoAuthOnly>
-                    <SuccessSignUp />
-                  </NoAuthOnly>
-                )}
-              />
+              >
+                <Route
+                  path="success"
+                  element={(
+                    <NoAuthOnly>
+                      <SuccessSignUp />
+                    </NoAuthOnly>
+                  )}
+                />
+              </Route>
               <Route
                 path="/login/guest"
                 element={(
@@ -62,9 +63,9 @@ function App() {
                 )}
               />
             </Route>
-            <Route path="/app" element={<AppLayout />}>
+            <Route path="app" element={<AppLayout />}>
               <Route
-                path="/app/dashboard"
+                path="dashboard"
                 element={(
                   <ProtectedRoute>
                     <Dashboard />
@@ -72,7 +73,7 @@ function App() {
               )}
               />
               <Route
-                path="/app/budgets"
+                path="budgets"
                 element={(
                   <ProtectedRoute>
                     <Budgets />
@@ -80,7 +81,7 @@ function App() {
               )}
               />
               <Route
-                path="/app/history"
+                path="history"
                 element={(
                   <ProtectedRoute>
                     <History />

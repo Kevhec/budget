@@ -1,16 +1,16 @@
 import Concurrence from '@/src/database/models/concurrence';
-import { User } from '@/src/database/models';
 import { Transaction } from 'sequelize';
 import {
   TargetType,
   Target,
   type Concurrence as ConcurrenceType,
+  UserAttributes,
 } from '../types';
 import parseConcurrenceObj from './parseConcurrenceObj';
 
 interface CreationParams {
   concurrence: ConcurrenceType,
-  user: User
+  user: UserAttributes
   target: Target<TargetType>
 }
 

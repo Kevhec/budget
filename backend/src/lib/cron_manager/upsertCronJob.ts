@@ -1,10 +1,9 @@
-import { User } from '@/src/database/models';
 import CronJob from '@/src/database/models/cronJobs';
 import { Transaction } from 'sequelize';
-import { JobTypes, JSONValue } from '../types';
+import { JobTypes, JSONValue, UserAttributes } from '../types';
 
 interface Params {
-  user: User
+  user: UserAttributes
   data: {
     jobName: JobTypes
     jobArgs: JSONValue
