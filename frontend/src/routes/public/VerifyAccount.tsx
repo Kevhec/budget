@@ -1,6 +1,6 @@
 import useAuth from '@/hooks/useAuth';
 import { useEffect } from 'react';
-import { Navigate, NavLink, useParams } from 'react-router-dom';
+import { Navigate, NavLink, useParams } from 'react-router';
 import Countdown from 'react-countdown';
 import Typography from '@/components/Typography';
 import { Button } from '@/components/ui/button';

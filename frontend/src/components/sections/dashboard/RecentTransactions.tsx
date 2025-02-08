@@ -4,7 +4,7 @@ import TransactionResumeCard from '@/components/TransactionResumeCard';
 import Typography from '@/components/Typography';
 import useTransactions from '@/hooks/useTransactions';
 import { Separator } from '@/components/ui/separator';
-import { NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router';
 
 export default function RecentTransactions() {
   const { state: { recentTransactions } } = useTransactions();

@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import {
   Budget, Transaction, User,
+  UserPreferences,
 } from '../database/models';
 import generateJWT from '../lib/utils/generateJWT';
 import convert from '../lib/utils/convert';
@@ -44,6 +45,7 @@ const signUp = async (
 
     // Create a new user,
     const newUser = await User.create(data);
+    const newPreferences = await UserPreferences.create();
 
     // If user is successfully created, generate a jwt using env secret key
     // and send it through a cookie to the client
@@ -55,6 +57,7 @@ const signUp = async (
     await verificationEmail(isProduction ? newUser.email : 'delivered@resend.dev', newUser.token || '');
 
     const plainUserObj = newUser.toJSON();
+    plainUserObj.preferences = newPreferences;
 
     // Sanitize user object in order to avoid sending sensitive data to frontend
     const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token']);
@@ -159,6 +162,7 @@ const logOut = async (req: Request, res: Response) => {
     // If user is a guest delete it's account so db is not overloaded with guest accounts
     if (user?.role === 'guest') {
       const t = await sequelize.transaction();
+      const userInstance = await User.findByPk(user.id, { transaction: t });
 
       // TODO: Handle guest cron task and job deletion
       try {
@@ -176,7 +180,7 @@ const logOut = async (req: Request, res: Response) => {
           transaction: t,
         });
 
-        await user.destroy({
+        await userInstance?.destroy({
           transaction: t,
         });
 
@@ -239,10 +243,8 @@ const getInfo = async (req: Request, res: Response) => {
       return res.status(404).json('User not found.');
     }
 
-    const plainUserObj = user.toJSON();
-
     // Remove sensitive or unnecessary data from user object to use for profiling purposes
-    const sanitizedUser = sanitizeObject(plainUserObj, ['password', 'token', 'updatedAt']);
+    const sanitizedUser = sanitizeObject(user, ['password', 'token', 'updatedAt']);
 
     return res.status(200).json({ data: sanitizedUser });
   } catch (error: unknown) {

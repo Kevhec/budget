@@ -7,6 +7,7 @@ import {
 } from 'sequelize';
 import type { Models } from '@/src/lib/types';
 import SequelizeConnection from '../config/SequelizeConnection';
+import UserPreferences from './userPreferences';
 
 const sequelize = SequelizeConnection.getInstance();
 
@@ -22,11 +23,11 @@ class User
 
   declare birthday: Date;
 
-  declare timezone: string;
-
   declare role: CreationOptional<string>;
 
   declare confirmed: CreationOptional<boolean>;
+
+  declare preferences?: InferAttributes<UserPreferences>;
 
   declare token: CreationOptional<string | null>;
 
@@ -42,6 +43,7 @@ class User
     this.hasMany(models.CronTask, { foreignKey: 'userId' });
     this.hasMany(models.CronJob, { foreignKey: 'userId' });
     this.hasMany(models.Concurrence, { foreignKey: 'userId' });
+    this.hasOne(models.UserPreferences, { foreignKey: 'userId', onDelete: 'CASCADE', as: 'preferences' });
   }
 }
 
@@ -74,10 +76,6 @@ User.init({
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: null,
-  },
-  timezone: {
-    type: DataTypes.STRING,
-    allowNull: false,
   },
   role: {
     type: DataTypes.STRING,

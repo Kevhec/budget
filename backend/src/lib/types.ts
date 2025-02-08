@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { type Request } from 'express';
+import { InferAttributes } from 'sequelize';
 import { type TransactionType } from '../database/models/transaction';
 import { concurrenceSchema } from '../database/schemas/general';
 import { CONCURRENCE_TYPE, DEFAULT_CONCURRENCES } from './constants';
+import type UserPreferences from '../database/models/userPreferences';
 import type {
   Budget,
   Category,
@@ -194,6 +196,7 @@ export enum MonthSelect {
 
 export interface Models {
   User: typeof User
+  UserPreferences: typeof UserPreferences,
   Budget: typeof Budget
   Concurrence: typeof ConcurrenceModel
   CronJob: typeof CronJob
@@ -212,3 +215,5 @@ export interface Target<T> {
   id: string,
   type: T
 }
+
+export type UserAttributes = InferAttributes<User>;

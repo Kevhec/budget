@@ -7,9 +7,11 @@ import Category from './category';
 import CronTask from './cronTask';
 import CronJob from './cronJobs';
 import Concurrence from './concurrence';
+import UserPreferences from './userPreferences';
 
 const models: Models = {
   User,
+  UserPreferences,
   Budget,
   Transaction,
   Category,
@@ -28,6 +30,7 @@ Object.values(models).forEach((model) => {
 
 export {
   User,
+  UserPreferences,
   Page,
   Budget,
   Category,

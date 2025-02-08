@@ -47,7 +47,7 @@ sequelize.sync().then(async () => {
 });
 
 // UMZUG (migrations tool)
-const runMigrations = async () => {
+/* const runMigrations = async () => {
   console.log(`${cliTheme.server('[SERVER]')}: Initializing umzug`);
   const umzug = new Umzug({
     migrations: { glob: 'src/database/migrations/*.cjs' },
@@ -62,7 +62,7 @@ const runMigrations = async () => {
 runMigrations().catch((error) => {
   console.log(`${cliTheme.serverWarn('[ERROR]')}: Migration failed: `, error);
   process.exit(1);
-});
+}); */
 
 startCronManager();
 

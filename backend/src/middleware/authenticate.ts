@@ -1,6 +1,6 @@
 import { type RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../database/models';
+import { User, UserPreferences } from '../database/models';
 
 interface JWTPayload {
   id: string
@@ -19,13 +19,23 @@ const authenticate: RequestHandler = async (req, res, next) => {
       attributes: {
         exclude: ['password'],
       },
+      include: [
+        {
+          model: UserPreferences,
+          as: 'preferences',
+        },
+      ],
     });
 
     if (!user) {
       return res.status(401).json('User not found');
     }
 
-    req.user = user;
+    const userData = user.toJSON();
+
+    console.log(userData);
+
+    req.user = userData;
 
     return next();
   } catch (error: unknown) {

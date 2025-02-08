@@ -1,10 +1,9 @@
-import { User } from '@/src/database/models';
 import CronTask from '@/src/database/models/cronTask';
 import { Transaction } from 'sequelize';
-import { TargetType, Target } from '../types';
+import { TargetType, Target, UserAttributes } from '../types';
 
 interface Params {
-  user: User,
+  user: UserAttributes,
   data: {
     cronExpression?: string
     endDate?: Date

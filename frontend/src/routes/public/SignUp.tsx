@@ -16,7 +16,7 @@ import { format } from '@formkit/tempo';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CalendarIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { es } from 'date-fns/locale';
 import { useEffect } from 'react';
