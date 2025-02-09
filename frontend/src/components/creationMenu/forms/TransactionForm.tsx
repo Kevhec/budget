@@ -30,6 +30,7 @@ import { Calendar } from '@/components/ui/calendar';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
 import { concurrenceInit } from '@/lib/constants';
 import { CreateTransactionParams, Transaction, TransactionType } from '@/types';
+import { useTranslation } from 'react-i18next';
 import ConcurrenceDialog from '../ConcurrenceDialog';
 
 type TransactionFormType = z.infer<typeof transactionSchema>;
@@ -43,15 +44,22 @@ export type TransactionFormProps = {
   dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
 };
 
+interface ComboboxBudget {
+  value: string
+  label: string
+}
+
 export default function TransactionForm({
   formId, className, editMode, item, onSubmit, dirtyChecker,
 }: TransactionFormProps) {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [budgetsOpen, setBudgetsOpen] = useState(false);
+  const [comboboxBudgets, setComboboxBudgets] = useState<ComboboxBudget[]>([]);
   const [isConcurrenceSelectOpen, setConcurrenceSelectOpen] = useState(false);
   const [isConcurrenceOptionHovered, setIsConcurrenceOptionHovered] = useState(false);
   const { state: { categories } } = useCategories();
   const { state: { budgets } } = useBudgets();
+  const { t } = useTranslation();
 
   const getValue = getModeValue(editMode);
 
@@ -111,15 +119,20 @@ export default function TransactionForm({
   const containerClasses = cn('flex flex-col gap-2 md:gap-4', className);
 
   const comboboxCategories = categories.map((category) => ({
+    fallbackName: category.name,
     value: category.id,
-    label: category.name,
+    key: category.key,
     color: category.color,
   }));
 
-  const comboboxBudgets = budgets.map((budget) => ({
-    value: budget.id,
-    label: budget.name,
-  }));
+  useEffect(() => {
+    const newComboboxBudgets = budgets.map((budget) => ({
+      value: budget.id,
+      label: budget.name,
+    }));
+
+    setComboboxBudgets(newComboboxBudgets);
+  }, [budgets]);
 
   return (
     <Form {...form}>
@@ -251,7 +264,7 @@ export default function TransactionForm({
                           <div className="flex gap-2 items-center">
                             <Circle fill={currentCategory?.color || '#000000'} stroke="none" className="w-3" />
                             {currentValue
-                              ? currentCategory?.label
+                              ? t(currentCategory?.key || 'Unnamed category')
                               : 'General'}
                           </div>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -267,7 +280,7 @@ export default function TransactionForm({
                             <CommandGroup>
                               {comboboxCategories.map((category) => (
                                 <CommandItem
-                                  value={category.label}
+                                  value={category.value}
                                   key={category.value}
                                   onSelect={() => {
                                     form.setValue('categoryId', category.value);
@@ -277,7 +290,7 @@ export default function TransactionForm({
                                 >
                                   <div className="flex items-center gap-2">
                                     <Circle fill={category.color || '#000000'} stroke="none" className="w-3" />
-                                    {category.label}
+                                    {t(category.key)}
                                   </div>
                                   <Check
                                     className={cn(

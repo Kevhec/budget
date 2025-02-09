@@ -23,6 +23,8 @@ class Category extends Model<InferAttributes<Category>, InferCreationAttributes<
 
   declare name: string;
 
+  declare key: string;
+
   declare color: string;
 
   declare isDefault: boolean;
@@ -44,6 +46,10 @@ Category.init({
     allowNull: false,
   },
   name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  key: {
     type: DataTypes.STRING,
     allowNull: false,
   },

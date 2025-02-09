@@ -54,6 +54,8 @@ async function syncPaginatedBudgets(
   try {
     const paginatedBudgets = await getPaginatedBudgets(options);
 
+    console.log({ paginatedBudgets });
+
     if (toGeneral) {
       const justBudgets = paginatedBudgets.data || [];
 
