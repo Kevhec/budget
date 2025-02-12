@@ -8,8 +8,8 @@ import {
   createBudget as createBudgetAction,
   syncPaginatedBudgets as syncPaginatedBudgetsAction,
   syncRecentBudgets as syncRecentBudgetsAction,
+  getBudgets as getBudgetsAction,
 } from '@/reducers/budget/budgetActions';
-import { defaultPaginatedOptions } from '@/lib/constants';
 
 export const BudgetContext = createContext<BudgetContextType | null>(null);
 
@@ -23,7 +23,11 @@ function BudgetProvider({ children }: React.PropsWithChildren) {
     createBudgetAction(dispatch, data, state);
   }, [state]);
 
-  const getBudgets = useCallback((options: PaginatedParams) => {
+  const getBudgets = useCallback(() => {
+    getBudgetsAction(dispatch);
+  }, []);
+
+  const getPaginatedBudgets = useCallback((options: PaginatedParams) => {
     syncPaginatedBudgetsAction(dispatch, options, true);
   }, []);
 
@@ -33,16 +37,16 @@ function BudgetProvider({ children }: React.PropsWithChildren) {
 
   const contextValue = useMemo<BudgetContextType>(() => ({
     state,
-    createBudget,
     getBudgets,
+    getPaginatedBudgets,
+    createBudget,
     updateRecentBudgets,
-  }), [state, createBudget, getBudgets, updateRecentBudgets]);
+  }), [state, createBudget, getBudgets, getPaginatedBudgets, updateRecentBudgets]);
 
   useEffect(() => {
-    syncRecentBudgetsAction(dispatch);
-    syncPaginatedBudgetsAction(dispatch, defaultPaginatedOptions);
-    syncPaginatedBudgetsAction(dispatch, undefined, true);
-  }, []);
+    updateRecentBudgets();
+    getBudgets();
+  }, [getBudgets, updateRecentBudgets]);
 
   return (
     <BudgetContext.Provider value={contextValue}>

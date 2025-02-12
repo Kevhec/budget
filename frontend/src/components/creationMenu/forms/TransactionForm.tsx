@@ -67,7 +67,9 @@ export default function TransactionForm({
     concurrence,
   } = item || {};
 
-  console.log({ item });
+  useEffect(() => {
+    console.log({ budgets });
+  }, [budgets]);
 
   const form = useForm<TransactionFormType>({
     resolver: zodResolver(transactionSchema),

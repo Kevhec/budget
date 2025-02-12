@@ -41,6 +41,37 @@ async function syncRecentBudgets(dispatch: Dispatch<BudgetAction>) {
   }
 }
 
+async function getBudgets(
+  dispatch: Dispatch<BudgetAction>,
+) {
+  dispatch({
+    type: BudgetActionType.SET_LOADING,
+    payload: true,
+  });
+
+  try {
+    const budgets = await getPaginatedBudgets({});
+    const budgetsData = budgets?.data;
+
+    if (budgetsData) {
+      dispatch({
+        type: BudgetActionType.SET_BUDGETS,
+        payload: budgetsData,
+      });
+    }
+  } catch (error) {
+    dispatch({
+      type: BudgetActionType.SET_BUDGETS,
+      payload: [],
+    });
+  } finally {
+    dispatch({
+      type: BudgetActionType.SET_LOADING,
+      payload: false,
+    });
+  }
+}
+
 async function syncPaginatedBudgets(
   dispatch: Dispatch<BudgetAction>,
   options?: PaginatedParams,
@@ -53,8 +84,6 @@ async function syncPaginatedBudgets(
 
   try {
     const paginatedBudgets = await getPaginatedBudgets(options);
-
-    console.log({ paginatedBudgets });
 
     if (toGeneral) {
       const justBudgets = paginatedBudgets.data || [];
@@ -95,6 +124,7 @@ async function createBudget(
   const currentPaginated = state.paginatedBudgets;
   const currentPage = currentPaginated.meta?.currentPage;
   const currentLimit = currentPaginated.meta?.itemsPerPage;
+  const currentBudgets = state.budgets;
 
   const formattedBudget = formatBudgetData(budget);
 
@@ -108,6 +138,11 @@ async function createBudget(
     dispatch({
       type: BudgetActionType.CREATE_BUDGET,
       payload: newBudget,
+    });
+
+    dispatch({
+      type: BudgetActionType.SET_BUDGETS,
+      payload: [newBudget, ...currentBudgets],
     });
 
     if (currentPage !== 1) {
@@ -133,5 +168,6 @@ async function createBudget(
 export {
   syncRecentBudgets,
   syncPaginatedBudgets,
+  getBudgets,
   createBudget,
 };
