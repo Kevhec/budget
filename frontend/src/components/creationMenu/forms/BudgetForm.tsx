@@ -28,6 +28,7 @@ import { concurrenceInit } from '@/lib/constants';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
 import Typography from '@/components/Typography';
 import { CreateBudgetParams, type Budget } from '@/types';
+import { useTranslation } from 'react-i18next';
 import ConcurrenceDialog from '../ConcurrenceDialog';
 
 export type BudgetFormProps = {
@@ -46,7 +47,10 @@ export default function BudgetForm({
 }: BudgetFormProps) {
   const [isConcurrenceSelectOpen, setConcurrenceSelectOpen] = useState(false);
   const [isConcurrenceOptionHovered, setIsConcurrenceOptionHovered] = useState(false);
+  const { t, i18n } = useTranslation();
 
+  const currentLanguage = i18n.language;
+  const languageCode = currentLanguage.split('-')[0];
   const getValue = getModeValue(editMode);
 
   const { defaultStartDate, defaultEndDate } = useMemo(() => {
@@ -131,12 +135,17 @@ export default function BudgetForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <FormLabel>
+                {t('forms.budget.inputs.description.label')}
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Ejemplo: Sueldo" {...field} />
+                <Input
+                  placeholder={t('forms.budget.inputs.description.placeholder')}
+                  {...field}
+                />
               </FormControl>
               <FormDescription className="text-xs">
-                Describe tu presupuesto
+                {t('forms.budget.inputs.description.description')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -147,12 +156,18 @@ export default function BudgetForm({
           name="totalAmount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Cantidad destinada</FormLabel>
+              <FormLabel>
+                {t('forms.budget.inputs.totalAmount.label')}
+              </FormLabel>
               <FormControl>
-                <Input type="number" placeholder="$200.000" {...field} />
+                <Input
+                  type="number"
+                  placeholder={t('forms.budget.inputs.totalAmount.placeholder')}
+                  {...field}
+                />
               </FormControl>
               <FormDescription className="text-xs">
-                ¿Cuánto tienes presupuestado?
+                {t('forms.budget.inputs.totalAmount.description')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -163,7 +178,9 @@ export default function BudgetForm({
           name="startDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Fecha de inicio</FormLabel>
+              <FormLabel>
+                {t('forms.budget.inputs.startDate.label')}
+              </FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -175,9 +192,9 @@ export default function BudgetForm({
                       )}
                     >
                       {field.value ? (
-                        format(field.value, 'long')
+                        format(field.value, 'long', currentLanguage)
                       ) : (
-                        <span>Selecciona una fecha</span>
+                        <span>{t('forms.budget.inputs.startDate.placeholder')}</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -188,12 +205,13 @@ export default function BudgetForm({
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
+                    localeString={currentLanguage}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
               <FormDescription className="text-xs">
-                ¿Cuándo inicia?
+                {t('forms.budget.inputs.startDate.description')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -205,8 +223,9 @@ export default function BudgetForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Se repite
+                {t('forms.recurrence.inputs.defaults.label')}
               </FormLabel>
+              {/* TODO: This should be a component */}
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
@@ -217,32 +236,32 @@ export default function BudgetForm({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Evento único" />
+                    <SelectValue placeholder={t('forms.recurrence.inputs.defaults.options.none')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none" defaultChecked>
-                    Evento único
+                    {t('forms.recurrence.inputs.defaults.options.none')}
                   </SelectItem>
                   <SelectItem value="daily">
-                    Todos los días
+                    {t('forms.recurrence.inputs.defaults.options.daily')}
                   </SelectItem>
                   <SelectItem value="weekly">
-                    Cada semana, el
+                    {t('forms.recurrence.inputs.defaults.options.weekly')}
                     {' '}
-                    {format((currentStartDate || new Date()), 'dddd')}
+                    {format((currentStartDate || new Date()), 'dddd', languageCode)}
                   </SelectItem>
                   <SelectItem value="monthly">
-                    Todos los meses, el
+                    {t('forms.recurrence.inputs.defaults.options.monthly')}
                     {' '}
                     {nthDay(currentStartDate)}
                   </SelectItem>
                   <SelectItem value="yearly" className="peer">
-                    Anualmente, el
+                    {t('forms.recurrence.inputs.defaults.options.yearly')}
                     {' '}
                     {(currentStartDate || new Date()).getDate()}
                     {' de '}
-                    {format((currentStartDate || new Date()), 'MMMM')}
+                    {format((currentStartDate || new Date()), 'MMMM', currentLanguage)}
                   </SelectItem>
                   <ConcurrenceDialog
                     form={form}
@@ -253,7 +272,7 @@ export default function BudgetForm({
                         onMouseOut={handleConcurrenceMouseOver}
                         value="custom"
                       >
-                        Personalizado...
+                        {t('forms.recurrence.inputs.defaults.options.custom')}
                       </SelectItem>
                     )}
                   />
@@ -261,7 +280,7 @@ export default function BudgetForm({
               </Select>
               <FormDescription className="text-xs">
                 {/* TODO: Pensar otro mensaje */}
-                ¿Es recurrente?
+                {t('forms.recurrence.inputs.defaults.description')}
               </FormDescription>
             </FormItem>
           )}
@@ -278,7 +297,7 @@ export default function BudgetForm({
                 name="endDate"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>Fecha límite</FormLabel>
+                    <FormLabel>{t('forms.budget.inputs.endDate.label')}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -291,10 +310,10 @@ export default function BudgetForm({
                           >
                             {field.value ? (
                               <Typography variant="span">
-                                {format((field.value || new Date()), 'long')}
+                                {format((field.value || new Date()), 'long', currentLanguage)}
                               </Typography>
                             ) : (
-                              <Typography variant="span">Selecciona una fecha</Typography>
+                              <Typography variant="span">{t('forms.budget.inputs.endDate.placeholder')}</Typography>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -305,13 +324,14 @@ export default function BudgetForm({
                           mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
+                          localeString={currentLanguage}
                           initialFocus
                           disabled={{ before: currentStartDate || null }}
                         />
                       </PopoverContent>
                     </Popover>
                     <FormDescription className="text-xs">
-                      ¿Cuándo termina?
+                      {t('forms.budget.inputs.endDate.description')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

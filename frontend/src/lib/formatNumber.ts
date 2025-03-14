@@ -1,7 +1,7 @@
-function formatMoney(number: number) {
-  return new Intl.NumberFormat('es-CO', {
+function formatMoney(number: number, locale: string = 'es-CO', currency: string = 'COP') {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'COP',
+    currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(number);

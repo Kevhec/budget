@@ -5,6 +5,8 @@ import {
   ControllerRenderProps,
   FieldValues, Path, UseFormReturn, useWatch,
 } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { useCallback } from 'react';
 import {
   FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage,
 } from './ui/form';
@@ -27,13 +29,20 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
     control: form.control,
     name: ['concurrenceWithEndDate', 'concurrenceDefaults', 'startDate'] as Path<T>[],
   });
+  const { t, i18n } = useTranslation();
 
-  const getFormattedDate = (field: ControllerRenderProps<T, Path<T>>, formatType: Format) => {
+  const currentLanguage = i18n.language;
+
+  const getFormattedDate = useCallback((
+    field: ControllerRenderProps<T, Path<T>>,
+    formatType: Format,
+    locale?: string,
+  ) => {
     if (Number.isNaN(field.value.getTime())) {
-      return withEndDate === 'true' ? format(new Date(), formatType) : '';
+      return withEndDate === 'true' ? format(new Date(), formatType, locale) : '';
     }
-    return format(field.value, formatType);
-  };
+    return format(field.value, formatType, locale);
+  }, [withEndDate]);
 
   return (
     <div className="flex gap-4 relative">
@@ -43,7 +52,7 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
         render={({ field }) => (
           <FormItem className="grid grid-rows-[min-content,1fr] gap-2">
             <FormLabel>
-              Parar
+              {t('common.stop')}
             </FormLabel>
             <FormControl>
               <RadioGroup
@@ -62,17 +71,17 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
                   <FormLabel
                     className={cn({
                       'text-slate-500': concurrenceDefaults === 'none',
-                    })}
+                    }, 'capitalize')}
                   >
-                    Nunca
+                    {t('helpers.never')}
                   </FormLabel>
                 </FormItem>
                 <FormItem className="flex items-center space-x-3 space-y-0">
                   <FormControl>
                     <RadioGroupItem value="true" />
                   </FormControl>
-                  <FormLabel>
-                    El
+                  <FormLabel className="capitalize">
+                    {t('helpers.the')}
                   </FormLabel>
                 </FormItem>
               </RadioGroup>
@@ -85,7 +94,7 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
         name={'concurrenceEndDate' as Path<T>}
         render={({ field }) => (
           <FormItem className="flex-1 grid grid-rows-2">
-            <FormLabel className="sr-only">Fecha límite</FormLabel>
+            <FormLabel className="sr-only">{t('common.endDate')}</FormLabel>
             <Popover>
               <PopoverTrigger asChild disabled={withEndDate === 'false'}>
                 <FormControl>
@@ -101,17 +110,17 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
                       <>
                         <Typography variant="span" className="md:hidden">
                           {
-                            getFormattedDate(field, 'medium')
+                            getFormattedDate(field, 'medium', currentLanguage)
                           }
                         </Typography>
                         <Typography variant="span" className="hidden md:inline">
                           {
-                            getFormattedDate(field, 'long')
+                            getFormattedDate(field, 'long', currentLanguage)
                           }
                         </Typography>
                       </>
                     ) : (
-                      <Typography variant="span">Selecciona una fecha</Typography>
+                      <Typography variant="span">{t('forms.recurrence.inputs.endDate.label')}</Typography>
                     )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
@@ -128,7 +137,7 @@ export default function ConcurrenceEndDate<T extends FieldValues>(
               </PopoverContent>
             </Popover>
             <FormDescription className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full text-center text-xs">
-              ¿Cuándo deseas terminar esta suscripción?
+              {t('forms.recurrence.inputs.endDate.description')}
             </FormDescription>
             <FormMessage />
           </FormItem>

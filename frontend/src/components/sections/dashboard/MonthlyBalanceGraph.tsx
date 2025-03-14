@@ -11,7 +11,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import ChartCard from '@/components/charts/ChartCard';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useAuth from '@/hooks/useAuth';
 import { format } from '@formkit/tempo';
 import useTransactions from '@/hooks/useTransactions';
@@ -29,56 +29,10 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import { useTranslation } from 'react-i18next';
+import NoDataCard from '@/components/utils/NoDataCard';
 
 export const description = 'A linear line chart';
-
-const chartConfig = {
-  totalBalance: {
-    label: 'Balance',
-    color: 'hsl(var(--chart-1))',
-  },
-  income: {
-    label: 'Ingresos',
-    color: 'hsl(var(--chart-2))',
-  },
-  expense: {
-    label: 'Gastos',
-    color: 'hsl(var(--chart-3))',
-  },
-} satisfies ChartConfig;
-
-const filterTypes = [
-  {
-    id: 'totalBalance',
-    label: 'Balance total',
-    color: 'softBlack',
-  },
-  {
-    id: 'income',
-    label: 'Ingresos',
-    color: 'safe',
-  },
-  {
-    id: 'expense',
-    label: 'Gastos',
-    color: 'danger',
-  },
-] as const;
-
-const chartLines = [
-  {
-    dataKey: 'totalBalance',
-    stroke: '#1B1B1B',
-  },
-  {
-    dataKey: 'income',
-    stroke: 'hsl(var(--safe))',
-  },
-  {
-    dataKey: 'expense',
-    stroke: 'hsl(var(--danger))',
-  },
-];
 
 const FilterSchema = z.object({
   filterTypes: z.array(z.string()),
@@ -94,12 +48,65 @@ export default function MonthlyBalanceGraph() {
   const [filterYearsList, setFilterYearsList] = useState<number[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const { t, i18n } = useTranslation();
   const filterForm = useForm<z.infer<typeof FilterSchema>>({
     resolver: zodResolver(FilterSchema),
     defaultValues: {
       filterTypes: ['totalBalance', 'income', 'expense'],
     },
   });
+
+  const currentLanguage = useMemo(() => i18n.language, [i18n.language]);
+
+  const { chartConfig, filterTypes, chartLines } = useMemo(() => ({
+    chartConfig: {
+      totalBalance: {
+        label: t('common.balance'),
+        color: 'hsl(var(--chart-1))',
+      },
+      income: {
+        label: t('common.income.plural'),
+        color: 'hsl(var(--chart-2))',
+      },
+      expense: {
+        label: t('common.expense.plural'),
+        color: 'hsl(var(--chart-3))',
+      },
+    } satisfies ChartConfig,
+
+    filterTypes: [
+      {
+        id: 'totalBalance',
+        label: t('common.totalBalance'),
+        color: 'softBlack',
+      },
+      {
+        id: 'income',
+        label: t('common.income.plural'),
+        color: 'safe',
+      },
+      {
+        id: 'expense',
+        label: t('common.expense.plural'),
+        color: 'danger',
+      },
+    ] as const,
+
+    chartLines: [
+      {
+        dataKey: 'totalBalance',
+        stroke: '#1B1B1B',
+      },
+      {
+        dataKey: 'income',
+        stroke: 'hsl(var(--safe))',
+      },
+      {
+        dataKey: 'expense',
+        stroke: 'hsl(var(--danger))',
+      },
+    ],
+  }), [t]);
 
   const filterTypesValues = useWatch({
     control: filterForm.control,
@@ -111,12 +118,12 @@ export default function MonthlyBalanceGraph() {
       const januaryDate = new Date(parseInt(selectedYear, 10), 0, 1);
 
       getBalance(
-        format(januaryDate, 'YYYY-MM'),
+        format(januaryDate, 'YYYY-MM', currentLanguage),
       );
     };
 
     getData();
-  }, [getBalance, recentTransactions, selectedYear]);
+  }, [getBalance, recentTransactions, selectedYear, currentLanguage]);
 
   useEffect(() => {
     const userCreationDate = new Date(user.createdAt);
@@ -163,13 +170,13 @@ export default function MonthlyBalanceGraph() {
   return (
     <section className="md:col-span-10 xl:col-span-10">
       <ChartCard
-        title="Así va tu dinero"
+        title={t('dashboard.monthlyBalanceGraph.graph.title')}
         titleIcon={<TrendingUp />}
         titleLeft
         subtitle={(
           <div className="flex gap-2 items-center">
             <Typography className="text-foreground">
-              Año
+              {t('common.year')}
             </Typography>
             <Select defaultValue={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className="w-fit px-2 py-1 h-fit">
@@ -197,8 +204,7 @@ export default function MonthlyBalanceGraph() {
                   <FormItem>
                     <FormLabel className="sr-only">Tipo</FormLabel>
                     <FormDescription className="sr-only">
-                      Selecciona qué datos deseas conocer anualmente, balance total,
-                      gastos o ingresos.
+                      {t('dashboard.monthlyBalanceGraph.graph.description')}
                     </FormDescription>
                     <div className="flex flex-col gap-2 xl:flex-row xl:gap-4">
                       {
@@ -237,7 +243,6 @@ export default function MonthlyBalanceGraph() {
                           />
                         ))
                       }
-
                     </div>
                   </FormItem>
                 )}
@@ -246,7 +251,7 @@ export default function MonthlyBalanceGraph() {
           </Form>
         )}
       >
-        <ChartContainer config={chartConfig} className="h-full w-full">
+        <ChartContainer config={chartConfig} className="h-full w-full relative">
           {
             chartData.length > 0 ? (
               <LineChart
@@ -292,7 +297,7 @@ export default function MonthlyBalanceGraph() {
                 }
               </LineChart>
             ) : (
-              <p>Sin datos</p>
+              <NoDataCard />
             )
           }
         </ChartContainer>

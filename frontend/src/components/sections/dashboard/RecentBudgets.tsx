@@ -7,6 +7,8 @@ import { CircleDollarSign } from 'lucide-react';
 import { NavLink } from 'react-router';
 import { Separator } from '@/components/ui/separator';
 import useTransactions from '@/hooks/useTransactions';
+import { useTranslation } from 'react-i18next';
+import NoDataCard from '@/components/utils/NoDataCard';
 
 export default function RecentBudgets() {
   const { updateRecentBudgets, state: { recentBudgets } } = useBudgets();
@@ -15,6 +17,7 @@ export default function RecentBudgets() {
     budgetsWithPlaceholder,
     setBudgetsWithPlaceholders,
   ] = useState<Budget[]>([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const getPlaceholders = () => new Array(4 - recentBudgets.length).fill({
@@ -49,12 +52,12 @@ export default function RecentBudgets() {
           <CircleDollarSign />
           <div>
             <Typography variant="h2" className="text-lg font-medium font-inter">
-              Presupuestos recientes
+              {t('dashboard.recentBudgets.heading')}
             </Typography>
           </div>
         </div>
         <NavLink to="#" className="text-sm text-blueishGray">
-          Ver más
+          {t('helpers.seeMore')}
         </NavLink>
       </div>
       <div className="relative flex flex-col gap-2 md:grow pb-2">
@@ -96,11 +99,7 @@ export default function RecentBudgets() {
         })}
         {
         recentBudgets.length === 0 && (
-          <div className="w-full h-full absolute grid place-items-center rounded-lg bg-white">
-            <Typography className="text-sm text-slate-600">
-              Sin Datos
-            </Typography>
-          </div>
+          <NoDataCard />
         )
       }
       </div>

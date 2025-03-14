@@ -29,6 +29,8 @@ async function syncRecentTransactions(dispatch: Dispatch<TransactionAction>) {
 
     const recentTransactions = response.data;
 
+    console.log({ recentTransactions });
+
     if (recentTransactions) {
       dispatch({
         type: TransactionActionType.SYNC_RECENT,

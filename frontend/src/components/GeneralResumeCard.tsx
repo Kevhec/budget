@@ -1,6 +1,7 @@
 import { cn, getMonthFromDate } from '@/lib/utils';
 import { formatMoney } from '@/lib/formatNumber';
 import { Months } from '@/types';
+import { useTranslation } from 'react-i18next';
 import {
   Card, CardContent, CardHeader, CardTitle,
 } from './ui/card';
@@ -17,6 +18,9 @@ interface Props {
 export default function GeneralResumeCard({
   variant, title, value, month, className,
 }: Props) {
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+
   const resumeCardClasses = cn('rounded-md p-4 col-span-4 border-none', {
     'bg-secondaryGreen text-white': variant === 'income',
     'bg-secondaryYellow': variant === 'expense',
@@ -25,7 +29,7 @@ export default function GeneralResumeCard({
   const formattedMoney = formatMoney(value);
 
   const date = new Date();
-  const currentMonth = getMonthFromDate(date);
+  const currentMonth = getMonthFromDate(date, currentLanguage);
 
   return (
     <Card className={resumeCardClasses}>
@@ -39,7 +43,7 @@ export default function GeneralResumeCard({
           {formattedMoney}
         </Typography>
         <Typography className="text-sm">
-          en
+          {t('helpers.in')}
           {' '}
           <Typography variant="span" className="capitalize">
             {month || currentMonth}

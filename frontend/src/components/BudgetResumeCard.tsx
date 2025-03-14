@@ -3,6 +3,7 @@ import { format } from '@formkit/tempo';
 import { formatMoney } from '@/lib/formatNumber';
 import { cn } from '@/lib/utils';
 import { PureBalance } from '@/types';
+import { useTranslation } from 'react-i18next';
 import {
   Card, CardContent, CardHeader, CardTitle,
 } from './ui/card';
@@ -35,6 +36,9 @@ export default function BudgetResumeCard({
   balance = defaultBalance,
   hidden,
 }: Props) {
+  const { t, i18n } = useTranslation();
+  const currentLangue = i18n.language;
+
   const { totalExpense, totalIncome } = balance;
   const netAmount = initialAmount + totalIncome - totalExpense;
 
@@ -60,19 +64,19 @@ export default function BudgetResumeCard({
           <div className="text-sm flex flex-col md:flex-row md:gap-1 ">
             <div className="flex gap-2 justify-between md:flex-col md:gap-0">
               <Typography className="text-sm md:hidden">
-                Inicio:
+                {t('common.starts')}
               </Typography>
               <Typography className="text-sm">
-                {format(startDate, 'D/MM/YY')}
+                {format(startDate, 'short', currentLangue)}
               </Typography>
             </div>
             <Typography variant="span" className="hidden md:inline">{' - '}</Typography>
             <div className="flex gap-2 justify-between md:flex-col md:gap-0">
               <Typography className="text-sm md:hidden">
-                Fin:
+                {t('common.ends')}
               </Typography>
               <Typography className="text-sm">
-                {format(endDate, 'D/MM/YY')}
+                {format(endDate, 'short', currentLangue)}
               </Typography>
             </div>
           </div>
@@ -88,7 +92,7 @@ export default function BudgetResumeCard({
           }
         </Typography>
         <Typography className="text-sm">
-          De un valor inicial de
+          {t('budgetResumeCard.valueDescription')}
           {' '}
           <Typography variant="span" className="block">{formatMoney(initialAmount)}</Typography>
         </Typography>

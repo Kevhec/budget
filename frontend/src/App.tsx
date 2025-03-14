@@ -9,7 +9,7 @@ import AppLayout from './layouts/AppLayout';
 import Dashboard from './routes/private/Dashboard';
 import ProtectedRoute from './routes/private/ProtectedRoute';
 import { TooltipProvider } from './components/ui/tooltip';
-import History from './routes/private/History';
+import Transactions from './routes/private/Transactions';
 import Budgets from './routes/private/Budgets';
 import VerifyAccount from './routes/public/VerifyAccount';
 import SignUp from './routes/public/SignUp';
@@ -81,10 +81,10 @@ function App() {
               )}
               />
               <Route
-                path="history"
+                path="transactions"
                 element={(
                   <ProtectedRoute>
-                    <History />
+                    <Transactions />
                   </ProtectedRoute>
               )}
               />

@@ -8,7 +8,7 @@ import { PaginatedParams } from './transaction';
 export interface Budget {
   id: string
   name: string
-  totalAmount: string
+  totalAmount: number
   startDate: string
   endDate: string
   createdAt: string

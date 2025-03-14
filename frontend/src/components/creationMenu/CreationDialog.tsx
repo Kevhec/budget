@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { cn } from '@/lib/utils';
 import useAlert from '@/hooks/useAlert';
+import { useTranslation } from 'react-i18next';
 import TransactionForm, { TransactionFormProps } from './forms/TransactionForm';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
@@ -49,6 +50,7 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
     showAlert,
     handleConfirm,
   } = useAlert();
+  const { t } = useTranslation();
 
   const FormComponent = formMapping[type];
   const formId = `${type}-creation-form`;
@@ -109,9 +111,9 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
         </DialogTrigger>
         <DialogContent className="p-0 max-w-lg w-[calc(100%-2rem)] rounded-sm">
           <DialogDescription className="sr-only">
-            Crea un nuevo recurso para
+            {t('creationDialog.description')}
             {' '}
-            {modalTitle || triggerLabel}
+            {(triggerLabel || modalTitle)?.toLowerCase()}
           </DialogDescription>
           <DialogHeader className="p-6 pb-0">
             <DialogTitle>
@@ -132,9 +134,9 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
             <Button form={formId} type="submit">
               {
                 editMode ? (
-                  'Guardar'
+                  t('common.save')
                 ) : (
-                  'Crear'
+                  t('common.create')
                 )
               }
             </Button>
@@ -146,8 +148,8 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
         onCancel={handleConfirm}
         open={isAlertOpen}
         onOpenChange={setIsAlertOpen}
-        title="Cambios sin guardar"
-        message="Tienes cambios sin guardar, ¿quieres continuar?"
+        title={t('confirmDialog.alerts.save.title')}
+        message={t('confirmationDialog.alerts.save.message')}
       />
     </>
   );

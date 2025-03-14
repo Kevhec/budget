@@ -2,7 +2,10 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { CreationParamsUnion, SimplifiedConcurrence } from '@/types';
-import { concurrenceInit, DAY_NAMES_SPANISH, SPANISH_MONTHS } from './constants';
+import i18next from '@/i18n';
+import { concurrenceInit } from './constants';
+
+const { t } = i18next;
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -19,8 +22,8 @@ export function removeAccents(str: string) {
   return str.normalize('NFD').replace(/\p{Diacritic}/gu, '');
 }
 
-export function getMonthFromDate(date: Date) {
-  return date.toLocaleString('default', { month: 'long' });
+export function getMonthFromDate(date: Date, locale: string = 'default') {
+  return date.toLocaleString(locale, { month: 'long' });
 }
 
 export function getDayOrdinalNumber(dayNumber: number) {
@@ -28,12 +31,22 @@ export function getDayOrdinalNumber(dayNumber: number) {
 }
 
 export function nthDay(date: Date = new Date(), withMonth?: boolean) {
-  const nth = ['primer', 'segundo', 'tercer', 'cuarto', 'quinto'];
-
   const dayNumber = date.getDate();
+  const ordinalIndex = Math.ceil(dayNumber / 7); // one-based
+  const day = date.getDay();
+  const month = date.getMonth();
 
-  return `${nth[Math.ceil(dayNumber / 7) - 1]} ${
-    DAY_NAMES_SPANISH[date.getDay()]} ${withMonth ? `de ${SPANISH_MONTHS[date.getMonth()]}` : ''}`.trim();
+  return `
+    ${t(`ordinals.${ordinalIndex}`)}
+    ${t(`helpers.time.weekdays.${day}`)}
+    ${withMonth ? `${t('helpers.of')} ${t(`helpers.time.months.${month}`)}` : ''}
+  `.trim();
+}
+
+export function getTranslatedDay(date: Date) {
+  const day = date.getDay();
+
+  return t(`helpers.time.weekdays.${day}`);
 }
 
 export function getTimezone() {
@@ -151,4 +164,11 @@ export function removeFromArrayById<T extends { id: string }>(arr: T[], id: stri
   const updatedArray = arr.toSpliced(itemIndex, 1);
 
   return updatedArray;
+}
+
+export function keywordsFilter(_: string, search: string, keywords?: string[]) {
+  return keywords
+    ?.map((keyword) => keyword.toLowerCase().includes(search.toLowerCase()))
+    .some(Boolean)
+    ? 1 : 0;
 }

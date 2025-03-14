@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "update-locales": "node scripts/updateLocales.cjs"
   },
   "dependencies": {
     "@formkit/tempo": "^0.1.2",
