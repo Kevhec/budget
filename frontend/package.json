@@ -37,6 +37,7 @@
     "i18next": "^24.2.2",
     "i18next-browser-languagedetector": "^8.0.2",
     "i18next-http-backend": "^3.0.2",
+    "just-capitalize": "^3.2.0",
     "just-debounce-it": "^3.2.0",
     "lucide-react": "^0.408.0",
     "react": "^18.2.0",

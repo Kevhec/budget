@@ -39,11 +39,13 @@ class CronTask extends Model<InferAttributes<CronTask>, InferCreationAttributes<
     this.belongsTo(models.Budget, {
       foreignKey: 'targetId',
       constraints: false,
+      foreignKeyConstraint: false,
       as: 'budgetCronTask',
     });
     this.belongsTo(models.Transaction, {
       foreignKey: 'targetId',
       constraints: false,
+      foreignKeyConstraint: false,
       as: 'transactionCronTask',
     });
     this.hasMany(models.CronJob, {

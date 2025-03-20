@@ -38,7 +38,7 @@ async function createTransaction(
       attributes: { exclude: ['categoryId'] },
       include: [{
         model: Category,
-        attributes: ['id', 'name', 'color'],
+        attributes: ['id', 'name', 'color', 'key'],
         as: 'category',
       }],
       transaction,

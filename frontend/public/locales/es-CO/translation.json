@@ -239,7 +239,15 @@
     },
     "of": "de",
     "never": "Nunca",
-    "the": "el"
+    "the": "el",
+    "selected": {
+      "feminine": {
+        "plural": "seleccionadas"
+      }
+    },
+    "edit": "editar",
+    "delete": "eliminar",
+    "hide": "ocultar"
   },
   "common": {
     "transaction": {
@@ -271,7 +279,9 @@
     "continue": "Continuar",
     "recurrence": "Recurrencia",
     "stop": "Parar",
-    "endDate": "Fecha límite"
+    "endDate": "Fecha límite",
+    "row": "fila",
+    "page": "página"
   },
   "budgetResumeCard": {
     "valueDescription": "De un valor inicial de"
@@ -393,5 +403,44 @@
     "3": "tercer",
     "4": "cuarto",
     "5": "quinto"
+  },
+  "history": {
+    "datatable": {
+      "controls": {
+        "view": "Ver",
+        "pagination": {
+          "perPage": "Transacciones por página",
+          "firstPage": "Ir a la primera página",
+          "prevPage": "Ir a la página anterior",
+          "nextPage": "Ir a la siguiente página",
+          "lastPage": "Ir a la última página"
+        }
+      },
+      "columns": {
+        "date": "Fecha",
+        "description": "Descripción",
+        "amount": "Cantidad",
+        "type": "Tipo",
+        "category_name": "Categoría",
+        "budgets": "Presupuesto",
+        "actions": "Acciones"
+      },
+      "actions": {
+        "trigger": "Abrir menú",
+        "label": "Acciones"
+      }
+    },
+    "heading": "Registro de transacciones"
+  },
+  "alerts": {
+    "deletion": {
+      "transaction": {
+        "title": "Eliminar transacción",
+        "message": {
+          "partOne": "Se eliminará la transacción",
+          "partTwo": "esta acción es irreversible."
+        }
+      }
+    }
   }
 }

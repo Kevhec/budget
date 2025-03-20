@@ -8,6 +8,7 @@ import {
   Card, CardContent,
 } from './ui/card';
 import { Badge } from './ui/badge';
+import CategoryBadge from './CategoryBadge';
 
 type Props = {
   description?: string
@@ -40,13 +41,7 @@ export default function TransactionResumeCard({
           <Typography className="capitalize font-medium truncate max-w-32" title={description}>
             {description || 'Placeholder'}
           </Typography>
-          <Badge
-            style={{
-              backgroundColor: category?.color,
-            }}
-          >
-            {t(`${category?.key}`) ?? t('category.none')}
-          </Badge>
+          <CategoryBadge category={category} />
         </div>
         <div className="flex justify-between">
           <Typography className="text-blueishGray text-sm">

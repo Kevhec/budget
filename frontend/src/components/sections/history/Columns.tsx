@@ -4,6 +4,9 @@ import { format } from '@formkit/tempo';
 import { type ColumnDef } from '@tanstack/react-table';
 import { DataTableColumnHeader } from './DataTableColumnHeader';
 import ActionsMenu from './ActionsMenu';
+import { useTranslation } from 'react-i18next';
+import Typography from '@/components/Typography';
+import CategoryBadge from '@/components/CategoryBadge';
 
 export const columns: ColumnDef<Transaction>[] = [
   {
@@ -12,8 +15,11 @@ export const columns: ColumnDef<Transaction>[] = [
       <DataTableColumnHeader column={column} title="Fecha" />
     ),
     cell: ({ row }) => {
+      const { i18n } = useTranslation();
+      const currentLanguage = i18n.language;
+
       const date = new Date(row.getValue('date'));
-      const formatted = format(date, 'long');
+      const formatted = format(date, 'long', currentLanguage);
 
       return (
         <div>
@@ -24,7 +30,9 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: 'description',
-    header: 'Descripción',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Descripción" textOnly />
+    ),
   },
   {
     accessorKey: 'amount',
@@ -36,9 +44,9 @@ export const columns: ColumnDef<Transaction>[] = [
       const formatted = formatMoney(amount);
 
       return (
-        <div className="text-right font-medium">
+        <p className="text-right font-medium">
           {formatted}
-        </div>
+        </p>
       );
     },
   },
@@ -47,12 +55,32 @@ export const columns: ColumnDef<Transaction>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Tipo" />
     ),
+    cell: ({ row }) => {
+      const { t } = useTranslation();
+      const transaction = row.original
+
+      return (
+        <p>
+          {t(`common.${transaction.type}.singular`)}
+        </p>
+      )
+    }
   },
   {
     accessorKey: 'category.name',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Categoría" />
     ),
+    cell: ({ row }) => {
+      const transaction = row.original;
+      const category = transaction.category;
+
+      return (
+        <div className='flex justify-center'>
+          <CategoryBadge category={category} />
+        </div>
+      )
+    }
   },
   {
     id: 'budgets',

@@ -1,6 +1,8 @@
 import { type SimplifiedConcurrence, type WeekDays } from '@/types';
 import { format } from '@formkit/tempo';
 
+const TRANSACTIONS_INITIAL_LIMIT = 5;
+
 const dateStringRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
 
 const initialPaginatedState = {
@@ -18,8 +20,7 @@ const initialPaginatedState = {
 
 const defaultPaginatedOptions = {
   page: 1,
-  limit: 5,
-  date: new Date(),
+  limit: TRANSACTIONS_INITIAL_LIMIT,
   include: 'budget,category,concurrence',
 };
 

@@ -239,7 +239,16 @@
     },
     "of": "of",
     "never": "Never",
-    "the": "the"
+    "the": "the",
+    "selected": {
+      "singular": "Selected",
+      "feminine": {
+        "plural": "selected"
+      }
+    },
+    "edit": "edit",
+    "delete": "delete",
+    "hide": "hide"
   },
   "common": {
     "transaction": {
@@ -271,7 +280,9 @@
     "continue": "Continue",
     "recurrence": "Recurrencia",
     "stop": "Stop",
-    "endDate": "End date"
+    "endDate": "End date",
+    "row": "row",
+    "page": "page"
   },
   "budgetResumeCard": {
     "valueDescription": "Out of an initial value of"
@@ -394,5 +405,44 @@
     "4": "fourth",
     "5": "fifth"
   },
-  "When does it start?": "¿Cuándo inicia?"
+  "When does it start?": "¿Cuándo inicia?",
+  "history": {
+    "datatable": {
+      "controls": {
+        "view": "View",
+        "pagination": {
+          "perPage": "Transactions per page",
+          "firstPage": "Go to first page",
+          "prevPage": "Go to previous page",
+          "nextPage": "Go to next page",
+          "lastPage": "Go to last page"
+        }
+      },
+      "columns": {
+        "date": "Date",
+        "description": "Description",
+        "amount": "Amount",
+        "type": "Type",
+        "category_name": "Category",
+        "budgets": "Budget",
+        "actions": "Actions"
+      },
+      "actions": {
+        "trigger": "Open menu",
+        "label": "Actions"
+      }
+    },
+    "heading": "Transaction Record"
+  },
+  "alerts": {
+    "deletion": {
+      "transaction": {
+        "title": "Delete transaction",
+        "message": {
+          "partOne": "Transaction",
+          "partTwo": "will be deleted, this action cannot be reverted."
+        }
+      }
+    }
+  }
 }

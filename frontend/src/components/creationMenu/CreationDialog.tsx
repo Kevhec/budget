@@ -55,7 +55,7 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
   const FormComponent = formMapping[type];
   const formId = `${type}-creation-form`;
 
-  const triggerClasses = cn(triggerClassname);
+  const triggerClasses = cn('capitalize', triggerClassname);
 
   const formHandlers = {
     creation: {
@@ -116,7 +116,7 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
             {(triggerLabel || modalTitle)?.toLowerCase()}
           </DialogDescription>
           <DialogHeader className="p-6 pb-0">
-            <DialogTitle>
+            <DialogTitle className='capitalize'>
               {modalTitle || triggerLabel}
             </DialogTitle>
           </DialogHeader>

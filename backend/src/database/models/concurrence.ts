@@ -48,11 +48,13 @@ InferCreationAttributes<Concurrence>
   public static associate(models: Models) {
     this.belongsTo(models.Budget, {
       foreignKey: 'targetId',
+      foreignKeyConstraint: false,
       constraints: false,
       as: 'budgetConcurrence',
     });
     this.belongsTo(models.Transaction, {
       foreignKey: 'targetId',
+      foreignKeyConstraint: false,
       constraints: false,
       as: 'transactionConcurrence',
     });

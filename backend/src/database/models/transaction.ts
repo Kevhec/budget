@@ -62,6 +62,7 @@ class Transaction
     this.hasOne(models.CronTask, {
       foreignKey: 'targetId',
       constraints: false,
+      foreignKeyConstraint: false,
       scope: { targetType: 'Transaction' },
       onDelete: 'CASCADE',
       as: 'transactionCronTask',
@@ -69,6 +70,7 @@ class Transaction
     this.hasOne(models.Concurrence, {
       foreignKey: 'targetId',
       constraints: false,
+      foreignKeyConstraint: false,
       scope: { targetType: 'Transaction' },
       onDelete: 'CASCADE',
       as: 'transactionConcurrence',
