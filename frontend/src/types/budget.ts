@@ -71,6 +71,7 @@ export type BudgetReducer = Reducer<BudgetState, BudgetAction>;
 export interface BudgetContextType {
   state: BudgetState
   createBudget: (data: CreateBudgetParams) => void
-  getBudgets: (options: PaginatedParams) => void
+  getBudgets: () => void
+  getPaginatedBudgets: (options: PaginatedParams) => void
   updateRecentBudgets: () => void
 }

@@ -23,6 +23,7 @@ function TransactionsProvider({ children }: PropsWithChildren) {
   ] = useReducer<TransactionReducer>(transactionReducer, initialTransactionState);
 
   const createTransaction = useCallback((data: CreateTransactionParams) => {
+    console.log({ data });
     createTransactionAction(dispatch, data, state);
   }, [state]);
 

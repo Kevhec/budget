@@ -5,6 +5,7 @@ export interface Category {
   id: string;
   name: string;
   color: string;
+  key: string;
   userId: string;
   updatedAt: string;
   createdAt: string;

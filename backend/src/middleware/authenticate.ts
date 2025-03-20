@@ -33,8 +33,6 @@ const authenticate: RequestHandler = async (req, res, next) => {
 
     const userData = user.toJSON();
 
-    console.log(userData);
-
     req.user = userData;
 
     return next();

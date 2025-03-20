@@ -50,7 +50,6 @@ async function createTransaction(
   } = req;
 
   const transaction = await sequelize.transaction();
-
   try {
     const dateObject = new Date(startDate);
     let jobData;
@@ -140,8 +139,6 @@ async function getAllTransactions(
     offset, limit, month, include,
   } = req.query;
 
-  console.log({ include });
-
   const includes = parseIncludes(String(include), {
     models: [
       {
@@ -153,7 +150,7 @@ async function getAllTransactions(
       {
         identifier: 'category',
         model: Category,
-        attributes: ['id', 'name', 'color'],
+        attributes: ['id', 'name', 'color', 'key'],
         as: 'category',
       },
       {

@@ -9,6 +9,7 @@ import {
   AlertDialogPortal,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   open: boolean
@@ -22,6 +23,8 @@ interface Props {
 export default function ConfirmDialog({
   open, onOpenChange, title, message, onConfirm, onCancel,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogPortal>
@@ -33,8 +36,12 @@ export default function ConfirmDialog({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => onConfirm(false)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => onCancel(true)}>Continuar</AlertDialogAction>
+            <AlertDialogCancel onClick={() => onConfirm(false)}>
+              {t('common.cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => onCancel(true)}>
+              {t('common.continue')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialogPortal>

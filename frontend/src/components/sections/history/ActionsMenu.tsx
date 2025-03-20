@@ -13,16 +13,12 @@ import useTransactions from '@/hooks/useTransactions';
 import { CreationType, Transaction } from '@/types';
 import { MoreHorizontal } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   item: Transaction
   type: CreationType,
 }
-
-const typeTranslationMapping = {
-  transaction: 'transacción',
-  budget: 'presupuesto',
-};
 
 export default function ActionsMenu({
   item,
@@ -37,6 +33,7 @@ export default function ActionsMenu({
     showAlert,
     handleConfirm,
   } = useAlert();
+  const { t } = useTranslation();
 
   const handleDelete = useCallback(() => {
     // TODO: Consider error message
@@ -63,27 +60,27 @@ export default function ActionsMenu({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{t('history.datatable.actions.trigger')}</span>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="space-y-2">
           <DropdownMenuLabel>
-            Acciones
+            {t('history.datatable.actions.label')}
           </DropdownMenuLabel>
           <DropdownMenuItem asChild>
             <CreationDialog
               type={type}
-              triggerLabel="Editar"
+              triggerLabel={t('helpers.edit')}
               triggerClassname="px-2 py-2 text-sm w-full hover:bg-slate-100 rounded-sm transition-colors font-medium"
-              modalTitle={`Editar ${typeTranslationMapping[type]}`}
+              modalTitle={`${t('helpers.edit')} ${t(`common.${type}.singular`)}`}
               item={item}
               editMode
             />
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Button variant="ghost" onClick={showAlert} className="w-full bg-red-950 text-white hover:!bg-red-900 hover:!text-white">
-              Eliminar
+            <Button variant="ghost" onClick={showAlert} className="w-full bg-red-950 text-white hover:!bg-red-900 hover:!text-white capitalize">
+              {t('helpers.delete')}
             </Button>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -94,7 +91,9 @@ export default function ActionsMenu({
         open={isAlertOpen}
         onOpenChange={setIsAlertOpen}
         title="Eliminar transacción"
-        message={`Se eliminará la transacción ${item.description}, esta acción es irreversible.`}
+        message={`
+          ${t('alerts.deletion.transaction.message.partOne')} ${item.description}, ${t('alerts.deletion.transaction.message.partTwo')}
+        `}
       />
     </>
   );

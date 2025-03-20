@@ -18,7 +18,9 @@ import {
   Popover, PopoverContent, PopoverContentNoPortal, PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { cn, getModeValue, nthDay } from '@/lib/utils';
+import {
+  cn, getModeValue, keywordsFilter, nthDay,
+} from '@/lib/utils';
 import {
   Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from '@/components/ui/command';
@@ -30,6 +32,7 @@ import { Calendar } from '@/components/ui/calendar';
 import ConcurrenceEndDate from '@/components/ConcurrenceEndDate';
 import { concurrenceInit } from '@/lib/constants';
 import { CreateTransactionParams, Transaction, TransactionType } from '@/types';
+import { useTranslation } from 'react-i18next';
 import ConcurrenceDialog from '../ConcurrenceDialog';
 
 type TransactionFormType = z.infer<typeof transactionSchema>;
@@ -43,23 +46,30 @@ export type TransactionFormProps = {
   dirtyChecker?: React.Dispatch<React.SetStateAction<boolean>>
 };
 
+interface ComboboxBudget {
+  value: string
+  label: string
+}
+
 export default function TransactionForm({
   formId, className, editMode, item, onSubmit, dirtyChecker,
 }: TransactionFormProps) {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [budgetsOpen, setBudgetsOpen] = useState(false);
+  const [comboboxBudgets, setComboboxBudgets] = useState<ComboboxBudget[]>([]);
   const [isConcurrenceSelectOpen, setConcurrenceSelectOpen] = useState(false);
   const [isConcurrenceOptionHovered, setIsConcurrenceOptionHovered] = useState(false);
   const { state: { categories } } = useCategories();
   const { state: { budgets } } = useBudgets();
+  const { t, i18n } = useTranslation();
 
+  const currentLanguage = i18n.language;
+  const languageCode = currentLanguage.split('-')[0];
   const getValue = getModeValue(editMode);
 
   const {
     concurrence,
   } = item || {};
-
-  console.log({ item });
 
   const form = useForm<TransactionFormType>({
     resolver: zodResolver(transactionSchema),
@@ -67,7 +77,7 @@ export default function TransactionForm({
       description: getValue(item?.description, ''),
       type: getValue(item?.type, TransactionType.Expense),
       amount: getValue(item?.amount, 0),
-      categoryId: getValue(item?.categoryId, categories.find((category) => category.name === 'General')?.id),
+      categoryId: getValue(item?.categoryId, categories.find((category) => category.key === 'category.general')?.id),
       budgetId: getValue(item?.budgetId, undefined),
       startDate: getValue(new Date(item?.date || ''), new Date()),
       concurrenceDefaults: getValue(concurrence?.defaults, concurrenceInit.defaults),
@@ -111,15 +121,20 @@ export default function TransactionForm({
   const containerClasses = cn('flex flex-col gap-2 md:gap-4', className);
 
   const comboboxCategories = categories.map((category) => ({
+    label: t(category.key),
     value: category.id,
-    label: category.name,
+    key: category.key,
     color: category.color,
   }));
 
-  const comboboxBudgets = budgets.map((budget) => ({
-    value: budget.id,
-    label: budget.name,
-  }));
+  useEffect(() => {
+    const newComboboxBudgets = budgets.map((budget) => ({
+      value: budget.id,
+      label: budget.name,
+    }));
+
+    setComboboxBudgets(newComboboxBudgets);
+  }, [budgets]);
 
   return (
     <Form {...form}>
@@ -129,23 +144,23 @@ export default function TransactionForm({
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tipo</FormLabel>
+              <FormLabel>{t('forms.transaction.inputs.type.label')}</FormLabel>
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Tipo" />
+                    <SelectValue placeholder={t('forms.transaction.inputs.type.placeholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="expense">Gasto</SelectItem>
-                  <SelectItem value="income">Ingreso</SelectItem>
+                  <SelectItem value="expense">{t('common.expense.singular')}</SelectItem>
+                  <SelectItem value="income">{t('common.income.singular')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription className="text-xs">
-                Tipo de transacción
+                {t('forms.transaction.inputs.type.description')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -156,12 +171,12 @@ export default function TransactionForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Descripción</FormLabel>
+              <FormLabel>{t('forms.transaction.inputs.description.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="Entretenimiento" {...field} />
+                <Input placeholder={t('forms.transaction.inputs.description.placeholder')} {...field} />
               </FormControl>
               <FormDescription className="text-xs">
-                Describe tu transacción
+                {t('forms.transaction.inputs.description.description')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -172,12 +187,12 @@ export default function TransactionForm({
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Valor</FormLabel>
+              <FormLabel>{t('forms.transaction.inputs.amount.label')}</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="$200.000" {...field} />
+                <Input type="number" placeholder={t('forms.transaction.inputs.amount.placeholder')} {...field} />
               </FormControl>
               <FormDescription className="text-xs">
-                ¿Cuánto dinero?
+                {t('forms.transaction.inputs.amount.description')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -188,7 +203,7 @@ export default function TransactionForm({
           name="startDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Fecha</FormLabel>
+              <FormLabel>{t('forms.transaction.inputs.startDate.label')}</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -200,9 +215,9 @@ export default function TransactionForm({
                       )}
                     >
                       {field.value ? (
-                        format(field.value, 'long')
+                        format(field.value, 'long', currentLanguage)
                       ) : (
-                        <span>Selecciona una fecha</span>
+                        <span>{t('forms.transaction.inputs.startDate.placeholder')}</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
@@ -213,12 +228,13 @@ export default function TransactionForm({
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
+                    localeString={currentLanguage}
                     initialFocus
                   />
                 </PopoverContent>
               </Popover>
               <FormDescription className="text-xs">
-                Selecciona la fecha de tu transacción
+                {t('forms.transaction.inputs.startDate.description')}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -236,7 +252,7 @@ export default function TransactionForm({
 
               return (
                 <FormItem className="flex flex-col md:block">
-                  <FormLabel>Categoría</FormLabel>
+                  <FormLabel>{t('forms.transaction.inputs.category.label')}</FormLabel>
                   <Popover open={categoriesOpen} onOpenChange={setCategoriesOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -250,29 +266,34 @@ export default function TransactionForm({
                         >
                           <div className="flex gap-2 items-center">
                             <Circle fill={currentCategory?.color || '#000000'} stroke="none" className="w-3" />
-                            {currentValue
-                              ? currentCategory?.label
-                              : 'General'}
+                            {
+                              currentValue
+                                ? t(currentCategory?.key || 'category.unnamed')
+                                : t('category.general')
+                            }
                           </div>
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
                     <PopoverContentNoPortal align="end" className="w-full p-0">
-                      <Command>
-                        <CommandInput placeholder="Busca una categoría..." />
+                      <Command
+                        filter={keywordsFilter}
+                      >
+                        <CommandInput placeholder={t('forms.transaction.inputs.category.placeholder')} />
                         <ScrollArea className="h-64">
-                          <CommandList className="max-h-none overflow-visible">
-                            <CommandEmpty>No se encontró ninguna categoría</CommandEmpty>
+                          <CommandList className="max-h-none overflow-auto">
+                            <CommandEmpty>{t('forms.transaction.inputs.category.notFound')}</CommandEmpty>
                             <CommandGroup>
                               {comboboxCategories.map((category) => (
                                 <CommandItem
-                                  value={category.label}
+                                  value={category.value}
                                   key={category.value}
                                   onSelect={() => {
                                     form.setValue('categoryId', category.value);
                                     setCategoriesOpen(false);
                                   }}
+                                  keywords={[category.label]}
                                   className="flex justify-between"
                                 >
                                   <div className="flex items-center gap-2">
@@ -296,7 +317,7 @@ export default function TransactionForm({
                     </PopoverContentNoPortal>
                   </Popover>
                   <FormDescription className="text-xs">
-                    Selecciona una categoría
+                    {t('forms.transaction.inputs.category.description')}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -308,7 +329,7 @@ export default function TransactionForm({
             name="budgetId"
             render={({ field }) => (
               <FormItem className="flex flex-col md:block">
-                <FormLabel>Presupuesto</FormLabel>
+                <FormLabel>{t('forms.transaction.inputs.budget.label')}</FormLabel>
                 <Popover open={budgetsOpen} onOpenChange={setBudgetsOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -325,23 +346,24 @@ export default function TransactionForm({
                             ? comboboxBudgets.find(
                               (budget) => budget.value === field.value,
                             )?.label
-                            : 'Selecciona un presupuesto'}
+                            : t('forms.transaction.inputs.budget.button')}
                         </div>
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContentNoPortal align="end" className="w-full p-0">
-                    <Command>
+                    <Command filter={keywordsFilter}>
                       <CommandInput placeholder="Busca un presupuesto..." />
                       <ScrollArea className="max-h-64">
                         <CommandList className="max-h-none overflow-visible">
-                          <CommandEmpty>No se encontró ninguna categoría</CommandEmpty>
+                          <CommandEmpty>{t('forms.transaction.inputs.budget.notFound')}</CommandEmpty>
                           <CommandGroup>
                             {comboboxBudgets?.map((budget) => (
                               <CommandItem
-                                value={budget.label}
+                                value={budget.value}
                                 key={budget.value}
+                                keywords={[budget.label]}
                                 onSelect={() => {
                                   form.setValue('budgetId', budget.value);
                                   setBudgetsOpen(false);
@@ -368,7 +390,7 @@ export default function TransactionForm({
                   </PopoverContentNoPortal>
                 </Popover>
                 <FormDescription className="text-xs">
-                  ¿Tu transacción hace parte de un presupuesto?
+                  {t('forms.transaction.inputs.budget.description')}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -381,7 +403,7 @@ export default function TransactionForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Se repite
+                {t('forms.recurrence.inputs.defaults.label')}
               </FormLabel>
               <Select
                 onValueChange={field.onChange}
@@ -393,32 +415,32 @@ export default function TransactionForm({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Evento único" />
+                    <SelectValue placeholder={t('forms.recurrence.inputs.defaults.options.none')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="none" defaultChecked>
-                    Evento único
+                    {t('forms.recurrence.inputs.defaults.options.none')}
                   </SelectItem>
                   <SelectItem value="daily">
-                    Todos los días
+                    {t('forms.recurrence.inputs.defaults.options.daily')}
                   </SelectItem>
                   <SelectItem value="weekly">
-                    Cada semana, el
+                    {t('forms.recurrence.inputs.defaults.options.weekly')}
                     {' '}
-                    {format((currentStartDate || new Date()), 'dddd')}
+                    {format((currentStartDate || new Date()), 'dddd', languageCode)}
                   </SelectItem>
                   <SelectItem value="monthly">
-                    Todos los meses, el
+                    {t('forms.recurrence.inputs.defaults.options.monthly')}
                     {' '}
                     {nthDay(currentStartDate)}
                   </SelectItem>
                   <SelectItem value="yearly" className="peer">
-                    Anualmente, el
+                    {t('forms.recurrence.inputs.defaults.options.yearly')}
                     {' '}
                     {(currentStartDate || new Date()).getDate()}
                     {' de '}
-                    {format((currentStartDate || new Date()), 'MMMM')}
+                    {format((currentStartDate || new Date()), 'MMMM', languageCode)}
                   </SelectItem>
                   <ConcurrenceDialog
                     form={form}
@@ -429,7 +451,7 @@ export default function TransactionForm({
                         onMouseOut={handleConcurrenceMouseOver}
                         value="custom"
                       >
-                        Personalizado...
+                        {t('forms.recurrence.inputs.defaults.options.custom')}
                       </SelectItem>
                     )}
                   />
@@ -437,7 +459,7 @@ export default function TransactionForm({
               </Select>
               <FormDescription className="text-xs">
                 {/* TODO: Pensar otro mensaje */}
-                ¿Es recurrente?
+                {t('forms.recurrence.inputs.defaults.description')}
               </FormDescription>
             </FormItem>
           )}

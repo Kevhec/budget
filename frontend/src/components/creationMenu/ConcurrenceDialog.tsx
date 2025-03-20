@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   FieldValues, Path, UseFormReturn,
   useWatch,
 } from 'react-hook-form';
 import { cn, nthDay } from '@/lib/utils';
 import { format } from '@formkit/tempo';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogClose,
@@ -29,96 +30,6 @@ import { TimePeriodSelect } from '../timePicker/period-select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import ConcurrenceEndDate from '../ConcurrenceEndDate';
 
-const concurrenceTypes = [
-  {
-    id: 'daily',
-    value: {
-      sing: 'día',
-      plur: 'días',
-    },
-  },
-  {
-    id: 'weekly',
-    value: {
-      sing: 'semana',
-      plur: 'semanas',
-    },
-  },
-  {
-    id: 'monthly',
-    value: {
-      sing: 'mes',
-      plur: 'meses',
-    },
-  },
-  {
-    id: 'semestrial',
-    value: {
-      sing: 'semestre',
-      plur: 'semestres',
-    },
-  },
-  {
-    id: 'yearly',
-    value: {
-      sing: 'año',
-      plur: 'años',
-    },
-  },
-];
-
-const weekdaysOptions = [
-  {
-    value: 'monday',
-    label: {
-      sr: 'Lunes',
-      visual: 'L',
-    },
-  },
-  {
-    value: 'tuesday',
-    label: {
-      sr: 'Martes',
-      visual: 'M',
-    },
-  },
-  {
-    value: 'wednesday',
-    label: {
-      sr: 'Miércoles',
-      visual: 'X',
-    },
-  },
-  {
-    value: 'thursday',
-    label: {
-      sr: 'Jueves',
-      visual: 'J',
-    },
-  },
-  {
-    value: 'friday',
-    label: {
-      sr: 'Viernes',
-      visual: 'V',
-    },
-  },
-  {
-    value: 'saturday',
-    label: {
-      sr: 'Sábado',
-      visual: 'S',
-    },
-  },
-  {
-    value: 'sunday',
-    label: {
-      sr: 'Domingo',
-      visual: 'D',
-    },
-  },
-];
-
 interface Props<T extends FieldValues = FieldValues> {
   trigger: React.ReactNode
   form: UseFormReturn<T>
@@ -136,14 +47,106 @@ export default function ConcurrenceDialog<T extends FieldValues>({
     return defaultPeriod as Period;
   });
   const [isDialogOpen, setDialogOpen] = useState<boolean>(false);
-  const [currentSteps, currentType] = useWatch({
+  const [currentSteps, currentType, startDate] = useWatch({
     control: form.control,
-    name: ['concurrenceSteps', 'concurrenceType'] as Path<T>[],
+    name: ['concurrenceSteps', 'concurrenceType', 'startDate'] as Path<T>[],
   });
+  const { t } = useTranslation();
 
   const minuteRef = useRef<HTMLInputElement>(null);
   const hourRef = useRef<HTMLInputElement>(null);
   const periodRef = useRef<HTMLButtonElement>(null);
+
+  const { concurrenceTypes, weekdaysOptions } = useMemo(() => ({
+    concurrenceTypes: [
+      {
+        id: 'daily',
+        value: {
+          sing: t('helpers.time.day.singular'),
+          plur: t('helpers.time.day.plural'),
+        },
+      },
+      {
+        id: 'weekly',
+        value: {
+          sing: t('helpers.time.week.singular'),
+          plur: t('helpers.time.week.plural'),
+        },
+      },
+      {
+        id: 'monthly',
+        value: {
+          sing: t('helpers.time.month.singular'),
+          plur: t('helpers.time.month.plural'),
+        },
+      },
+      {
+        id: 'semestrial',
+        value: {
+          sing: t('helpers.time.semester.singular'),
+          plur: t('helpers.time.semester.plural'),
+        },
+      },
+      {
+        id: 'yearly',
+        value: {
+          sing: t('helpers.time.year.singular'),
+          plur: t('helpers.time.year.plural'),
+        },
+      },
+    ],
+    weekdaysOptions: [
+      {
+        value: 'monday',
+        label: {
+          sr: t('helpers.time.weekdays.monday.full'),
+          visual: t('helpers.time.weekdays.monday.single'),
+        },
+      },
+      {
+        value: 'tuesday',
+        label: {
+          sr: t('helpers.time.weekdays.tuesday.full'),
+          visual: t('helpers.time.weekdays.tuesday.single'),
+        },
+      },
+      {
+        value: 'wednesday',
+        label: {
+          sr: t('helpers.time.weekdays.wednesday.full'),
+          visual: t('helpers.time.weekdays.wednesday.single'),
+        },
+      },
+      {
+        value: 'thursday',
+        label: {
+          sr: t('helpers.time.weekdays.thursday.full'),
+          visual: t('helpers.time.weekdays.thursday.single'),
+        },
+      },
+      {
+        value: 'friday',
+        label: {
+          sr: t('helpers.time.weekdays.friday.full'),
+          visual: t('helpers.time.weekdays.friday.single'),
+        },
+      },
+      {
+        value: 'saturday',
+        label: {
+          sr: t('helpers.time.weekdays.saturday.full'),
+          visual: t('helpers.time.weekdays.saturday.single'),
+        },
+      },
+      {
+        value: 'sunday',
+        label: {
+          sr: t('helpers.time.weekdays.sunday.full'),
+          visual: t('helpers.time.weekdays.sunday.single'),
+        },
+      },
+    ],
+  }), [t]);
 
   const handleSave = async (evt: React.MouseEvent<HTMLButtonElement>) => {
     evt.preventDefault();
@@ -178,10 +181,10 @@ export default function ConcurrenceDialog<T extends FieldValues>({
       <DialogContent className="max-w-md w-[calc(100%-2rem)] rounded-sm">
         <DialogHeader>
           <DialogTitle>
-            Concurrencia
+            {t('common.recurrence')}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Define cómo se debe repetir la creación de tu presupuesto
+            {t('forms.recurrence.description')}
           </DialogDescription>
         </DialogHeader>
         <div className="flex gap-2 items-center">
@@ -191,7 +194,9 @@ export default function ConcurrenceDialog<T extends FieldValues>({
             render={({ field }) => (
               <FormItem className="flex-1">
                 <div className="flex items-center justify-between gap-4">
-                  <FormLabel className="whitespace-nowrap">Repetir cada</FormLabel>
+                  <FormLabel className="whitespace-nowrap">
+                    {t('forms.recurrence.inputs.steps')}
+                  </FormLabel>
                   <FormControl>
                     <Input type="number" {...field} min={1} className="w-16 text-center" value={field.value} />
                   </FormControl>
@@ -206,7 +211,7 @@ export default function ConcurrenceDialog<T extends FieldValues>({
             render={({ field }) => (
               <FormItem className="w-32">
                 <FormLabel className="sr-only">
-                  Tipo de concurrencia
+                  {t('forms.recurrence.inputs.type')}
                 </FormLabel>
                 <Select
                   defaultValue={field.value}
@@ -244,13 +249,13 @@ export default function ConcurrenceDialog<T extends FieldValues>({
           render={({ field }) => (
             <FormItem className="flex items-center justify-between">
               <FormLabel htmlFor="hours">
-                Tiempo
+                {t('forms.recurrence.inputs.time')}
               </FormLabel>
               <FormControl className="!mt-0">
                 <div className="flex gap-3">
                   <FormItem className="flex flex-col items-center gap-2">
                     <FormLabel htmlFor="hours">
-                      Horas
+                      {t('helpers.time.hour.plural')}
                     </FormLabel>
                     <FormControl>
                       <TimePickerInput
@@ -266,7 +271,7 @@ export default function ConcurrenceDialog<T extends FieldValues>({
                   </FormItem>
                   <FormItem className="flex flex-col items-center gap-2">
                     <FormLabel htmlFor="minutes">
-                      Minutos
+                      {t('helpers.time.minute.plural')}
                     </FormLabel>
                     <FormControl>
                       <TimePickerInput
@@ -282,7 +287,7 @@ export default function ConcurrenceDialog<T extends FieldValues>({
                   </FormItem>
                   <FormItem className="flex flex-col items-center gap-2">
                     <FormLabel htmlFor="period">
-                      Periodo
+                      {t('helpers.time.period')}
                     </FormLabel>
                     <FormControl>
                       <TimePeriodSelect
@@ -310,7 +315,7 @@ export default function ConcurrenceDialog<T extends FieldValues>({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Repetir el
+                    {t('forms.recurrence.inputs.repeatOn')}
                   </FormLabel>
                   <FormControl>
                     <RadioGroup
@@ -356,8 +361,8 @@ export default function ConcurrenceDialog<T extends FieldValues>({
               name={'concurrenceMonthSelect' as Path<T>}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="sr-only">
-                    Día del mes
+                  <FormLabel>
+                    {t('forms.recurrence.inputs.monthSelect.label')}
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
@@ -365,19 +370,20 @@ export default function ConcurrenceDialog<T extends FieldValues>({
                   >
                     <FormControl>
                       <SelectTrigger>
+                        {/* TODO: Translate this placeholder */}
                         <SelectValue placeholder="Seleccione el día de concurrencia" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="exact">
-                        Todos los meses,
-                        {' el día '}
-                        {new Date().getDate()}
+                        {t('forms.recurrence.inputs.monthSelect.options.exact')}
+                        {' '}
+                        {startDate?.getDate() || new Date().getDate()}
                       </SelectItem>
                       <SelectItem value="ordinal">
-                        Todos los meses, el
+                        {t('forms.recurrence.inputs.monthSelect.options.ordinal')}
                         {' '}
-                        {nthDay(new Date())}
+                        {nthDay(startDate || new Date())}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -392,7 +398,7 @@ export default function ConcurrenceDialog<T extends FieldValues>({
         />
         <DialogFooter>
           <DialogClose asChild>
-            <Button onClick={handleSave} type="button">Guardar</Button>
+            <Button onClick={handleSave} type="button">{t('common.save')}</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>

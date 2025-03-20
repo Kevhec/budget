@@ -25,7 +25,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { PaginationMeta, TablePagination } from '@/types';
 import debounce from 'just-debounce-it';
+import { useTranslation } from 'react-i18next';
 import { DataTablePagination } from './DataTablePagination';
+import Typography from '@/components/Typography';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -44,8 +46,9 @@ export default function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [pagination, setPagination] = useState<TablePagination>({
     pageIndex: 0,
-    pageSize: 5,
+    pageSize: 20,
   });
+  const { t } = useTranslation();
 
   const debouncedPageChange = useMemo(
     () => debounce((newPagination: TablePagination) => onPageChange?.(newPagination), 300),
@@ -85,11 +88,14 @@ export default function DataTable<TData, TValue>({
   }, [pagination, onPageChange, debouncedPageChange, meta?.currentPage, meta?.itemsPerPage, data]);
 
   return (
-    <div className="space-y-4">
-      <DropdownMenu>
+    <div className="space-y-4 h-full">
+      <Typography variant="h2">
+        {t('history.heading')}
+      </Typography>
+{/*       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="ml-auto">
-            Ver
+            {t('history.datatable.controls.view')}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -109,8 +115,8 @@ export default function DataTable<TData, TValue>({
               </DropdownMenuCheckboxItem>
             ))}
         </DropdownMenuContent>
-      </DropdownMenu>
-      <Table>
+      </DropdownMenu> */}
+      <Table className="flex-1 bg-white rounded-md p-4">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -144,7 +150,7 @@ export default function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                {t('helpers.noData')}
               </TableCell>
             </TableRow>
           )}

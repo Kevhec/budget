@@ -51,6 +51,8 @@ function parseConcurrence(
     ? ENGLISH_ORDINALS[weekDayOrdinalIndex] as Ordinals
     : undefined;
 
+  console.log({ ordinal });
+
   const recurrence: ParsedConcurrence = {
     recurrence: {
       type: type as RecurrenceType,

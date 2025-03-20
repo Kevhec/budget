@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import useAuth from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback/* , AvatarImage */ } from './ui/avatar';
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import {
   Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger,
 } from './ui/sheet';
 import Navigation from './Navigation';
+import Footer from './Footer';
 /* import { SidebarTrigger } from './ui/sidebar'; */
 
 export default function Header() {
@@ -29,6 +31,7 @@ export default function Header() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState<boolean>(false);
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (state.user && state.user.username) {
@@ -72,18 +75,21 @@ export default function Header() {
         <SheetTrigger asChild>
           <Button variant="outline" className="lg:hidden">
             <Menu className="h-5 w-5" />
-            <span className="sr-only">Abrir menú</span>
+            <span className="sr-only">{t('app.sidebarSheet.trigger')}</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="sm:max-w-xs font-openSans bg-[#343A40] text-white border-none">
-          <SheetTitle className="sr-only">Menú de la aplicación</SheetTitle>
-          <SheetDescription className="sr-only">Navega a través de Ahorrify</SheetDescription>
-          <p className="text-3xl font-semibold mb-32 font-openSans">Ahorrify</p>
-          <Navigation />
+        <SheetContent side="left" className="sm:max-w-xs flex flex-col justify-between font-openSans bg-[#343A40] text-white border-none">
+          <div>
+            <SheetTitle className="sr-only">{t('app.sidebarSheet.title')}</SheetTitle>
+            <SheetDescription className="sr-only">{t('app.sidebarSheet.description')}</SheetDescription>
+            <p className="text-3xl font-semibold mb-32 font-openSans">Budmin</p>
+            <Navigation />
+          </div>
+          <Footer />
         </SheetContent>
       </Sheet>
       <p className="flex-1">
-        ¡Hola!
+        { t('app.header.greeting') }
         {' '}
         <span className="font-bold">
           {state.user?.username || ''}
@@ -101,21 +107,21 @@ export default function Header() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>
-            Mi Cuenta
+            {t('app.userMenu.label')}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
               <User className="mr-2 w-4 h-4" />
-              <span>Perfil</span>
+              <span>{t('app.userMenu.profile')}</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Moon className="mr-2 w-4 h-4" />
-              <span>Modo oscuro</span>
+              <span>{t('app.userMenu.darkMode')}</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className="mr-2 w-4 h-4" />
-              <span>Opciones</span>
+              <span>{t('app.userMenu.options')}</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -123,7 +129,7 @@ export default function Header() {
             <Button asChild>
               <>
                 <LogOut className="mr-2 w-4 h-4" />
-                <span>Cerrar Sesión</span>
+                <span>{t('app.userMenu.signOut')}</span>
               </>
             </Button>
           </DropdownMenuItem>

@@ -5,6 +5,7 @@ import Typography from '@/components/Typography';
 import useTransactions from '@/hooks/useTransactions';
 import { Separator } from '@/components/ui/separator';
 import { NavLink } from 'react-router';
+import { useTranslation } from 'react-i18next';
 
 export default function RecentTransactions() {
   const { state: { recentTransactions } } = useTransactions();
@@ -12,6 +13,7 @@ export default function RecentTransactions() {
     transactionsWithPlaceholder,
     setTransactionsWithPlaceholders,
   ] = useState<Transaction[]>([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const getPlaceholders = () => new Array(4 - recentTransactions.length).fill({
@@ -35,10 +37,10 @@ export default function RecentTransactions() {
     <section className="rounded-md mb-2 md:mb-0 bg-white p-4 md:flex-1 md:col-span-10 md:row-start-2">
       <div className="flex justify-between items-center pb-4">
         <Typography variant="h2">
-          Últimas transacciones
+          {t('dashboard.recentTransactions.heading')}
         </Typography>
-        <NavLink to="#" className="text-sm text-blueishGray">
-          Ver más
+        <NavLink to="/app/transactions" className="text-sm text-blueishGray">
+          {t('helpers.seeMore')}
         </NavLink>
       </div>
       <div className="relative">
@@ -46,10 +48,13 @@ export default function RecentTransactions() {
           const {
             description, date, amount, type, category, hidden,
           } = transaction;
+
           let fallbackId;
+
           if (!transaction.id) {
             fallbackId = crypto.randomUUID();
           }
+
           return (
             <React.Fragment key={transaction.id || fallbackId}>
               <TransactionResumeCard
@@ -75,7 +80,7 @@ export default function RecentTransactions() {
           recentTransactions.length === 0 && (
             <div className="w-full h-full absolute top-0 right-0 grid place-items-center">
               <Typography className="text-sm text-slate-600">
-                Sin Datos
+                {t('helpers.noData')}
               </Typography>
             </div>
           )

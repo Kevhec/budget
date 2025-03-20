@@ -54,7 +54,8 @@ function generateCronExpression(concurrence: Params) {
   }
 
   if (weekDay?.ordinal) {
-    ordinalWeekdayNumber = getOrdinalIndex(weekDay.ordinal);
+    console.log({ ordinal: weekDay.ordinal });
+    ordinalWeekdayNumber = getOrdinalIndex(weekDay.ordinal) || 1;
   }
 
   const startDay = startDate.getDate();
@@ -71,7 +72,7 @@ function generateCronExpression(concurrence: Params) {
       cronExpression += `* * ${weekDayNumber}/${steps}`;
       break;
     case RecurrenceType.MONTHLY:
-      cronExpression += `${startDay} */${steps} ${weekDayNumber || '*'}${`#${ordinalWeekdayNumber}` || ''}`;
+      cronExpression += `${startDay} */${steps} ${weekDayNumber || '*'}${ordinalWeekdayNumber ? `#${ordinalWeekdayNumber}` : ''}`;
       break;
     case RecurrenceType.SEMESTRIAL: {
       const nextMonth = (startMonth + 6) > 12 ? (startMonth + 6) - 12 : (startMonth + 6);
@@ -84,6 +85,8 @@ function generateCronExpression(concurrence: Params) {
     default:
       throw new Error('Unsupported occurrence type');
   }
+
+  console.log({ cronExpression });
 
   return cronExpression.trim();
 }

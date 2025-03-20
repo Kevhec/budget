@@ -4,7 +4,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import useTransactions from '@/hooks/useTransactions';
 import { TablePagination } from '@/types';
 
-export default function History() {
+export default function Transactions() {
   const { state: { paginatedTransactions }, changePage } = useTransactions();
 
   const handlePageChange = (pagination: TablePagination) => {

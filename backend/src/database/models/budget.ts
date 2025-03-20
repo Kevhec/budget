@@ -37,6 +37,7 @@ class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budg
     this.hasOne(models.CronTask, {
       foreignKey: 'targetId',
       constraints: false,
+      foreignKeyConstraint: false,
       scope: { targetType: 'Budget' },
       onDelete: 'CASCADE',
       as: 'budgetCronTask',
@@ -44,6 +45,7 @@ class Budget extends Model<InferAttributes<Budget>, InferCreationAttributes<Budg
     this.hasOne(models.Concurrence, {
       foreignKey: 'targetId',
       constraints: false,
+      foreignKeyConstraint: false,
       scope: { targetType: 'Budget' },
       onDelete: 'CASCADE',
       as: 'budgetConcurrence',

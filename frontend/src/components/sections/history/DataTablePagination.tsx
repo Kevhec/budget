@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useTranslation } from 'react-i18next';
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
@@ -22,20 +23,26 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({
   table,
 }: DataTablePaginationProps<TData>) {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex items-center justify-between px-2">
-      <div className="flex-1 text-sm text-muted-foreground">
+    <div className="flex items-center justify-end px-2">
+{/*       <div className="flex-1 text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length}
         {' '}
-        of
+        {t('helpers.of')}
         {' '}
         {table.getFilteredRowModel().rows.length}
         {' '}
-        row(s) selected.
-      </div>
+        {t('common.row')}
+        (s)
+        {' '}
+        {t('helpers.selected.feminine.plural')}
+        .
+      </div> */}
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <p className="text-sm font-medium">{t('history.datatable.controls.pagination.perPage')}</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
@@ -46,7 +53,7 @@ export function DataTablePagination<TData>({
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[5, 10, 20, 30, 40, 50].map((pageSize) => (
+              {[20, 30, 40, 50].map((pageSize) => (
                 <SelectItem key={pageSize} value={`${pageSize}`}>
                   {pageSize}
                 </SelectItem>
@@ -55,11 +62,11 @@ export function DataTablePagination<TData>({
           </Select>
         </div>
         <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-          Page
+          {t('common.page')}
           {' '}
           {table.getState().pagination.pageIndex + 1}
           {' '}
-          of
+          {t('helpers.of')}
           {' '}
           {table.getPageCount()}
         </div>
@@ -70,7 +77,7 @@ export function DataTablePagination<TData>({
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
           >
-            <span className="sr-only">Go to first page</span>
+            <span className="sr-only">{t('history.datatable.controls.pagination.firstPage')}</span>
             <ChevronsLeft />
           </Button>
           <Button
@@ -79,7 +86,7 @@ export function DataTablePagination<TData>({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            <span className="sr-only">Go to previous page</span>
+            <span className="sr-only">{t('history.datatable.controls.pagination.prevPage')}</span>
             <ChevronLeft />
           </Button>
           <Button
@@ -88,7 +95,7 @@ export function DataTablePagination<TData>({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            <span className="sr-only">Go to next page</span>
+            <span className="sr-only">{t('history.datatable.controls.pagination.nextPage')}</span>
             <ChevronRight />
           </Button>
           <Button
@@ -97,7 +104,7 @@ export function DataTablePagination<TData>({
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
           >
-            <span className="sr-only">Go to last page</span>
+            <span className="sr-only">{t('history.datatable.controls.pagination.lastPage')}</span>
             <ChevronsRight />
           </Button>
         </div>
