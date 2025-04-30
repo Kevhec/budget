@@ -28,6 +28,8 @@ const signUp = async (
     timezone,
   } = req.body;
 
+  console.log({ birthday });
+
   // TODO: Delete accounts that are not verified on a week, provide a warning message;
 
   try {

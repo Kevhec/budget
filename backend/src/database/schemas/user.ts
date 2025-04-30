@@ -3,8 +3,7 @@ import { z } from 'zod';
 const userSchema = z.object({
   username: z.string().min(3).max(30),
   email: z.string().email(),
-  test: z.coerce.date(),
-  birthday: z.date(),
+  birthday: z.coerce.date(),
   password: z
     .string({ required_error: 'Campo obligatorio' })
     .min(8, { message: 'Debe contener mínimo 8 caracteres' })

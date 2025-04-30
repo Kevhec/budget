@@ -282,10 +282,12 @@
     "stop": "Stop",
     "endDate": "End date",
     "row": "row",
-    "page": "page"
+    "page": "page",
+    "amount": "Amount"
   },
   "budgetResumeCard": {
-    "valueDescription": "Out of an initial value of"
+    "valueDescription": "Out of an initial value of",
+    "transactionsAmount": "Associated transactions"
   },
   "creationDialog": {
     "description": "Create a new"
@@ -443,6 +445,12 @@
           "partTwo": "will be deleted, this action cannot be reverted."
         }
       }
+    }
+  },
+  "budgets": {
+    "dialogDescription": "Extended data about your budget",
+    "dialog": {
+      "graphHeading": "Budget Evolution"
     }
   }
 }

@@ -45,6 +45,8 @@ export default function SignUp() {
       repeatPassword,
     } = value;
 
+    console.log({ birthday });
+
     signUp({
       username,
       email,

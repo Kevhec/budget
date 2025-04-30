@@ -50,7 +50,8 @@ async function getBudgets(
   });
 
   try {
-    const budgets = await getPaginatedBudgets({});
+    const budgets = await getPaginatedBudgets();
+    console.log(budgets);
     const budgetsData = budgets?.data;
 
     if (budgetsData) {
