@@ -172,3 +172,7 @@ export function keywordsFilter(_: string, search: string, keywords?: string[]) {
     .some(Boolean)
     ? 1 : 0;
 }
+
+export function percentageChange(initialValue: number, finalValue: number) {
+  return (finalValue / initialValue) * 100;
+}

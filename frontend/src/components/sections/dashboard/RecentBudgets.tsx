@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Budget } from '@/types';
 import Typography from '@/components/Typography';
 import useBudgets from '@/hooks/useBudgets';
-import BudgetResumeCard from '@/components/BudgetResumeCard';
+import BudgetResumeCard from '@/components/budget/BudgetResumeCard';
 import { CircleDollarSign } from 'lucide-react';
 import { NavLink } from 'react-router';
 import { Separator } from '@/components/ui/separator';
@@ -63,12 +63,8 @@ export default function RecentBudgets() {
       <div className="relative flex flex-col gap-2 md:grow pb-2">
         {budgetsWithPlaceholder.map((budget, i) => {
           const {
-            name, startDate, endDate, totalAmount, hidden, balance,
+            hidden,
           } = budget;
-
-          const startDateObj = new Date(startDate);
-          const endDateObj = new Date(endDate);
-          const numericAmount = parseInt(totalAmount, 10);
 
           let fallbackId;
 
@@ -79,12 +75,8 @@ export default function RecentBudgets() {
           return (
             <React.Fragment key={budget.id || fallbackId}>
               <BudgetResumeCard
-                name={name}
-                startDate={startDateObj}
-                endDate={endDateObj}
-                initialAmount={numericAmount}
+                budget={budget}
                 hidden={hidden}
-                balance={balance}
               />
               {
                 (

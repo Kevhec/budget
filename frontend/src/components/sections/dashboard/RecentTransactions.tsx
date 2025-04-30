@@ -46,7 +46,7 @@ export default function RecentTransactions() {
       <div className="relative">
         {transactionsWithPlaceholder.map((transaction, i) => {
           const {
-            description, date, amount, type, category, hidden,
+            hidden,
           } = transaction;
 
           let fallbackId;
@@ -58,11 +58,7 @@ export default function RecentTransactions() {
           return (
             <React.Fragment key={transaction.id || fallbackId}>
               <TransactionResumeCard
-                description={description}
-                date={date}
-                amount={amount}
-                type={type}
-                category={category}
+                transaction={transaction}
                 hidden={hidden}
               />
               {

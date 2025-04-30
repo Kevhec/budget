@@ -116,6 +116,12 @@
   }
 }
 
+@layer utilities {
+  .h-max-min-content {
+    height: max(min-content, 100%);
+  }
+}
+
 .recharts-wrapper svg{
   overflow: inherit !important;
 }

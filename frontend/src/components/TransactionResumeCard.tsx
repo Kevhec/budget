@@ -1,29 +1,28 @@
 import { format } from '@formkit/tempo';
 import { cn } from '@/lib/utils';
-import { Category } from '@/types';
+import { Transaction } from '@/types';
 import { formatMoney } from '@/lib/formatNumber';
 import { useTranslation } from 'react-i18next';
 import Typography from './Typography';
 import {
   Card, CardContent,
 } from './ui/card';
-import { Badge } from './ui/badge';
 import CategoryBadge from './CategoryBadge';
 
 type Props = {
-  description?: string
-  date?: Date
-  amount?: number
-  type?: 'expense' | 'income'
-  category?: Category | null
+  transaction: Transaction
   hidden?: boolean
 };
 
 export default function TransactionResumeCard({
-  description, date, amount, type, category, hidden,
+  transaction, hidden,
 }: Props) {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const currentLanguage = i18n.language;
+
+  const {
+    description, date, amount, type, category,
+  } = transaction;
 
   const amountClasses = cn({
     'text-secondaryGreen': type === 'income',

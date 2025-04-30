@@ -1,9 +1,12 @@
-import type { Request, Response } from 'express';
+import { response, type Request, type Response } from 'express';
 import {
-  DatabaseError, fn, literal, Op,
+  DatabaseError, fn, InferAttributes, literal, Op,
+  Sequelize,
 } from 'sequelize';
 import { format } from '@formkit/tempo';
-import { Budget, CronTask, Transaction } from '../database/models';
+import {
+  Budget, Category, CronTask, Transaction,
+} from '../database/models';
 import generateDateRange from '../lib/utils/generateDateRange';
 import {
   createBudget as createBudgetJob,
@@ -152,7 +155,19 @@ async function getAllBudgets(
           },
         },
       ],
-      attributes: { exclude: ['userId'] },
+      attributes: {
+        exclude: ['userId'],
+        include: [
+          [
+            Sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM "transactions" AS "transactions"
+              WHERE "transactions"."budgetId" = "Budget"."id"
+            )`),
+            'transactionsCount',
+          ],
+        ],
+      },
       order: [['createdAt', 'DESC']],
     });
 
@@ -160,10 +175,6 @@ async function getAllBudgets(
       const notFoundMessage = 'No budgets found';
       return res.status(404).json(notFoundMessage);
     }
-
-    const { meta, links } = generateLinksMetadata({
-      count, rows, offset: intOffset, limit: intLimit,
-    });
 
     let budgetsToReturn;
 
@@ -180,11 +191,26 @@ async function getAllBudgets(
       budgetsToReturn = rows.map((item) => item.get());
     }
 
-    return res.status(200).json({
+    const responseObject: {
+      data: InferAttributes<Budget, { omit: never }>[]
+      meta?: any
+      links?: any
+    } = {
       data: budgetsToReturn,
-      meta,
-      links,
+    };
+
+    // TODO: Replicate this for any paginated endpoint, consider a function
+    const { meta, links } = generateLinksMetadata({
+      count, rows, offset: intOffset, limit: intLimit,
     });
+
+    responseObject.meta = meta;
+
+    if (strOffset && strLimit) {
+      responseObject.links = links;
+    }
+
+    return res.status(200).json(responseObject);
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
@@ -225,27 +251,48 @@ async function getBudget(
   }
 }
 
-async function getBudgetExpenses(
+async function getBudgetTransactions(
   req: Request,
   res: Response,
 ): Promise<Response | undefined> {
   try {
     const budgetId = req.params.id;
 
-    const expenses = await Budget.findOne({
+    const { rows, count } = await Transaction.findAndCountAll({
       where: {
-        id: budgetId,
+        budgetId,
         userId: req.user?.id,
       },
-      include: Transaction,
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          attributes: { exclude: ['userId'] },
+        },
+      ],
+      attributes: { exclude: ['userId', 'categoryId'] },
     });
 
-    if (!expenses) {
-      return res.status(404).json(`No budget where found for id ${budgetId}`);
+    if (count === 0) {
+      return res.status(404).json(`There are not transactions associated to budget ${budgetId}`);
     }
 
-    return res.status(200).json({ data: expenses });
-  } catch (error: unknown) {
+    const responseObject: {
+      data: InferAttributes<Transaction, { omit: never }>[]
+      meta?: any
+      links?: any
+    } = {
+      data: rows.map((transaction) => transaction.get()),
+    };
+
+    const { meta } = generateLinksMetadata({
+      count, rows, offset: 0, limit: 0,
+    });
+
+    responseObject.meta = meta;
+
+    return res.status(200).json(responseObject);
+  } catch (error) {
     if (error instanceof Error) {
       console.error('ERROR: ', error.message);
     }
@@ -470,5 +517,5 @@ export {
   getBudgetBalance,
   updateBudget,
   deleteBudget,
-  getBudgetExpenses,
+  getBudgetTransactions,
 };

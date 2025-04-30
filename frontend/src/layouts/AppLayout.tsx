@@ -12,15 +12,61 @@ import CategoriesProvider from '@/context/CategoriesProvider';
 import BudgetProvider from '@/context/BudgetProvider';
 import Footer from '@/components/Footer';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from 'react-responsive';
+import { cn } from '@/lib/utils';
+import React, { useEffect, useRef, useState } from 'react';
 /* import { SidebarProvider } from '@/components/ui/sidebar'; */
 
 export default function AppLayout() {
   const location = useLocation();
   const { t } = useTranslation();
+  const headerRef = useRef<HTMLElement | null>(null);
+  const [containerHeight, setContainerHeight] = useState(0);
+  const isBudgetsPage = location.pathname === '/app/budgets';
+
+  const isTabletOrDesktop = useMediaQuery({
+    query: '(min-width: 768px)',
+  });
+
+  let ContainerComponent: React.ElementType = 'div';
+
+  const getContainerHeight = () => {
+    if (headerRef.current) {
+      const headerHeight = headerRef.current.offsetHeight;
+      const windowHeight = window.innerHeight;
+
+      const newContainerHeight = windowHeight - headerHeight;
+
+      setContainerHeight(newContainerHeight);
+    }
+  };
+
+  useEffect(() => {
+    getContainerHeight();
+
+    window.addEventListener('resize', getContainerHeight);
+
+    return () => window.removeEventListener('resize', getContainerHeight);
+  }, []);
 
   if (location.pathname === '/app/') {
     return <Navigate to="/app/dashboard" replace />;
   }
+
+  if (!isBudgetsPage || !isTabletOrDesktop) {
+    ContainerComponent = ScrollArea;
+  }
+
+  const containerClasses = cn(
+    'md:h-[--height] w-full relative overflow-y-hidden',
+  );
+
+  const mainElementClasses = cn(
+    'px-4 py-2 md:py-4 flex flex-col bg-softGray md:min-h-full md:h-min grow max-w-[100vw] md:absolute md:inset-0',
+    {
+      'md:h-full md:min-h-auto': isBudgetsPage && isTabletOrDesktop,
+    },
+  );
 
   return (
   /*     <SidebarProvider> */
@@ -55,13 +101,18 @@ export default function AppLayout() {
               </div>
               <Footer />
             </aside>
-            <div className="flex flex-col w-full">
-              <Header />
-              <ScrollArea className="w-full h-full">
-                <main className="px-4 py-2 md:py-4 flex flex-col bg-softGray md:h-full grow max-w-[100vw]">
+            <div className="flex flex-col w-full md:max-h-screen">
+              <Header ref={headerRef} />
+              <ContainerComponent
+                className={containerClasses}
+                style={{
+                  '--height': `${containerHeight}px`,
+                } as React.CSSProperties}
+              >
+                <main className={mainElementClasses}>
                   <Outlet />
                 </main>
-              </ScrollArea>
+              </ContainerComponent>
             </div>
           </div>
         </BudgetProvider>

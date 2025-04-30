@@ -5,7 +5,7 @@ import {
   getAllBudgets,
   getBudget,
   updateBudget,
-  getBudgetExpenses,
+  getBudgetTransactions,
   getBudgetBalance,
 } from '../controllers/budget';
 import authenticate from '../middleware/authenticate';
@@ -56,6 +56,6 @@ router.route('/:id')
     deleteBudget,
   );
 
-router.get('/:id/transactions', authenticate, authorizeAccess(Budget), getBudgetExpenses);
+router.get('/:id/transactions', authenticate, authorizeAccess(Budget), getBudgetTransactions);
 
 export default router;

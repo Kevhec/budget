@@ -14,12 +14,13 @@ export interface Budget {
   createdAt: string
   updatedAt: string
   userId: string
-  hidden?: boolean
-  concurrence?: SimplifiedConcurrence
   balance: {
     totalExpense: number
     totalIncome: number
   }
+  transactionsCount: number
+  hidden?: boolean
+  concurrence?: SimplifiedConcurrence
 }
 
 export type CreateBudgetParams = z.infer<typeof budgetSchema>;
@@ -75,3 +76,29 @@ export interface BudgetContextType {
   getPaginatedBudgets: (options: PaginatedParams) => void
   updateRecentBudgets: () => void
 }
+
+export type BudgetBalanceChartData = {
+  date: string,
+  balance: number,
+  amount?: number,
+  description?: string
+};
+
+export interface BudgetAmountData {
+  totalAmount: number;
+  netAmount: number;
+  amountBounds: {
+    safe: {
+      y1: number;
+    };
+    warn: {
+      y1: number;
+      y2: number;
+    };
+    danger: {
+      y2: number;
+    };
+  };
+}
+
+export type BudgetAmountDataNullable = BudgetAmountData | null;

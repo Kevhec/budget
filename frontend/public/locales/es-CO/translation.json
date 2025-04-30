@@ -281,10 +281,12 @@
     "stop": "Parar",
     "endDate": "Fecha límite",
     "row": "fila",
-    "page": "página"
+    "page": "página",
+    "amount": "Cantidad"
   },
   "budgetResumeCard": {
-    "valueDescription": "De un valor inicial de"
+    "valueDescription": "De un valor inicial de",
+    "transactionsAmount": "Transacciones asociadas"
   },
   "creationDialog": {
     "description": "Crea un nuevo o una nueva"
@@ -441,6 +443,12 @@
           "partTwo": "esta acción es irreversible."
         }
       }
+    }
+  },
+  "budgets": {
+    "dialogDescription": "Datos extra sobre tu presupuesto",
+    "dialog": {
+      "graphHeading": "Evolución del presupuesto"
     }
   }
 }

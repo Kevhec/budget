@@ -1,7 +1,7 @@
 import {
   ChevronDown, LogOut, Menu, Moon, Settings, User,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import useAuth from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ import Navigation from './Navigation';
 import Footer from './Footer';
 /* import { SidebarTrigger } from './ui/sidebar'; */
 
-export default function Header() {
+const Header = forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>((_, ref) => {
   const { state, logout } = useAuth();
   const navigation = useNavigate();
   const [avatarFallback, setAvatarFallback] = useState<string>('');
@@ -69,7 +69,7 @@ export default function Header() {
   });
 
   return (
-    <header className="px-4 py-4 gap-x-2 bg-white flex justify-between items-center">
+    <header className="px-4 py-4 gap-x-2 bg-white flex justify-between items-center" ref={ref}>
       <Sheet open={open} onOpenChange={setOpen}>
         {/* <SidebarTrigger /> */}
         <SheetTrigger asChild>
@@ -137,4 +137,6 @@ export default function Header() {
       </DropdownMenu>
     </header>
   );
-}
+});
+
+export default Header;

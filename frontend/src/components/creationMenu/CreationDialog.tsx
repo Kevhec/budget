@@ -116,7 +116,7 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
             {(triggerLabel || modalTitle)?.toLowerCase()}
           </DialogDescription>
           <DialogHeader className="p-6 pb-0">
-            <DialogTitle className='capitalize'>
+            <DialogTitle className="capitalize">
               {modalTitle || triggerLabel}
             </DialogTitle>
           </DialogHeader>

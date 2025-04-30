@@ -47,6 +47,11 @@ const concurrenceInit: SimplifiedConcurrence = {
   endDate: undefined,
 };
 
+const defaultBalance = {
+  totalExpense: 0,
+  totalIncome: 0,
+};
+
 export {
   dateStringRegex,
   initialPaginatedState,
@@ -58,4 +63,5 @@ export {
   DAY_NAMES_SPANISH,
   ENGLISH_ORDINALS,
   SPANISH_MONTHS,
+  defaultBalance,
 };
