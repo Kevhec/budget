@@ -476,7 +476,7 @@ async function updateTransaction(
         {
           identifier: 'category',
           model: Category,
-          attributes: ['id', 'name', 'color'],
+          attributes: ['id', 'name', 'color', 'key'],
           as: 'category',
         },
         {

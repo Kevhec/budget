@@ -106,6 +106,8 @@ async function createTransaction(
       payload: newTransaction,
     });
 
+    console.log({ newTransaction });
+
     if (currentPage !== 1) {
       syncPaginatedTransactions(dispatch, getPaginationOptions({
         currentPage,
