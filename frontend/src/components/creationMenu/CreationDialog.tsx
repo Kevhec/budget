@@ -57,6 +57,7 @@ const CreationDialog = forwardRef<ElementRef<typeof DialogTrigger>, Props>(({
 
   const triggerClasses = cn('capitalize', triggerClassname);
 
+  // Get appropriate handler according to the type and mode
   const formHandlers = {
     creation: {
       transaction: (value: CreateTransactionParams) => {

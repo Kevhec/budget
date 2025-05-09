@@ -1,4 +1,4 @@
-import { Category, Transaction } from '@/src/database/models';
+import { Budget, Category, Transaction } from '@/src/database/models';
 import { Transaction as TransactionType } from 'sequelize';
 import type { CreateTransactionParams } from '../types';
 
@@ -35,12 +35,20 @@ async function createTransaction(
 
     const transactionWithCategory = await Transaction.findOne({
       where: { id: newTransaction.id },
-      attributes: { exclude: ['categoryId'] },
-      include: [{
-        model: Category,
-        attributes: ['id', 'name', 'color', 'key'],
-        as: 'category',
-      }],
+      attributes: { exclude: ['categoryId', 'budgetId'] },
+      include: [
+        {
+          model: Category,
+          attributes: ['id', 'name', 'color', 'key'],
+          as: 'category',
+        },
+        {
+          identifier: 'budget',
+          model: Budget,
+          attributes: ['id', 'name', 'totalAmount', 'startDate', 'endDate'],
+          as: 'budget',
+        },
+      ],
       transaction,
     });
 
